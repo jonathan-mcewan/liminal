@@ -61,6 +61,9 @@ body {
 
 /* Section heading */
 .panel-section > h2 {
+  display:        flex;
+  align-items:    center;
+  gap:            0.4rem;
   font-size:      0.6rem;
   font-weight:    600;
   letter-spacing: 0.12em;
@@ -68,6 +71,13 @@ body {
   color:          var(--muted-foreground);
   padding-bottom: 0.5rem;
   border-bottom:  1px solid var(--border);
+}
+
+.panel-section > h2 svg {
+  width:       0.75rem;
+  height:      0.75rem;
+  flex-shrink: 0;
+  opacity:     0.7;
 }
 
 /* ── Main canvas area ────────────────────────────────────────────────────── */
@@ -354,6 +364,25 @@ button:active {
 #logo-name-display {
   color:       var(--muted-foreground);
   font-weight: 400;
+}
+
+/* ── Button icons ────────────────────────────────────────────────────────── */
+button svg {
+  width:       0.8rem;
+  height:      0.8rem;
+  flex-shrink: 0;
+}
+
+/* ── Card actions row — lives under the canvas ───────────────────────────── */
+.card-actions {
+  display: flex;
+  gap:     0.5rem;
+  width:   100%;
+}
+
+.card-actions button {
+  flex:    1;
+  gap:     0.4rem;
 }
 
 /* ── Canvas wrap — brand + canvas + descriptor stacked ───────────────────── */

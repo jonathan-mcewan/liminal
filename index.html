@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>liminal</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   </head>
   <body>
 
@@ -13,7 +14,7 @@
     <aside class="panel">
 
       <div class="panel-section">
-        <h2>Identity</h2>
+        <h2><i data-lucide="user"></i>Identity</h2>
         <div class="field">
           <span>Name</span>
           <input id="person-name" type="text" value="Alex Reeves" placeholder="Full name" />
@@ -25,7 +26,7 @@
       </div>
 
       <div class="panel-section">
-        <h2>Card</h2>
+        <h2><i data-lucide="fingerprint"></i>Card</h2>
         <div class="field">
           <span>Seed</span>
           <input id="seed" type="number" value="42" min="0" max="999999" />
@@ -33,7 +34,7 @@
       </div>
 
       <div class="panel-section">
-        <h2>Colour</h2>
+        <h2><i data-lucide="palette"></i>Colour</h2>
         <div class="field">
           <div class="field-hdr">
             <span>Hue <span id="hue-value-display"></span>&deg;</span>
@@ -68,7 +69,7 @@
       </div>
 
       <div class="panel-section">
-        <h2>Background</h2>
+        <h2><i data-lucide="layers"></i>Background</h2>
         <div class="field">
           <span>Noise Zoom <span id="noise-zoom-display">4</span></span>
           <input id="noise-zoom" type="range" min="2" max="16" step="1" value="4" />
@@ -90,7 +91,7 @@
       </div>
 
       <div class="panel-section">
-        <h2>Logo</h2>
+        <h2><i data-lucide="shapes"></i>Logo</h2>
         <div class="field">
           <span>Style <span id="logo-name-display"></span></span>
           <select id="logo-style">
@@ -120,7 +121,7 @@
       </div>
 
       <div class="panel-section">
-        <h2>Effects</h2>
+        <h2><i data-lucide="sparkles"></i>Effects</h2>
         <div class="field field--row">
           <input id="show-artifacts" type="checkbox" checked />
           <span>Artifacts</span>
@@ -145,13 +146,6 @@
         </div>
       </div>
 
-      <div class="panel-section">
-        <h2>Actions</h2>
-        <button id="btn-render">Render</button>
-        <button id="btn-rand">Shuffle</button>
-        <button id="btn-export">Export PNG</button>
-      </div>
-
     </aside>
 
     <!-- ── Canvas area ────────────────────────────────────────────────────── -->
@@ -160,6 +154,11 @@
         <span class="brand">liminal</span>
         <canvas id="canvas"></canvas>
         <p class="descriptor" id="card-descriptor"></p>
+        <div class="card-actions">
+          <button id="btn-render"><i data-lucide="refresh-cw"></i>Render</button>
+          <button id="btn-rand"><i data-lucide="shuffle"></i>Shuffle</button>
+          <button id="btn-export"><i data-lucide="download"></i>Export PNG</button>
+        </div>
       </div>
     </main>
 
@@ -612,6 +611,7 @@
       jobTitleInput.addEventListener("input",   render);   // replaceState — continuous typing
 
       // ── Init ──────────────────────────────────────────────────────────────
+      lucide.createIcons();
       applyQueryString();
       updateColorSliders();
       updateSeedInputs();
