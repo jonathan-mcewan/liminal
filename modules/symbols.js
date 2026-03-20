@@ -701,43 +701,56 @@ function drawLissajous(ctx, x, y, radius, sw, symbolColor, rng) {
 }
 
 // ── Style 14: Rose Curve ──────────────────────────────────────────────────────
-// Polar rose r = cos(k·θ). Odd k produces k petals; even k produces 2k petals.
-// The curve is filled with a very light tint and stroked with full weight.
-// A faint enclosing ring grounds the form; a centre disc anchors it.
+// Polar rose r = cos(k·θ). Petals are filled with a radial gradient that is
+// fully transparent at the origin and builds to near-opaque at the petal tips,
+// giving each petal a natural bloom. A thin stroke traces the edge. An optional
+// inner ghost rose at 60% scale and slight rotation adds layered depth.
 function drawRoseCurve(ctx, x, y, radius, sw, symbolColor, rng) {
   const k          = rng.int(2, 6);
   const startAngle = rng.next() * Math.PI;
-  const hasRing    = rng.float(0, 1) > 0.45;
+  const hasGhost   = rng.float(0, 1) > 0.42;
 
   const thetaMax = k % 2 === 0 ? Math.PI * 2 : Math.PI;
   const scale    = radius * 0.90;
-  const steps    = 400;
+  const steps    = 500;
+
+  function rosePath(sc, angleOffset) {
+    ctx.beginPath();
+    for (let s = 0; s <= steps; s++) {
+      const theta = startAngle + angleOffset + thetaMax * (s / steps);
+      const r     = sc * Math.cos(k * theta);
+      if (s === 0) ctx.moveTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
+      else          ctx.lineTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
+    }
+    ctx.closePath();
+  }
+
+  // Radial gradient: transparent at centre → opaque at petal tips
+  const grad = ctx.createRadialGradient(x, y, 0, x, y, scale);
+  grad.addColorStop(0,    symbolColor(0, 0));
+  grad.addColorStop(0.30, symbolColor(0, 0.08));
+  grad.addColorStop(0.70, symbolColor(0, 0.38));
+  grad.addColorStop(1,    symbolColor(0, 0.78));
 
   ctx.lineCap = 'round';
 
-  ctx.beginPath();
-  for (let s = 0; s <= steps; s++) {
-    const theta = startAngle + thetaMax * (s / steps);
-    const r     = scale * Math.cos(k * theta);
-    if (s === 0) ctx.moveTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
-    else          ctx.lineTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
-  }
-  ctx.closePath();
-  ctx.fillStyle   = symbolColor(0, 0.13);
+  // Primary rose — gradient fill + thin outline
+  rosePath(scale, 0);
+  ctx.fillStyle = grad;
   ctx.fill();
-  ctx.lineWidth   = sw;
-  ctx.strokeStyle = symbolColor(0, 0.88);
+  ctx.lineWidth   = sw * 0.42;
+  ctx.strokeStyle = symbolColor(0, 0.52);
   ctx.stroke();
 
-  if (hasRing) {
-    ctx.lineCap     = 'butt';
-    ctx.lineWidth   = sw * 0.42;
-    ctx.beginPath(); ctx.arc(x, y, radius * 0.94, 0, Math.PI * 2);
-    ctx.strokeStyle = symbolColor(0, 0.18);
+  // Ghost inner rose — outline only, offset rotation, very low opacity
+  if (hasGhost) {
+    rosePath(scale * 0.60, Math.PI / (k * 2));
+    ctx.lineWidth   = sw * 0.28;
+    ctx.strokeStyle = symbolColor(0, 0.22);
     ctx.stroke();
   }
 
-  ctx.beginPath(); ctx.arc(x, y, radius * 0.09, 0, Math.PI * 2);
+  ctx.beginPath(); ctx.arc(x, y, radius * 0.07, 0, Math.PI * 2);
   ctx.fillStyle = symbolColor(6, 1); ctx.fill();
 }
 
