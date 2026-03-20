@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>liminal</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   </head>
@@ -151,7 +152,25 @@
     <!-- ── Canvas area ────────────────────────────────────────────────────── -->
     <main class="main">
       <div class="canvas-wrap">
-        <span class="brand">liminal</span>
+        <div class="brand">
+          <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="14" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="0.75"/>
+            <line x1="16"    y1="11"    x2="16"    y2="2.5"   stroke="rgba(255,255,255,0.82)" stroke-width="1.3" stroke-linecap="round"/>
+            <line x1="20.33" y1="13.5"  x2="27.69" y2="9.25"  stroke="rgba(255,255,255,0.82)" stroke-width="1.3" stroke-linecap="round"/>
+            <line x1="20.33" y1="18.5"  x2="27.69" y2="22.75" stroke="rgba(255,255,255,0.82)" stroke-width="1.3" stroke-linecap="round"/>
+            <line x1="16"    y1="21"    x2="16"    y2="29.5"  stroke="rgba(255,255,255,0.82)" stroke-width="1.3" stroke-linecap="round"/>
+            <line x1="11.67" y1="18.5"  x2="4.31"  y2="22.75" stroke="rgba(255,255,255,0.82)" stroke-width="1.3" stroke-linecap="round"/>
+            <line x1="11.67" y1="13.5"  x2="4.31"  y2="9.25"  stroke="rgba(255,255,255,0.82)" stroke-width="1.3" stroke-linecap="round"/>
+            <line x1="18.5"  y1="11.67" x2="20.5"  y2="8.21"  stroke="rgba(255,255,255,0.34)" stroke-width="0.65" stroke-linecap="round"/>
+            <line x1="21"    y1="16"    x2="25"    y2="16"    stroke="rgba(255,255,255,0.34)" stroke-width="0.65" stroke-linecap="round"/>
+            <line x1="18.5"  y1="20.33" x2="20.5"  y2="23.79" stroke="rgba(255,255,255,0.34)" stroke-width="0.65" stroke-linecap="round"/>
+            <line x1="13.5"  y1="20.33" x2="11.5"  y2="23.79" stroke="rgba(255,255,255,0.34)" stroke-width="0.65" stroke-linecap="round"/>
+            <line x1="11"    y1="16"    x2="7"     y2="16"    stroke="rgba(255,255,255,0.34)" stroke-width="0.65" stroke-linecap="round"/>
+            <line x1="13.5"  y1="11.67" x2="11.5"  y2="8.21"  stroke="rgba(255,255,255,0.34)" stroke-width="0.65" stroke-linecap="round"/>
+            <circle cx="16" cy="16" r="2.5" fill="rgba(255,255,255,0.95)"/>
+          </svg>
+          <span class="brand-name">liminal</span>
+        </div>
         <canvas id="canvas"></canvas>
         <p class="descriptor" id="card-descriptor"></p>
         <div class="card-actions">
@@ -400,12 +419,9 @@
         const color    = getEffectiveColor();
         const seed     = parseInt(seedInput.value, 10) | 0;
         const theme    = color.isDark ? 'Dark' : 'Light';
-        const colorName = hueToColorName(color.hue);
-        const styleVal = parseInt(logoStyleSelect.value, 10);
-        const logoName = styleVal >= 0
-          ? LOGO_NAMES[styleVal]
-          : LOGO_NAMES[makePRNG(seed ^ 0x9E3779B9).int(0, 9)];
-        return `${theme} · ${colorName} · ${logoName} · #${seed}`;
+        const name     = personNameInput.value.trim();
+        const parts    = [theme, name && name, `#${seed}`].filter(Boolean);
+        return parts.join(' · ');
       }
 
       function updateDescriptor() {

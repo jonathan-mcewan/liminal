@@ -396,14 +396,27 @@ button svg {
 }
 
 .brand {
+  display:        flex;
+  align-items:    center;
+  gap:            0.5rem;
+  opacity:        0.55;
+  user-select:    none;
+  align-self:     flex-start;
+}
+
+.brand-icon {
+  width:       20px;
+  height:      20px;
+  flex-shrink: 0;
+}
+
+.brand-name {
   font-size:      0.6rem;
   font-weight:    600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color:          var(--muted-foreground);
-  opacity:        0.55;
-  user-select:    none;
-  align-self:     flex-start;
+  line-height:    1;
 }
 
 .descriptor {
