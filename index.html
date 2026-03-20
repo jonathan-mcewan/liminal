@@ -197,6 +197,7 @@
           <button id="btn-render"><i data-lucide="refresh-cw"></i>Render</button>
           <button id="btn-rand"><i data-lucide="shuffle"></i>Shuffle</button>
           <button id="btn-export"><i data-lucide="download"></i>Export PNG</button>
+          <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
         </div>
       </div>
     </main>
@@ -672,6 +673,13 @@
         link.href     = document.getElementById("canvas").toDataURL("image/png");
         link.click();
         render();
+      });
+
+      document.getElementById("btn-copy-link").addEventListener("click", (e) => {
+        navigator.clipboard.writeText(window.location.href);
+        const btn = e.currentTarget;
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.innerHTML = '<i data-lucide="link"></i>Copy Link'; lucide.createIcons(); }, 1500);
       });
 
       logoStyleSelect.addEventListener("change",      () => render(true));
