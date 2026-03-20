@@ -129,14 +129,16 @@ export function drawNoise(ctx, geometry, cardPRNG, noiseZoom, noiseBrightness = 
  *   3 — Arc slice:      a thick partial arc, square caps, spanning ~90–180°
  *   4 — Grid fragment:  a small regular grid of dots clipped to a rectangle
  */
-export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity = 0.2) {
+export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity = 0.2, artifactCount = null, artifactScale = 1) {
   const { cardLeft, cardTop, cardWidth, cardHeight } = geometry;
-  const opacity = artifactOpacity; // global opacity multiplier for all artifacts
+  const opacity = artifactOpacity;
   const c = (a) => isDark ? `rgba(255,255,255,${a * opacity})` : `rgba(0,0,0,${a * opacity})`;
+  const sc = (v) => v * artifactScale; // scale size-related dimensions
 
-  const artifactCount = cardPRNG.int(3, 7);
+  const artifactCountFromPRNG = cardPRNG.int(3, 7); // always consume PRNG to preserve sequence
+  const count = artifactCount !== null ? Math.max(0, artifactCount | 0) : artifactCountFromPRNG;
 
-  for (let a = 0; a < artifactCount; a++) {
+  for (let a = 0; a < count; a++) {
     const type = cardPRNG.int(0, 4);
     ctx.save();
 
@@ -145,8 +147,8 @@ export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity =
       const angle  = cardPRNG.float(-Math.PI * 0.25, Math.PI * 0.25);
       const midX   = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
       const midY   = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
-      const len    = cardWidth * cardPRNG.float(0.9, 1.4);
-      const width  = cardWidth * cardPRNG.float(0.12, 0.28);
+      const len    = sc(cardWidth * cardPRNG.float(0.9, 1.4));
+      const width  = sc(cardWidth * cardPRNG.float(0.12, 0.28));
       const alpha  = cardPRNG.float(0.02, 0.05);
       const ca     = Math.cos(angle), sa = Math.sin(angle);
       const cp     = Math.cos(angle + Math.PI / 2), sp = Math.sin(angle + Math.PI / 2);
@@ -165,15 +167,15 @@ export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity =
       const angle  = cardPRNG.float(0, Math.PI);
       const midX   = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
       const midY   = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
-      const len    = cardWidth * cardPRNG.float(0.7, 1.3);
-      const spread = cardWidth * cardPRNG.float(0.12, 0.22);
+      const len    = sc(cardWidth * cardPRNG.float(0.7, 1.3));
+      const spread = sc(cardWidth * cardPRNG.float(0.12, 0.22));
       const ca     = Math.cos(angle), sa = Math.sin(angle);
       const cp     = Math.cos(angle + Math.PI / 2), sp = Math.sin(angle + Math.PI / 2);
       ctx.lineCap = 'butt';
       for (let i = 0; i < lineN; i++) {
         const t     = (i / (lineN - 1) - 0.5) * spread;
         const alpha = cardPRNG.float(0.02, 0.06);
-        ctx.lineWidth   = cardWidth * cardPRNG.float(0.018, 0.042);
+        ctx.lineWidth   = sc(cardWidth * cardPRNG.float(0.018, 0.042));
         ctx.strokeStyle = c(alpha);
         ctx.beginPath();
         ctx.moveTo(midX - ca * len * 0.5 + cp * t, midY - sa * len * 0.5 + sp * t);
@@ -203,11 +205,11 @@ export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity =
       // Arc slice — thick partial arc, square caps
       const cx     = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
       const cy     = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
-      const r      = cardWidth * cardPRNG.float(0.30, 0.60);
+      const r      = sc(cardWidth * cardPRNG.float(0.30, 0.60));
       const start  = cardPRNG.float(0, Math.PI * 2);
       const span   = cardPRNG.float(Math.PI * 0.4, Math.PI * 1.1);
       const alpha  = cardPRNG.float(0.02, 0.05);
-      ctx.lineWidth   = cardWidth * cardPRNG.float(0.040, 0.090);
+      ctx.lineWidth   = sc(cardWidth * cardPRNG.float(0.040, 0.090));
       ctx.lineCap     = 'butt';
       ctx.strokeStyle = c(alpha);
       ctx.beginPath();
@@ -218,11 +220,11 @@ export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity =
       // Grid fragment — evenly spaced dots clipped to a rectangle
       const rx     = cardLeft + cardWidth  * cardPRNG.float(0.05, 0.6);
       const ry     = cardTop  + cardHeight * cardPRNG.float(0.05, 0.6);
-      const rw     = cardWidth  * cardPRNG.float(0.30, 0.55);
-      const rh     = cardHeight * cardPRNG.float(0.25, 0.50);
+      const rw     = sc(cardWidth  * cardPRNG.float(0.30, 0.55));
+      const rh     = sc(cardHeight * cardPRNG.float(0.25, 0.50));
       const cols   = cardPRNG.int(3, 7);
       const rows   = cardPRNG.int(3, 6);
-      const dotR   = cardWidth * cardPRNG.float(0.012, 0.026);
+      const dotR   = sc(cardWidth * cardPRNG.float(0.012, 0.026));
       const alpha  = cardPRNG.float(0.03, 0.07);
       ctx.beginPath(); ctx.rect(rx, ry, rw, rh); ctx.clip();
       ctx.fillStyle = c(alpha);
