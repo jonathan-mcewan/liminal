@@ -625,7 +625,7 @@ function drawStarburst(ctx, x, y, radius, sw, symbolColor, rng) {
       tipX, tipY
     );
     grad.addColorStop(0, symbolColor(0, 0));
-    grad.addColorStop(1, symbolColor(0, 0.82));
+    grad.addColorStop(1, symbolColor(0, 0.38));
 
     ctx.beginPath();
     ctx.moveTo(tipX, tipY);
@@ -646,7 +646,7 @@ function drawStarburst(ctx, x, y, radius, sw, symbolColor, rng) {
   }
   ctx.closePath();
   ctx.lineWidth   = sw * 0.40;
-  ctx.strokeStyle = symbolColor(0, 0.30);
+  ctx.strokeStyle = symbolColor(0, 0.18);
   ctx.stroke();
 
   ctx.beginPath(); ctx.arc(x, y, innerR * 0.38, 0, Math.PI * 2);
@@ -728,9 +728,9 @@ function drawRoseCurve(ctx, x, y, radius, sw, symbolColor, rng) {
   // Radial gradient: transparent at centre → opaque at petal tips
   const grad = ctx.createRadialGradient(x, y, 0, x, y, scale);
   grad.addColorStop(0,    symbolColor(0, 0));
-  grad.addColorStop(0.30, symbolColor(0, 0.08));
-  grad.addColorStop(0.70, symbolColor(0, 0.38));
-  grad.addColorStop(1,    symbolColor(0, 0.78));
+  grad.addColorStop(0.30, symbolColor(0, 0.03));
+  grad.addColorStop(0.70, symbolColor(0, 0.16));
+  grad.addColorStop(1,    symbolColor(0, 0.38));
 
   ctx.lineCap = 'round';
 
@@ -739,14 +739,14 @@ function drawRoseCurve(ctx, x, y, radius, sw, symbolColor, rng) {
   ctx.fillStyle = grad;
   ctx.fill();
   ctx.lineWidth   = sw * 0.42;
-  ctx.strokeStyle = symbolColor(0, 0.52);
+  ctx.strokeStyle = symbolColor(0, 0.30);
   ctx.stroke();
 
   // Ghost inner rose — outline only, offset rotation, very low opacity
   if (hasGhost) {
     rosePath(scale * 0.60, Math.PI / (k * 2));
     ctx.lineWidth   = sw * 0.28;
-    ctx.strokeStyle = symbolColor(0, 0.22);
+    ctx.strokeStyle = symbolColor(0, 0.12);
     ctx.stroke();
   }
 
