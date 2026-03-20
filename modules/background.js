@@ -129,9 +129,9 @@ export function drawNoise(ctx, geometry, cardPRNG, noiseZoom, noiseBrightness = 
  *   3 — Arc slice:      a thick partial arc, square caps, spanning ~90–180°
  *   4 — Grid fragment:  a small regular grid of dots clipped to a rectangle
  */
-export function drawArtifacts(ctx, geometry, isDark, cardPRNG) {
+export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity = 0.2) {
   const { cardLeft, cardTop, cardWidth, cardHeight } = geometry;
-  const opacity = 0.2; // global opacity multiplier for all artifacts — keeps them very subtle
+  const opacity = artifactOpacity; // global opacity multiplier for all artifacts
   const c = (a) => isDark ? `rgba(255,255,255,${a * opacity})` : `rgba(0,0,0,${a * opacity})`;
 
   const artifactCount = cardPRNG.int(3, 7);

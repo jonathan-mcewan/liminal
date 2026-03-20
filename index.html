@@ -32,6 +32,14 @@
           <span>Seed</span>
           <input id="seed" type="number" value="42" min="0" max="999999" />
         </div>
+        <div class="field field--row">
+          <input id="show-lanyard" type="checkbox" />
+          <span>Lanyard Hole</span>
+        </div>
+        <div class="field field--row">
+          <input id="show-shadow" type="checkbox" checked />
+          <span>Drop Shadow</span>
+        </div>
       </div>
 
       <div class="panel-section">
@@ -137,13 +145,11 @@
             <button id="btn-next-artifact">Next</button>
           </div>
         </div>
-        <div class="field field--row">
-          <input id="show-shadow" type="checkbox" checked />
-          <span>Drop Shadow</span>
-        </div>
-        <div class="field field--row">
-          <input id="show-lanyard" type="checkbox" />
-          <span>Lanyard Hole</span>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Opacity <span id="artifact-opacity-display"></span></span>
+          </div>
+          <input id="artifact-opacity" type="range" min="0" max="60" step="1" value="20" />
         </div>
       </div>
 
@@ -221,6 +227,8 @@
       const showArtifactsToggle    = document.getElementById("show-artifacts");
       const artifactSeedInput      = document.getElementById("artifact-seed");
       const artifactSeedReset      = document.getElementById("artifact-seed-reset");
+      const artifactOpacitySlider  = document.getElementById("artifact-opacity");
+      const artifactOpacityDisplay = document.getElementById("artifact-opacity-display");
       const showShadowToggle       = document.getElementById("show-shadow");
       const showLanyardToggle      = document.getElementById("show-lanyard");
 
@@ -341,6 +349,7 @@
           personName:            personNameInput.value.trim(),
           jobTitle:              jobTitleInput.value.trim(),
           artifactSeed:          seeds.artifactSeed,
+          artifactOpacity:       parseInt(artifactOpacitySlider.value, 10) / 100,
           showArtifacts:         showArtifactsToggle.checked,
           showShadow:            showShadowToggle.checked,
           showLanyard:           showLanyardToggle.checked,
@@ -362,6 +371,8 @@
         if (q.has("name"))      personNameInput.value        = q.get("name");
         if (q.has("title"))     jobTitleInput.value          = q.get("title");
         if (q.has("artifacts")) showArtifactsToggle.checked  = q.get("artifacts") !== "0";
+        if (q.has("aopacity")) { artifactOpacitySlider.value = q.get("aopacity");
+                                  artifactOpacityDisplay.textContent = artifactOpacitySlider.value; }
         if (q.has("shadow"))    showShadowToggle.checked     = q.get("shadow")    !== "0";
         if (q.has("lanyard"))   showLanyardToggle.checked    = q.get("lanyard")   !== "0";
 
@@ -388,6 +399,7 @@
           name:      personNameInput.value.trim(),
           title:     jobTitleInput.value.trim(),
           artifacts: showArtifactsToggle.checked ? "1" : "0",
+          aopacity:  artifactOpacitySlider.value,
           shadow:    showShadowToggle.checked     ? "1" : "0",
           lanyard:   showLanyardToggle.checked    ? "1" : "0",
         });
@@ -577,6 +589,12 @@
         render(true);
       });
 
+      // ── Artifact opacity ──────────────────────────────────────────────────
+      artifactOpacitySlider.addEventListener("input", () => {
+        artifactOpacityDisplay.textContent = artifactOpacitySlider.value;
+        render();
+      });
+
       // ── Artifact seed ─────────────────────────────────────────────────────
       document.getElementById("btn-next-artifact").addEventListener("click", () => {
         seedOverrides.artifactSeed = (parseInt(artifactSeedInput.value, 10) | 0) + 1;
@@ -627,6 +645,7 @@
       jobTitleInput.addEventListener("input",   render);   // replaceState — continuous typing
 
       // ── Init ──────────────────────────────────────────────────────────────
+      artifactOpacityDisplay.textContent = artifactOpacitySlider.value;
       lucide.createIcons();
       applyQueryString();
       updateColorSliders();

@@ -84,6 +84,7 @@ export function generateCard({
   personName         = '',
   jobTitle           = '',
   artifactSeed       = 0,
+  artifactOpacity    = 0.2,
   showArtifacts      = true,
   showShadow         = true,
   showLanyard        = false,
@@ -172,7 +173,7 @@ export function generateCard({
   drawCardBodyGradient(ctx, geometry, isDark, cardColor);
   drawVignette(ctx, geometry, isDark);
   drawNoise(ctx, geometry, cardPRNG, noiseZoom, noiseBrightness, noiseContrast);
-  if (showArtifacts) drawArtifacts(ctx, geometry, isDark, artifactPRNG);
+  if (showArtifacts) drawArtifacts(ctx, geometry, isDark, artifactPRNG, artifactOpacity);
 
   // Symbol — drawn with its own save/restore so ctx state leaks don't affect text
   ctx.save();
