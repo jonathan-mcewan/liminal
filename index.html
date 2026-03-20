@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Card Generator</title>
+    <title>liminal</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -156,7 +156,11 @@
 
     <!-- ── Canvas area ────────────────────────────────────────────────────── -->
     <main class="main">
-      <canvas id="canvas"></canvas>
+      <div class="canvas-wrap">
+        <span class="brand">liminal</span>
+        <canvas id="canvas"></canvas>
+        <p class="descriptor" id="card-descriptor"></p>
+      </div>
     </main>
 
     <script type="module">
@@ -382,10 +386,40 @@
         else      history.replaceState(null, "", url);
       }
 
+      // ── Card descriptor ───────────────────────────────────────────────────
+      function hueToColorName(hue) {
+        const stops = [
+          [15, 'Red'], [30, 'Orange'], [55, 'Amber'], [75, 'Yellow'],
+          [150, 'Green'], [175, 'Teal'], [195, 'Cyan'], [225, 'Sky'],
+          [255, 'Blue'], [285, 'Violet'], [315, 'Purple'], [345, 'Rose'],
+        ];
+        for (const [max, name] of stops) if (hue < max) return name;
+        return 'Red';
+      }
+
+      function getCardDescriptor() {
+        const color    = getEffectiveColor();
+        const seed     = parseInt(seedInput.value, 10) | 0;
+        const theme    = color.isDark ? 'Dark' : 'Light';
+        const colorName = hueToColorName(color.hue);
+        const styleVal = parseInt(logoStyleSelect.value, 10);
+        const logoName = styleVal >= 0
+          ? LOGO_NAMES[styleVal]
+          : LOGO_NAMES[makePRNG(seed ^ 0x9E3779B9).int(0, 9)];
+        return `${theme} · ${colorName} · ${logoName} · #${seed}`;
+      }
+
+      function updateDescriptor() {
+        const desc = getCardDescriptor();
+        document.getElementById('card-descriptor').textContent = desc;
+        document.title = `liminal · ${desc}`;
+      }
+
       function render(push = false) {
         generateCard(params());
         syncURL(push);
         updateLogoName();
+        updateDescriptor();
       }
 
       // Restore full state when user navigates back/forward.
@@ -396,6 +430,7 @@
         updateResetButtons();
         generateCard(params()); // render without touching history
         updateLogoName();
+        updateDescriptor();
       });
 
       // ── Seed change: clear all overrides ─────────────────────────────────

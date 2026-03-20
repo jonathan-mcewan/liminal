@@ -83,8 +83,8 @@ body {
 
 canvas {
   display:      block;
-  max-width:    min(540px, 100%);
-  max-height:   calc(100vh - 3rem);
+  width:        100%;
+  max-height:   calc(100vh - 6rem); /* leave room for brand + descriptor */
   aspect-ratio: 1;
 }
 
@@ -354,4 +354,89 @@ button:active {
 #logo-name-display {
   color:       var(--muted-foreground);
   font-weight: 400;
+}
+
+/* ── Canvas wrap — brand + canvas + descriptor stacked ───────────────────── */
+.canvas-wrap {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.75rem;
+  max-width:      min(540px, 100%);
+  width:          100%;
+}
+
+.brand {
+  font-size:      0.6rem;
+  font-weight:    600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color:          var(--muted-foreground);
+  opacity:        0.55;
+  user-select:    none;
+  align-self:     flex-start;
+}
+
+.descriptor {
+  font-size:      0.6rem;
+  letter-spacing: 0.07em;
+  color:          var(--muted-foreground);
+  opacity:        0.5;
+  text-align:     center;
+  user-select:    none;
+}
+
+/* ── Mobile layout ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  html, body {
+    height:   auto;
+    overflow: auto;
+  }
+
+  body {
+    flex-direction: column-reverse; /* canvas on top, panel below */
+    overflow:       auto;
+  }
+
+  .panel {
+    width:      100%;
+    min-width:  0;
+    height:     auto;
+    max-height: none;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    overflow-y: visible;
+    display:    grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    column-gap:  0.75rem;
+    row-gap:     1.5rem;
+  }
+
+  /* Section headings span both columns */
+  .panel-section {
+    break-inside: avoid;
+  }
+
+  /* Actions section spans full width */
+  .panel-section:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .main {
+    flex:     0 0 auto;
+    padding:  1rem;
+    overflow: visible;
+  }
+
+  canvas {
+    max-height: none;
+    max-width:  calc(100vw - 2rem);
+    width:      calc(100vw - 2rem);
+  }
+
+  .canvas-wrap {
+    max-width: none;
+    width:     calc(100vw - 2rem);
+  }
 }
