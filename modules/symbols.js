@@ -29,6 +29,11 @@ export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng) {
     drawPolygonFreeNodes,
     drawDotMatrix,
     drawDotMask,
+    drawSpiral,
+    drawWaveField,
+    drawStarburst,
+    drawLissajous,
+    drawRoseCurve,
   ];
 
   (variants[style] ?? variants[0])(ctx, x, y, radius, strokeWeight, symbolColor, rng);
@@ -501,5 +506,207 @@ function drawDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
       }
     }
   }
+}
+
+// ── Style 10: Spiral ──────────────────────────────────────────────────────────
+// Archimedean spiral sweeping outward from a small hub. One to three arms,
+// each offset by equal angular steps. The primary arm is heavier; extra arms
+// fade. A faint outer ring completes the form.
+function drawSpiral(ctx, x, y, radius, sw, symbolColor, rng) {
+  const rotations  = rng.float(2.5, 5.0);
+  const armCount   = rng.int(1, 3);
+  const startAngle = rng.next() * Math.PI * 2;
+  const innerFrac  = rng.float(0.08, 0.20);
+
+  ctx.lineCap = 'round';
+  const steps = 260;
+
+  for (let arm = 0; arm < armCount; arm++) {
+    const armOffset = (Math.PI * 2 / armCount) * arm;
+    ctx.lineWidth   = arm === 0 ? sw : sw * 0.52;
+    ctx.strokeStyle = symbolColor(0, arm === 0 ? 0.90 : 0.40);
+    ctx.beginPath();
+    for (let s = 0; s <= steps; s++) {
+      const t  = s / steps;
+      const r  = radius * innerFrac + radius * (1 - innerFrac) * t;
+      const px = x + Math.cos(startAngle + armOffset + t * rotations * Math.PI * 2) * r;
+      const py = y + Math.sin(startAngle + armOffset + t * rotations * Math.PI * 2) * r;
+      if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  ctx.lineCap     = 'butt';
+  ctx.lineWidth   = sw * 0.42;
+  ctx.beginPath(); ctx.arc(x, y, radius * 0.96, 0, Math.PI * 2);
+  ctx.strokeStyle = symbolColor(0, 0.22);
+  ctx.stroke();
+
+  ctx.beginPath(); ctx.arc(x, y, radius * innerFrac * 0.70, 0, Math.PI * 2);
+  ctx.fillStyle = symbolColor(6, 1); ctx.fill();
+}
+
+// ── Style 11: Wave Field ──────────────────────────────────────────────────────
+// Sinusoidal wave lines at a seeded angle, clipped to a circle. Each line
+// shares the same frequency but carries a per-line phase offset, so the waves
+// ripple across the form rather than staying in lockstep. Outer ring border.
+function drawWaveField(ctx, x, y, radius, sw, symbolColor, rng) {
+  const lineCount = rng.int(6, 13);
+  const freq      = rng.float(1.5, 4.5);
+  const amp       = rng.float(0.05, 0.16);  // amplitude as fraction of radius
+  const angle     = rng.float(0, Math.PI);
+  const phaseStep = rng.float(0.4, 1.2);
+
+  const perp    = { x:  Math.cos(angle), y:  Math.sin(angle) };
+  const dir     = { x: -Math.sin(angle), y:  Math.cos(angle) };
+  const spacing = (radius * 2) / lineCount;
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.clip();
+
+  ctx.lineCap   = 'butt';
+  ctx.lineWidth = sw * 0.65;
+
+  const steps = 90;
+  for (let i = 0; i < lineCount; i++) {
+    const baseT = -radius + spacing * (i + 0.5);
+    const phase = i * phaseStep;
+    ctx.strokeStyle = symbolColor(0, 0.65 + 0.20 * (i % 2));
+    ctx.beginPath();
+    for (let s = 0; s <= steps; s++) {
+      const u    = -radius * 1.2 + (radius * 2.4) * (s / steps);
+      const wave = radius * amp * Math.sin(freq * Math.PI * 2 * (u / (radius * 2)) + phase);
+      const px   = x + perp.x * (baseT + wave) + dir.x * u;
+      const py   = y + perp.y * (baseT + wave) + dir.y * u;
+      if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  ctx.lineCap     = 'butt';
+  ctx.lineWidth   = sw;
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = symbolColor(0, 0.58);
+  ctx.stroke();
+}
+
+// ── Style 12: Starburst ───────────────────────────────────────────────────────
+// Alternating long and short points forming a sharp star shape. Very low fill
+// opacity keeps it light; a fine stroke traces the silhouette. Hub disc at
+// centre. Spike count and inner radius vary by seed.
+function drawStarburst(ctx, x, y, radius, sw, symbolColor, rng) {
+  const spikeCount = rng.int(6, 16);
+  const startAngle = rng.next() * Math.PI * 2;
+  const innerRatio = rng.float(0.28, 0.52);
+
+  ctx.lineCap  = 'round';
+  ctx.lineJoin = 'round';
+
+  ctx.beginPath();
+  for (let i = 0; i < spikeCount * 2; i++) {
+    const ang = startAngle + (Math.PI / spikeCount) * i;
+    const r   = i % 2 === 0 ? radius * 0.92 : radius * innerRatio;
+    if (i === 0) ctx.moveTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r);
+    else          ctx.lineTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r);
+  }
+  ctx.closePath();
+  ctx.fillStyle   = symbolColor(0, 0.12);
+  ctx.fill();
+  ctx.lineWidth   = sw * 0.55;
+  ctx.strokeStyle = symbolColor(0, 0.86);
+  ctx.stroke();
+
+  ctx.beginPath(); ctx.arc(x, y, radius * innerRatio * 0.38, 0, Math.PI * 2);
+  ctx.fillStyle = symbolColor(6, 1); ctx.fill();
+}
+
+// ── Style 13: Lissajous ───────────────────────────────────────────────────────
+// Parametric curve x = sin(a·t + δ), y = sin(b·t) traced inside the symbol
+// radius. Frequency ratio and phase shift are seed-derived, producing shapes
+// from simple figure-eights to dense multi-lobed knots. An optional inner
+// ghost curve at reduced scale adds depth.
+function drawLissajous(ctx, x, y, radius, sw, symbolColor, rng) {
+  const freqA    = rng.int(2, 5);
+  const freqB    = rng.int(2, 5);
+  const delta    = rng.float(0, Math.PI);
+  const hasGhost = rng.float(0, 1) > 0.45;
+
+  const scale = radius * 0.86;
+  const steps = 420;
+
+  ctx.lineCap = 'round';
+
+  ctx.lineWidth   = sw;
+  ctx.strokeStyle = symbolColor(0, 0.88);
+  ctx.beginPath();
+  for (let s = 0; s <= steps; s++) {
+    const t  = (s / steps) * Math.PI * 2;
+    const px = x + scale * Math.sin(freqA * t + delta);
+    const py = y + scale * Math.sin(freqB * t);
+    if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+
+  if (hasGhost) {
+    ctx.lineWidth   = sw * 0.40;
+    ctx.strokeStyle = symbolColor(-5, 0.30);
+    ctx.beginPath();
+    for (let s = 0; s <= steps; s++) {
+      const t  = (s / steps) * Math.PI * 2;
+      const px = x + scale * 0.68 * Math.sin(freqA * t + delta + 0.28);
+      const py = y + scale * 0.68 * Math.sin(freqB * t + 0.28);
+      if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  ctx.lineCap     = 'butt';
+  ctx.lineWidth   = sw * 0.40;
+  ctx.beginPath(); ctx.arc(x, y, radius * 0.95, 0, Math.PI * 2);
+  ctx.strokeStyle = symbolColor(0, 0.18);
+  ctx.stroke();
+}
+
+// ── Style 14: Rose Curve ──────────────────────────────────────────────────────
+// Polar rose r = cos(k·θ). Odd k produces k petals; even k produces 2k petals.
+// The curve is filled with a very light tint and stroked with full weight.
+// A faint enclosing ring grounds the form; a centre disc anchors it.
+function drawRoseCurve(ctx, x, y, radius, sw, symbolColor, rng) {
+  const k          = rng.int(2, 6);
+  const startAngle = rng.next() * Math.PI;
+  const hasRing    = rng.float(0, 1) > 0.45;
+
+  const thetaMax = k % 2 === 0 ? Math.PI * 2 : Math.PI;
+  const scale    = radius * 0.90;
+  const steps    = 400;
+
+  ctx.lineCap = 'round';
+
+  ctx.beginPath();
+  for (let s = 0; s <= steps; s++) {
+    const theta = startAngle + thetaMax * (s / steps);
+    const r     = scale * Math.cos(k * theta);
+    if (s === 0) ctx.moveTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
+    else          ctx.lineTo(x + r * Math.cos(theta), y + r * Math.sin(theta));
+  }
+  ctx.closePath();
+  ctx.fillStyle   = symbolColor(0, 0.13);
+  ctx.fill();
+  ctx.lineWidth   = sw;
+  ctx.strokeStyle = symbolColor(0, 0.88);
+  ctx.stroke();
+
+  if (hasRing) {
+    ctx.lineCap     = 'butt';
+    ctx.lineWidth   = sw * 0.42;
+    ctx.beginPath(); ctx.arc(x, y, radius * 0.94, 0, Math.PI * 2);
+    ctx.strokeStyle = symbolColor(0, 0.18);
+    ctx.stroke();
+  }
+
+  ctx.beginPath(); ctx.arc(x, y, radius * 0.09, 0, Math.PI * 2);
+  ctx.fillStyle = symbolColor(6, 1); ctx.fill();
 }
 

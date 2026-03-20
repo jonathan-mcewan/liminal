@@ -115,6 +115,11 @@
             <option value="7">Polygon Free Nodes</option>
             <option value="8">Dot Matrix</option>
             <option value="9">Dot Mask</option>
+            <option value="10">Spiral</option>
+            <option value="11">Wave Field</option>
+            <option value="12">Starburst</option>
+            <option value="13">Lissajous</option>
+            <option value="14">Rose Curve</option>
           </select>
         </div>
         <div class="field">
@@ -253,7 +258,8 @@
 
       const LOGO_NAMES = ['Venn', 'Segmented Ring', 'Radial Spokes', 'Layered Arcs',
                           'Orbital', 'Parallel Lines', 'Polygon Nodes', 'Polygon Free Nodes',
-                          'Dot Matrix', 'Dot Mask'];
+                          'Dot Matrix', 'Dot Mask',
+                          'Spiral', 'Wave Field', 'Starburst', 'Lissajous', 'Rose Curve'];
 
       // ── Seed-derived defaults ─────────────────────────────────────────────
       function deriveSeedParams(seed) {
@@ -337,7 +343,7 @@
           logoNameDisplay.textContent = '';
         } else {
           const seed  = parseInt(seedInput.value, 10) | 0;
-          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 9);
+          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 14);
           logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
         }
       }
