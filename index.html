@@ -137,6 +137,10 @@
           <input id="show-shadow" type="checkbox" checked />
           <span>Drop Shadow</span>
         </div>
+        <div class="field field--row">
+          <input id="show-lanyard" type="checkbox" />
+          <span>Lanyard Hole</span>
+        </div>
       </div>
 
       <div class="panel-section">
@@ -194,6 +198,7 @@
       const artifactSeedInput      = document.getElementById("artifact-seed");
       const artifactSeedReset      = document.getElementById("artifact-seed-reset");
       const showShadowToggle       = document.getElementById("show-shadow");
+      const showLanyardToggle      = document.getElementById("show-lanyard");
 
       // ── Override state ────────────────────────────────────────────────────
       // Only keys that the user has explicitly set are present.
@@ -313,6 +318,7 @@
           artifactSeed:          seeds.artifactSeed,
           showArtifacts:         showArtifactsToggle.checked,
           showShadow:            showShadowToggle.checked,
+          showLanyard:           showLanyardToggle.checked,
           transparent,
         };
       }
@@ -332,6 +338,7 @@
         if (q.has("title"))     jobTitleInput.value          = q.get("title");
         if (q.has("artifacts")) showArtifactsToggle.checked  = q.get("artifacts") !== "0";
         if (q.has("shadow"))    showShadowToggle.checked     = q.get("shadow")    !== "0";
+        if (q.has("lanyard"))   showLanyardToggle.checked    = q.get("lanyard")   !== "0";
 
         // Colour overrides — only in URL if user set them
         if (q.has("dark"))      colorOverrides.isDark          = q.get("dark")     !== "0";
@@ -357,6 +364,7 @@
           title:     jobTitleInput.value.trim(),
           artifacts: showArtifactsToggle.checked ? "1" : "0",
           shadow:    showShadowToggle.checked     ? "1" : "0",
+          lanyard:   showLanyardToggle.checked    ? "1" : "0",
         });
         if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
         if (colorOverrides.cardLightness   !== undefined) q.set("litness",  colorOverrides.cardLightness);
@@ -561,6 +569,7 @@
       logoStyleSelect.addEventListener("change",      () => render(true));
       showArtifactsToggle.addEventListener("change",  () => render(true));
       showShadowToggle.addEventListener("change",     () => render(true));
+      showLanyardToggle.addEventListener("change",    () => render(true));
       personNameInput.addEventListener("input", render);   // replaceState — continuous typing
       jobTitleInput.addEventListener("input",   render);   // replaceState — continuous typing
 

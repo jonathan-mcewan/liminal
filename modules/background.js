@@ -256,6 +256,48 @@ export function drawTopGloss(ctx, geometry) {
 }
 
 /**
+ * Lanyard notch — a horizontal stadium-shaped slot punched near the top
+ * centre of the card, sized for a thick lanyard clip.
+ *
+ * Uses destination-out compositing to erase card pixels cleanly, so the
+ * canvas background shows through on-screen and is transparent on PNG export.
+ * A thin rim stroke is drawn afterwards to simulate the metal reinforcement.
+ */
+export function drawLanyardHole(ctx, geometry, isDark) {
+  const { cardTop, cardWidth, cardHeight, centerX } = geometry;
+  const slotW = cardWidth * 0.18;          // ~15 mm on a real 85.6 mm card — wide enough for thick lanyard hardware
+  const slotH = cardWidth * 0.058;         // ~5 mm tall
+  const slotR = slotH / 2;                 // fully rounded ends (stadium shape)
+  const slotX = centerX - slotW / 2;       // left edge
+  const slotY = cardTop + cardHeight * 0.07 - slotH / 2;  // centred vertically at 7% from top
+
+  function slotPath() {
+    ctx.beginPath();
+    ctx.moveTo(slotX + slotR, slotY);
+    ctx.lineTo(slotX + slotW - slotR, slotY);
+    ctx.arc(slotX + slotW - slotR, slotY + slotR, slotR, -Math.PI / 2, Math.PI / 2);
+    ctx.lineTo(slotX + slotR, slotY + slotH);
+    ctx.arc(slotX + slotR, slotY + slotR, slotR, Math.PI / 2, -Math.PI / 2);
+    ctx.closePath();
+  }
+
+  // Punch the slot through all card layers drawn so far.
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  slotPath();
+  ctx.fill();
+  ctx.restore();
+
+  // Rim stroke — achromatic, low opacity, reads as a metal reinforcement edge.
+  ctx.save();
+  slotPath();
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)';
+  ctx.lineWidth   = cardWidth * 0.006;
+  ctx.stroke();
+  ctx.restore();
+}
+
+/**
  * Thin stroke around the card perimeter.
  * Very low opacity — just enough to give the card a defined edge.
  */

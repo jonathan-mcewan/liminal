@@ -8,6 +8,7 @@ import {
   drawNoise,
   drawArtifacts,
   drawTopGloss,
+  drawLanyardHole,
   drawCardEdge,
 } from './background.js';
 import { drawSymbol }   from './symbols.js';
@@ -85,6 +86,7 @@ export function generateCard({
   artifactSeed       = 0,
   showArtifacts      = true,
   showShadow         = true,
+  showLanyard        = false,
   transparent        = false,
 } = {}) {
   const canvas = document.getElementById('canvas');
@@ -151,7 +153,7 @@ export function generateCard({
   // ── Derived logo metrics ──────────────────────────────────────────────────
   const symbolRadius = cardWidth * symbolRadiusFactor;
   const symbolX      = centerX;
-  const symbolY      = cardTop + cardHeight * 0.295; // upper third of card
+  const symbolY      = cardTop + cardHeight * 0.36;  // upper half, below lanyard notch
 
   // ── Drawing ───────────────────────────────────────────────────────────────
 
@@ -179,6 +181,7 @@ export function generateCard({
 
   drawCardText(ctx, geometry, personName, jobTitle, symbolColor);
   drawTopGloss(ctx, geometry);
+  if (showLanyard) drawLanyardHole(ctx, geometry, isDark);
 
   ctx.restore(); // end card clip
 
