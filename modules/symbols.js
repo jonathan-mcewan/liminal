@@ -593,32 +593,63 @@ function drawWaveField(ctx, x, y, radius, sw, symbolColor, rng) {
 }
 
 // ── Style 12: Starburst ───────────────────────────────────────────────────────
-// Alternating long and short points forming a sharp star shape. Very low fill
-// opacity keeps it light; a fine stroke traces the silhouette. Hub disc at
-// centre. Spike count and inner radius vary by seed.
+// Each spike is a gradient-filled triangle: transparent at the inner ring,
+// opaque at the outer tip. The whole star outline is then stroked at reduced
+// opacity so the gradient reads cleanly. Hub disc anchors the centre.
 function drawStarburst(ctx, x, y, radius, sw, symbolColor, rng) {
   const spikeCount = rng.int(6, 16);
   const startAngle = rng.next() * Math.PI * 2;
   const innerRatio = rng.float(0.28, 0.52);
+  const outerR     = radius * 0.92;
+  const innerR     = radius * innerRatio;
 
   ctx.lineCap  = 'round';
   ctx.lineJoin = 'round';
 
+  // One gradient-filled triangle per spike
+  for (let i = 0; i < spikeCount; i++) {
+    const tipAng   = startAngle + (Math.PI * 2 / spikeCount) * i;
+    const leftAng  = tipAng - Math.PI / spikeCount;
+    const rightAng = tipAng + Math.PI / spikeCount;
+
+    const tipX   = x + Math.cos(tipAng) * outerR;
+    const tipY   = y + Math.sin(tipAng) * outerR;
+    const leftX  = x + Math.cos(leftAng)  * innerR;
+    const leftY  = y + Math.sin(leftAng)  * innerR;
+    const rightX = x + Math.cos(rightAng) * innerR;
+    const rightY = y + Math.sin(rightAng) * innerR;
+
+    // Gradient runs from the inner midpoint toward the tip
+    const grad = ctx.createLinearGradient(
+      x + Math.cos(tipAng) * innerR * 0.6, y + Math.sin(tipAng) * innerR * 0.6,
+      tipX, tipY
+    );
+    grad.addColorStop(0, symbolColor(0, 0));
+    grad.addColorStop(1, symbolColor(0, 0.82));
+
+    ctx.beginPath();
+    ctx.moveTo(tipX, tipY);
+    ctx.lineTo(leftX, leftY);
+    ctx.lineTo(rightX, rightY);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  // Outline — subtle so gradient reads first
   ctx.beginPath();
   for (let i = 0; i < spikeCount * 2; i++) {
     const ang = startAngle + (Math.PI / spikeCount) * i;
-    const r   = i % 2 === 0 ? radius * 0.92 : radius * innerRatio;
+    const r   = i % 2 === 0 ? outerR : innerR;
     if (i === 0) ctx.moveTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r);
     else          ctx.lineTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r);
   }
   ctx.closePath();
-  ctx.fillStyle   = symbolColor(0, 0.12);
-  ctx.fill();
-  ctx.lineWidth   = sw * 0.55;
-  ctx.strokeStyle = symbolColor(0, 0.86);
+  ctx.lineWidth   = sw * 0.40;
+  ctx.strokeStyle = symbolColor(0, 0.30);
   ctx.stroke();
 
-  ctx.beginPath(); ctx.arc(x, y, radius * innerRatio * 0.38, 0, Math.PI * 2);
+  ctx.beginPath(); ctx.arc(x, y, innerR * 0.38, 0, Math.PI * 2);
   ctx.fillStyle = symbolColor(6, 1); ctx.fill();
 }
 
