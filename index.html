@@ -1,0 +1,576 @@
+<!doctype html>
+<!-- ES modules require a local HTTP server (e.g. `npx serve .` or VS Code Live Server) -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Card Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+
+    <!-- ── Left control panel ─────────────────────────────────────────────── -->
+    <aside class="panel">
+
+      <div class="panel-section">
+        <h2>Identity</h2>
+        <div class="field">
+          <span>Name</span>
+          <input id="person-name" type="text" value="Alex Reeves" placeholder="Full name" />
+        </div>
+        <div class="field">
+          <span>Job Title</span>
+          <input id="job-title" type="text" value="Senior Engineer" placeholder="Job title" />
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2>Card</h2>
+        <div class="field">
+          <span>Seed</span>
+          <input id="seed" type="number" value="42" min="0" max="999999" />
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2>Colour</h2>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Hue <span id="hue-value-display"></span>&deg;</span>
+            <button class="btn-reset" id="hue-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="hue" type="range" min="0" max="359" value="220" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Saturation <span id="saturation-value-display"></span></span>
+            <button class="btn-reset" id="saturation-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="saturation" type="range" min="0" max="100" step="1" value="50" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Theme</span>
+            <button class="btn-reset" id="dark-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="seg-control" id="theme-seg">
+            <button id="theme-light">Light</button>
+            <button id="theme-dark">Dark</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Lightness <span id="lightness-value-display"></span></span>
+            <button class="btn-reset" id="lightness-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="card-lightness" type="range" min="0" max="100" step="1" value="16" />
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2>Background</h2>
+        <div class="field">
+          <span>Noise Zoom <span id="noise-zoom-display">4</span></span>
+          <input id="noise-zoom" type="range" min="2" max="16" step="1" value="4" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Brightness <span id="noise-brightness-display"></span></span>
+            <button class="btn-reset" id="noise-brightness-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="noise-brightness" type="range" min="0" max="30" step="1" value="6" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Contrast <span id="noise-contrast-display"></span></span>
+            <button class="btn-reset" id="noise-contrast-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="noise-contrast" type="range" min="0" max="20" step="1" value="5" />
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2>Logo</h2>
+        <div class="field">
+          <span>Style <span id="logo-name-display"></span></span>
+          <select id="logo-style">
+            <option value="-1">Auto</option>
+            <option value="0">Venn</option>
+            <option value="1">Segmented Ring</option>
+            <option value="2">Radial Spokes</option>
+            <option value="3">Layered Arcs</option>
+            <option value="4">Orbital</option>
+            <option value="5">Parallel Lines</option>
+            <option value="6">Polygon Nodes</option>
+            <option value="7">Polygon Free Nodes</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Logo Seed</span>
+            <button class="btn-reset" id="logo-nonce-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="inline-row">
+            <input id="logo-nonce" type="number" value="0" min="0" max="999999" />
+            <button id="btn-next-logo">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2>Effects</h2>
+        <div class="field field--row">
+          <input id="show-artifacts" type="checkbox" checked />
+          <span>Artifacts</span>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Artifact Seed</span>
+            <button class="btn-reset" id="artifact-seed-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="inline-row">
+            <input id="artifact-seed" type="number" value="0" min="0" max="999999" />
+            <button id="btn-next-artifact">Next</button>
+          </div>
+        </div>
+        <div class="field field--row">
+          <input id="show-shadow" type="checkbox" checked />
+          <span>Drop Shadow</span>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2>Actions</h2>
+        <button id="btn-render">Render</button>
+        <button id="btn-rand">Shuffle</button>
+        <button id="btn-export">Export PNG</button>
+      </div>
+
+    </aside>
+
+    <!-- ── Canvas area ────────────────────────────────────────────────────── -->
+    <main class="main">
+      <canvas id="canvas"></canvas>
+    </main>
+
+    <script type="module">
+      import { generateCard, deriveColorParams } from "./modules/card.js";
+      import { makePRNG }                        from "./modules/prng.js";
+
+      // ── DOM references ────────────────────────────────────────────────────
+      const seedInput              = document.getElementById("seed");
+
+      const hueSlider              = document.getElementById("hue");
+      const hueDisplay             = document.getElementById("hue-value-display");
+      const hueReset               = document.getElementById("hue-reset");
+      const saturationSlider       = document.getElementById("saturation");
+      const saturationDisplay      = document.getElementById("saturation-value-display");
+      const saturationReset        = document.getElementById("saturation-reset");
+      const themeLightBtn          = document.getElementById("theme-light");
+      const themeDarkBtn           = document.getElementById("theme-dark");
+      const isDarkReset            = document.getElementById("dark-reset");
+      const cardLightnessSlider    = document.getElementById("card-lightness");
+      const cardLightnessDisplay   = document.getElementById("lightness-value-display");
+      const cardLightnessReset     = document.getElementById("lightness-reset");
+
+      const noiseZoomSlider        = document.getElementById("noise-zoom");
+      const noiseZoomDisplay       = document.getElementById("noise-zoom-display");
+      const noiseBrightnessSlider  = document.getElementById("noise-brightness");
+      const noiseBrightnessDisplay = document.getElementById("noise-brightness-display");
+      const noiseBrightnessReset   = document.getElementById("noise-brightness-reset");
+      const noiseContrastSlider    = document.getElementById("noise-contrast");
+      const noiseContrastDisplay   = document.getElementById("noise-contrast-display");
+      const noiseContrastReset     = document.getElementById("noise-contrast-reset");
+
+      const personNameInput        = document.getElementById("person-name");
+      const jobTitleInput          = document.getElementById("job-title");
+
+      const logoStyleSelect        = document.getElementById("logo-style");
+      const logoNameDisplay        = document.getElementById("logo-name-display");
+      const logoNonceInput         = document.getElementById("logo-nonce");
+      const logoNonceReset         = document.getElementById("logo-nonce-reset");
+
+      const showArtifactsToggle    = document.getElementById("show-artifacts");
+      const artifactSeedInput      = document.getElementById("artifact-seed");
+      const artifactSeedReset      = document.getElementById("artifact-seed-reset");
+      const showShadowToggle       = document.getElementById("show-shadow");
+
+      // ── Override state ────────────────────────────────────────────────────
+      // Only keys that the user has explicitly set are present.
+      // Absent key → use seed-derived default.
+      const colorOverrides = {};  // isDark | cardLightness | hue | saturation | noiseBrightness | noiseContrast
+      const seedOverrides  = {};  // logoNonce | artifactSeed
+
+      const LOGO_NAMES = ['Venn', 'Segmented Ring', 'Radial Spokes', 'Layered Arcs',
+                          'Orbital', 'Parallel Lines', 'Polygon Nodes', 'Polygon Free Nodes'];
+
+      // ── Seed-derived defaults ─────────────────────────────────────────────
+      function deriveSeedParams(seed) {
+        const p = makePRNG(seed ^ 0xDEADBEEF);
+        return {
+          logoNonce:    p.int(0, 99999),
+          artifactSeed: p.int(0, 99999),
+        };
+      }
+
+      // ── Effective values (override ?? seed-derived) ───────────────────────
+      function getEffectiveColor() {
+        const seed    = parseInt(seedInput.value, 10) | 0;
+        const derived = deriveColorParams(seed);
+        const effectiveIsDark = colorOverrides.isDark ?? derived.isDark;
+        // When isDark is overridden to the opposite mode, use the alt derived lightness
+        // so the slider shows a sensible value for the new mode.
+        const derivedLightness = effectiveIsDark === derived.isDark
+          ? derived.cardLightness
+          : derived.altCardLightness;
+        return {
+          isDark:          effectiveIsDark,
+          cardLightness:   colorOverrides.cardLightness   ?? derivedLightness,
+          hue:             colorOverrides.hue             ?? derived.hue,
+          saturation:      colorOverrides.saturation      ?? derived.saturation,
+          noiseBrightness: colorOverrides.noiseBrightness ?? derived.noiseBrightness,
+          noiseContrast:   colorOverrides.noiseContrast   ?? derived.noiseContrast,
+        };
+      }
+
+      function getEffectiveSeeds() {
+        const seed    = parseInt(seedInput.value, 10) | 0;
+        const derived = deriveSeedParams(seed);
+        return {
+          logoNonce:    seedOverrides.logoNonce    ?? derived.logoNonce,
+          artifactSeed: seedOverrides.artifactSeed ?? derived.artifactSeed,
+        };
+      }
+
+      // ── Slider / display sync ─────────────────────────────────────────────
+      function updateThemeSeg(isDark) {
+        themeLightBtn.classList.toggle("active", !isDark);
+        themeDarkBtn.classList.toggle("active",   isDark);
+      }
+
+      function updateColorSliders() {
+        const c = getEffectiveColor();
+        updateThemeSeg(c.isDark);
+        cardLightnessSlider.value        = c.cardLightness;
+        cardLightnessDisplay.textContent = c.cardLightness;
+        hueSlider.value                  = c.hue;
+        hueDisplay.textContent           = c.hue;
+        saturationSlider.value           = c.saturation;
+        saturationDisplay.textContent    = c.saturation;
+        noiseBrightnessSlider.value      = Math.round(c.noiseBrightness * 100);
+        noiseBrightnessDisplay.textContent = Math.round(c.noiseBrightness * 100);
+        noiseContrastSlider.value        = Math.round(c.noiseContrast * 100);
+        noiseContrastDisplay.textContent = Math.round(c.noiseContrast * 100);
+      }
+
+      function updateSeedInputs() {
+        const s = getEffectiveSeeds();
+        logoNonceInput.value    = s.logoNonce;
+        artifactSeedInput.value = s.artifactSeed;
+      }
+
+      function updateResetButtons() {
+        isDarkReset.classList.toggle('visible',            colorOverrides.isDark          !== undefined);
+        cardLightnessReset.classList.toggle('visible',     colorOverrides.cardLightness   !== undefined);
+        hueReset.classList.toggle('visible',               colorOverrides.hue             !== undefined);
+        saturationReset.classList.toggle('visible',        colorOverrides.saturation      !== undefined);
+        noiseBrightnessReset.classList.toggle('visible',   colorOverrides.noiseBrightness !== undefined);
+        noiseContrastReset.classList.toggle('visible',     colorOverrides.noiseContrast   !== undefined);
+        logoNonceReset.classList.toggle('visible',         seedOverrides.logoNonce        !== undefined);
+        artifactSeedReset.classList.toggle('visible',      seedOverrides.artifactSeed     !== undefined);
+      }
+
+      function updateLogoName() {
+        const override = parseInt(logoStyleSelect.value, 10);
+        if (override >= 0) {
+          logoNameDisplay.textContent = '';
+        } else {
+          const seed  = parseInt(seedInput.value, 10) | 0;
+          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 7);
+          logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
+        }
+      }
+
+      // ── Build params for generateCard ─────────────────────────────────────
+      function params(transparent = false) {
+        const color = getEffectiveColor();
+        const seeds = getEffectiveSeeds();
+        return {
+          size:                  1024,
+          padding:               0.08,
+          seed:                  parseInt(seedInput.value, 10) | 0,
+          logoNonce:             seeds.logoNonce,
+          logoStyle:             parseInt(logoStyleSelect.value, 10),
+          hue:                   color.hue,
+          isDarkOverride:        colorOverrides.isDark          !== undefined ? colorOverrides.isDark          : null,
+          cardLightnessOverride: colorOverrides.cardLightness   !== undefined ? colorOverrides.cardLightness   : null,
+          saturationOverride:    colorOverrides.saturation      !== undefined ? colorOverrides.saturation      : null,
+          noiseZoom:             parseInt(noiseZoomSlider.value, 10) | 0,
+          noiseBrightness:       color.noiseBrightness,
+          noiseContrast:         color.noiseContrast,
+          personName:            personNameInput.value.trim(),
+          jobTitle:              jobTitleInput.value.trim(),
+          artifactSeed:          seeds.artifactSeed,
+          showArtifacts:         showArtifactsToggle.checked,
+          showShadow:            showShadowToggle.checked,
+          transparent,
+        };
+      }
+
+      // ── URL sync ──────────────────────────────────────────────────────────
+      // Named so it can be called again from popstate.
+      // Clears all overrides first so stale values don't bleed through.
+      function applyQueryString() {
+        clearAllOverrides();
+        const q = new URLSearchParams(location.search);
+
+        if (q.has("seed"))      seedInput.value              = q.get("seed");
+        if (q.has("lstyle"))    logoStyleSelect.value        = q.get("lstyle");
+        if (q.has("zoom"))    { noiseZoomSlider.value        = q.get("zoom");
+                                noiseZoomDisplay.textContent = noiseZoomSlider.value; }
+        if (q.has("name"))      personNameInput.value        = q.get("name");
+        if (q.has("title"))     jobTitleInput.value          = q.get("title");
+        if (q.has("artifacts")) showArtifactsToggle.checked  = q.get("artifacts") !== "0";
+        if (q.has("shadow"))    showShadowToggle.checked     = q.get("shadow")    !== "0";
+
+        // Colour overrides — only in URL if user set them
+        if (q.has("dark"))      colorOverrides.isDark          = q.get("dark")     !== "0";
+        if (q.has("litness"))   colorOverrides.cardLightness   = parseInt(q.get("litness"),   10);
+        if (q.has("hue"))       colorOverrides.hue             = parseInt(q.get("hue"),       10);
+        if (q.has("sat"))       colorOverrides.saturation      = parseInt(q.get("sat"),       10);
+        if (q.has("nbright"))   colorOverrides.noiseBrightness = parseInt(q.get("nbright"),   10) / 100;
+        if (q.has("ncontrast")) colorOverrides.noiseContrast   = parseInt(q.get("ncontrast"), 10) / 100;
+
+        // Seed overrides
+        if (q.has("nonce"))     seedOverrides.logoNonce    = parseInt(q.get("nonce"), 10);
+        if (q.has("aseed"))     seedOverrides.artifactSeed = parseInt(q.get("aseed"), 10);
+      }
+
+      // push=true  → pushState    (navigable: shuffle, seed change, discrete actions)
+      // push=false → replaceState (continuous: slider drag, text typing)
+      function syncURL(push = false) {
+        const q = new URLSearchParams({
+          seed:      seedInput.value,
+          lstyle:    logoStyleSelect.value,
+          zoom:      noiseZoomSlider.value,
+          name:      personNameInput.value.trim(),
+          title:     jobTitleInput.value.trim(),
+          artifacts: showArtifactsToggle.checked ? "1" : "0",
+          shadow:    showShadowToggle.checked     ? "1" : "0",
+        });
+        if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
+        if (colorOverrides.cardLightness   !== undefined) q.set("litness",  colorOverrides.cardLightness);
+        if (colorOverrides.hue             !== undefined) q.set("hue",      colorOverrides.hue);
+        if (colorOverrides.saturation      !== undefined) q.set("sat",      colorOverrides.saturation);
+        if (colorOverrides.noiseBrightness !== undefined) q.set("nbright",  Math.round(colorOverrides.noiseBrightness * 100));
+        if (colorOverrides.noiseContrast   !== undefined) q.set("ncontrast",Math.round(colorOverrides.noiseContrast   * 100));
+        if (seedOverrides.logoNonce        !== undefined) q.set("nonce",    seedOverrides.logoNonce);
+        if (seedOverrides.artifactSeed     !== undefined) q.set("aseed",    seedOverrides.artifactSeed);
+        const url = "?" + q.toString();
+        if (push) history.pushState(null, "", url);
+        else      history.replaceState(null, "", url);
+      }
+
+      function render(push = false) {
+        generateCard(params());
+        syncURL(push);
+        updateLogoName();
+      }
+
+      // Restore full state when user navigates back/forward.
+      window.addEventListener("popstate", () => {
+        applyQueryString();
+        updateColorSliders();
+        updateSeedInputs();
+        updateResetButtons();
+        generateCard(params()); // render without touching history
+        updateLogoName();
+      });
+
+      // ── Seed change: clear all overrides ─────────────────────────────────
+      function clearAllOverrides() {
+        delete colorOverrides.isDark;
+        delete colorOverrides.cardLightness;
+        delete colorOverrides.hue;
+        delete colorOverrides.saturation;
+        delete colorOverrides.noiseBrightness;
+        delete colorOverrides.noiseContrast;
+        delete seedOverrides.logoNonce;
+        delete seedOverrides.artifactSeed;
+      }
+
+      seedInput.addEventListener("change", () => {
+        clearAllOverrides();
+        updateColorSliders();
+        updateSeedInputs();
+        updateResetButtons();
+        render(true);
+      });
+
+      // ── Colour events ─────────────────────────────────────────────────────
+      hueSlider.addEventListener("input", () => {
+        colorOverrides.hue     = parseInt(hueSlider.value, 10);
+        hueDisplay.textContent = hueSlider.value;
+        updateResetButtons();
+        render();
+      });
+      hueReset.addEventListener("click", () => {
+        delete colorOverrides.hue;
+        updateColorSliders();
+        updateResetButtons();
+        render(true);
+      });
+
+      saturationSlider.addEventListener("input", () => {
+        colorOverrides.saturation       = parseInt(saturationSlider.value, 10);
+        saturationDisplay.textContent   = saturationSlider.value;
+        updateResetButtons();
+        render();
+      });
+      saturationReset.addEventListener("click", () => {
+        delete colorOverrides.saturation;
+        updateColorSliders();
+        updateResetButtons();
+        render(true);
+      });
+
+      function setTheme(isDark) {
+        colorOverrides.isDark = isDark;
+        // Clear lightness override when switching mode — altCardLightness kicks in automatically.
+        delete colorOverrides.cardLightness;
+        updateColorSliders();
+        updateResetButtons();
+        render(true);
+      }
+      themeLightBtn.addEventListener("click", () => setTheme(false));
+      themeDarkBtn.addEventListener("click",  () => setTheme(true));
+      isDarkReset.addEventListener("click", () => {
+        delete colorOverrides.isDark;
+        delete colorOverrides.cardLightness; // coupled: lightness was mode-specific
+        updateColorSliders();
+        updateResetButtons();
+        render(true);
+      });
+
+      cardLightnessSlider.addEventListener("input", () => {
+        colorOverrides.cardLightness     = parseInt(cardLightnessSlider.value, 10);
+        cardLightnessDisplay.textContent = cardLightnessSlider.value;
+        updateResetButtons();
+        render();
+      });
+      cardLightnessReset.addEventListener("click", () => {
+        delete colorOverrides.cardLightness;
+        updateColorSliders();
+        updateResetButtons();
+        render(true);
+      });
+
+      // ── Background events ─────────────────────────────────────────────────
+      noiseZoomSlider.addEventListener("input", () => {
+        noiseZoomDisplay.textContent = noiseZoomSlider.value;
+        render();
+      });
+
+      noiseBrightnessSlider.addEventListener("input", () => {
+        colorOverrides.noiseBrightness     = parseInt(noiseBrightnessSlider.value, 10) / 100;
+        noiseBrightnessDisplay.textContent = noiseBrightnessSlider.value;
+        updateResetButtons();
+        render();
+      });
+      noiseBrightnessReset.addEventListener("click", () => {
+        delete colorOverrides.noiseBrightness;
+        updateColorSliders();
+        updateResetButtons();
+        render(true);
+      });
+
+      noiseContrastSlider.addEventListener("input", () => {
+        colorOverrides.noiseContrast     = parseInt(noiseContrastSlider.value, 10) / 100;
+        noiseContrastDisplay.textContent = noiseContrastSlider.value;
+        updateResetButtons();
+        render();
+      });
+      noiseContrastReset.addEventListener("click", () => {
+        delete colorOverrides.noiseContrast;
+        updateColorSliders();
+        updateResetButtons();
+        render(true);
+      });
+
+      // ── Logo seed ─────────────────────────────────────────────────────────
+      document.getElementById("btn-next-logo").addEventListener("click", () => {
+        seedOverrides.logoNonce = (parseInt(logoNonceInput.value, 10) | 0) + 1;
+        logoNonceInput.value    = seedOverrides.logoNonce;
+        updateResetButtons();
+        render(true);
+      });
+      logoNonceInput.addEventListener("change", () => {
+        seedOverrides.logoNonce = parseInt(logoNonceInput.value, 10) | 0;
+        updateResetButtons();
+        render(true);
+      });
+      logoNonceReset.addEventListener("click", () => {
+        delete seedOverrides.logoNonce;
+        updateSeedInputs();
+        updateResetButtons();
+        render(true);
+      });
+
+      // ── Artifact seed ─────────────────────────────────────────────────────
+      document.getElementById("btn-next-artifact").addEventListener("click", () => {
+        seedOverrides.artifactSeed = (parseInt(artifactSeedInput.value, 10) | 0) + 1;
+        artifactSeedInput.value    = seedOverrides.artifactSeed;
+        updateResetButtons();
+        render(true);
+      });
+      artifactSeedInput.addEventListener("change", () => {
+        seedOverrides.artifactSeed = parseInt(artifactSeedInput.value, 10) | 0;
+        updateResetButtons();
+        render(true);
+      });
+      artifactSeedReset.addEventListener("click", () => {
+        delete seedOverrides.artifactSeed;
+        updateSeedInputs();
+        updateResetButtons();
+        render(true);
+      });
+
+      // ── Other controls ────────────────────────────────────────────────────
+      document.getElementById("btn-render").addEventListener("click", () => render(true));
+
+      document.getElementById("btn-rand").addEventListener("click", () => {
+        seedInput.value = (Math.random() * 99999) | 0;
+        // Overrides survive shuffle — pinned values stay pinned.
+        updateColorSliders();
+        updateSeedInputs();
+        updateResetButtons();
+        render(true);
+      });
+
+      document.getElementById("btn-export").addEventListener("click", () => {
+        const c = getEffectiveColor();
+        const s = getEffectiveSeeds();
+        generateCard(params(true));
+        const link    = document.createElement("a");
+        link.download = `card-s${seedInput.value}-h${c.hue}-l${s.logoNonce}.png`;
+        link.href     = document.getElementById("canvas").toDataURL("image/png");
+        link.click();
+        render();
+      });
+
+      logoStyleSelect.addEventListener("change",      () => render(true));
+      showArtifactsToggle.addEventListener("change",  () => render(true));
+      showShadowToggle.addEventListener("change",     () => render(true));
+      personNameInput.addEventListener("input", render);   // replaceState — continuous typing
+      jobTitleInput.addEventListener("input",   render);   // replaceState — continuous typing
+
+      // ── Init ──────────────────────────────────────────────────────────────
+      applyQueryString();
+      updateColorSliders();
+      updateSeedInputs();
+      updateResetButtons();
+      render(); // replaceState on first load — initial URL is already canonical
+    </script>
+
+  </body>
+</html>

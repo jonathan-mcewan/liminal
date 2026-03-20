@@ -1,0 +1,356 @@
+/* ── shadcn/ui design tokens (dark theme) ────────────────────────────────── */
+:root {
+  --background:         oklch(0.10 0 0);
+  --foreground:         oklch(0.985 0 0);
+  --card:               oklch(0.205 0 0);
+  --card-foreground:    oklch(0.985 0 0);
+  --muted:              oklch(0.269 0 0);
+  --muted-foreground:   oklch(0.556 0 0);
+  --accent:             oklch(0.269 0 0);
+  --accent-foreground:  oklch(0.985 0 0);
+  --border:             oklch(1 0 0 / 10%);
+  --input:              oklch(1 0 0 / 15%);
+  --ring:               oklch(0.556 0 0);
+  --radius:             0.375rem;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* ── App shell — sidebar + main ──────────────────────────────────────────── */
+body {
+  background:  var(--background);
+  color:       var(--foreground);
+  font-family: var(--font-mono);
+  font-size:   0.75rem;
+  display:     flex;
+  flex-direction: row;
+  overflow:    hidden;
+}
+
+/* ── Left control panel ──────────────────────────────────────────────────── */
+.panel {
+  width:          260px;
+  min-width:      260px;
+  height:         100vh;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+  padding:        1.5rem;
+  border-right:   1px solid var(--border);
+  overflow-y:     auto;
+}
+
+.panel-section {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.75rem;
+}
+
+/* Section heading */
+.panel-section > h2 {
+  font-size:      0.6rem;
+  font-weight:    600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:          var(--muted-foreground);
+  padding-bottom: 0.5rem;
+  border-bottom:  1px solid var(--border);
+}
+
+/* ── Main canvas area ────────────────────────────────────────────────────── */
+.main {
+  flex:            1;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         1.5rem;
+  overflow:        hidden;
+}
+
+canvas {
+  display:      block;
+  max-width:    min(540px, 100%);
+  max-height:   calc(100vh - 3rem);
+  aspect-ratio: 1;
+}
+
+/* ── Field — label + input stacked ──────────────────────────────────────── */
+.field {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.375rem;
+}
+
+/* Label — shadcn Label component style */
+.field > span {
+  font-size:      0.6875rem;
+  font-weight:    500;
+  color:          var(--muted-foreground);
+  letter-spacing: 0.04em;
+  line-height:    1;
+  user-select:    none;
+}
+
+/* ── Input — shadcn Input component style ────────────────────────────────── */
+input[type="text"],
+input[type="number"] {
+  width:         100%;
+  height:        2.25rem;
+  border-radius: calc(var(--radius) - 1px);
+  border:        1px solid var(--border);
+  background:    transparent;
+  color:         var(--foreground);
+  font-family:   var(--font-mono);
+  font-size:     0.75rem;
+  padding:       0 0.625rem;
+  outline:       none;
+  transition:    border-color 0.15s, box-shadow 0.15s;
+}
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder {
+  color: var(--muted-foreground);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+  border-color: var(--ring);
+  box-shadow:   0 0 0 2px oklch(0.556 0 0 / 20%);
+}
+
+/* Suppress browser spinner on number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ── Select — matches input style ───────────────────────────────────────── */
+select {
+  width:         100%;
+  height:        2.25rem;
+  border-radius: calc(var(--radius) - 1px);
+  border:        1px solid var(--border);
+  background:    transparent;
+  color:         var(--foreground);
+  font-family:   var(--font-mono);
+  font-size:     0.75rem;
+  padding:       0 0.5rem;
+  outline:       none;
+  cursor:        pointer;
+  transition:    border-color 0.15s, box-shadow 0.15s;
+}
+
+select:focus {
+  border-color: var(--ring);
+  box-shadow:   0 0 0 2px oklch(0.556 0 0 / 20%);
+}
+
+select option {
+  background: oklch(0.15 0 0);
+}
+
+/* ── Range — minimal, matches shadcn aesthetic ───────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance:   none;
+  width:        100%;
+  height:       2.25rem;
+  background:   transparent;
+  cursor:       pointer;
+  outline:      none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height:        2px;
+  border-radius: 9999px;
+  background:    var(--border);
+}
+input[type="range"]::-moz-range-track {
+  height:        2px;
+  border-radius: 9999px;
+  background:    var(--border);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width:         14px;
+  height:        14px;
+  margin-top:    -6px;
+  border-radius: 9999px;
+  background:    var(--foreground);
+  border:        2px solid var(--background);
+  box-shadow:    0 0 0 1px var(--border);
+  transition:    box-shadow 0.15s;
+}
+input[type="range"]::-moz-range-thumb {
+  width:         14px;
+  height:        14px;
+  border-radius: 9999px;
+  background:    var(--foreground);
+  border:        2px solid var(--background);
+  box-shadow:    0 0 0 1px var(--border);
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px oklch(0.556 0 0 / 25%);
+}
+
+/* ── Button — shadcn Button, "outline" variant ───────────────────────────── */
+button {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  white-space:     nowrap;
+  width:           100%;
+  height:          2.25rem;
+  padding:         0 1rem;
+  border-radius:   calc(var(--radius) - 1px);
+  border:          1px solid var(--border);
+  background:      transparent;
+  color:           var(--muted-foreground);
+  font-family:     var(--font-mono);
+  font-size:       0.6875rem;
+  font-weight:     500;
+  letter-spacing:  0.06em;
+  cursor:          pointer;
+  outline:         none;
+  transition:      background 0.12s, color 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+button:hover {
+  background:   var(--accent);
+  color:        var(--accent-foreground);
+  border-color: oklch(1 0 0 / 18%);
+}
+
+button:focus-visible {
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+}
+
+button:active {
+  opacity: 0.85;
+}
+
+/* Inline field+button row (e.g. Logo nonce + Next Logo) */
+.inline-row {
+  display: flex;
+  gap:     0.5rem;
+}
+
+.inline-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.inline-row button {
+  width: auto;
+  flex-shrink: 0;
+  padding: 0 0.75rem;
+}
+
+/* ── Segmented control — Light / Dark theme picker ───────────────────────── */
+.seg-control {
+  display:       flex;
+  border:        1px solid var(--border);
+  border-radius: calc(var(--radius) - 1px);
+  overflow:      hidden;
+}
+
+.seg-control button {
+  flex:          1;
+  height:        1.875rem;
+  border:        none;
+  border-radius: 0;
+  background:    transparent;
+  color:         var(--muted-foreground);
+  font-size:     0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.seg-control button + button {
+  border-left: 1px solid var(--border);
+}
+
+.seg-control button.active {
+  background: var(--muted);
+  color:      var(--foreground);
+}
+
+.seg-control button:hover:not(.active) {
+  background: oklch(1 0 0 / 4%);
+  color:      var(--foreground);
+}
+
+/* ── Field header — label row with optional inline reset button ──────────── */
+.field-hdr {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  line-height:     1;
+}
+
+/* Tiny seed-reset button — hidden until control has a user override */
+.btn-reset {
+  width:           auto;
+  height:          auto;
+  padding:         0 0.2rem;
+  border:          none;
+  background:      transparent;
+  color:           var(--muted-foreground);
+  font-size:       0.7rem;
+  font-family:     var(--font-mono);
+  cursor:          pointer;
+  opacity:         0;
+  pointer-events:  none;
+  transition:      opacity 0.15s, color 0.12s;
+  user-select:     none;
+}
+
+.btn-reset.visible {
+  opacity:        1;
+  pointer-events: auto;
+}
+
+.btn-reset:hover {
+  color:       var(--foreground);
+  background:  transparent;
+}
+
+/* Hue degree readout */
+#hue-value-display {
+  color:      var(--muted-foreground);
+  font-weight: 400;
+}
+
+/* Horizontal field variant — checkbox + label side by side */
+.field--row {
+  flex-direction: row;
+  align-items:    center;
+  gap:            0.5rem;
+}
+
+.field--row input[type="checkbox"] {
+  width:  1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  accent-color: var(--foreground);
+  cursor: pointer;
+}
+
+/* Logo name readout beside nonce label */
+#logo-name-display {
+  color:       var(--muted-foreground);
+  font-weight: 400;
+}
