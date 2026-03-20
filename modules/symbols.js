@@ -27,6 +27,8 @@ export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng) {
     drawParallelLines,
     drawPolygonNodes,
     drawPolygonFreeNodes,
+    drawDotMatrix,
+    drawDotMask,
   ];
 
   (variants[style] ?? variants[0])(ctx, x, y, radius, strokeWeight, symbolColor, rng);
@@ -414,5 +416,90 @@ function drawPolygonFreeNodes(ctx, x, y, radius, sw, symbolColor, rng) {
   // Hub disc
   ctx.beginPath(); ctx.arc(x, y, sw * 2.5, 0, Math.PI * 2);
   ctx.fillStyle = symbolColor(8, 1); ctx.fill();
+}
+
+// ── Style 8: Dot Matrix ───────────────────────────────────────────────────────
+// A rectangular grid of dots where each dot is independently shown or hidden
+// by the PRNG. Grid dimensions and density are both seed-derived, producing
+// everything from sparse scatter to dense LED-panel looks.
+// Invisible positions render as ghost dots to expose the underlying grid.
+function drawDotMatrix(ctx, x, y, radius, sw, symbolColor, rng) {
+  const cols    = rng.int(5, 13);
+  const rows    = rng.int(5, 13);
+  const cellW   = (radius * 2) / cols;
+  const cellH   = (radius * 2) / rows;
+  const dotR    = Math.min(cellW, cellH) * rng.float(0.20, 0.40);
+  const density = rng.float(0.38, 0.68);
+  const x0      = x - radius + cellW * 0.5;
+  const y0      = y - radius + cellH * 0.5;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const lit = rng.next() < density;
+      const dx  = x0 + col * cellW;
+      const dy  = y0 + row * cellH;
+      if (lit) {
+        ctx.beginPath();
+        ctx.arc(dx, dy, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.88);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(dx, dy, dotR * 0.45, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.10);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+// ── Style 9: Dot Mask ─────────────────────────────────────────────────────────
+// Dots on a regular grid lit only when they fall inside a seed-derived blob.
+// The blob is a polar curve built from sinusoidal harmonics — organic but
+// deterministic. Grid density (zoom) is seed-derived: coarse grids give chunky
+// pixel approximations; fine grids resolve the shape more smoothly.
+function drawDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
+  const harmonicCount = rng.int(2, 5);
+  const harmonics = [];
+  for (let h = 0; h < harmonicCount; h++) {
+    harmonics.push({
+      freq:  rng.int(2, 5),
+      amp:   rng.float(0.06, 0.20),
+      phase: rng.float(0, Math.PI * 2),
+    });
+  }
+  const blobBase = radius * rng.float(0.65, 0.88);
+  function blobR(theta) {
+    return harmonics.reduce(
+      (r, h) => r + blobBase * h.amp * Math.sin(h.freq * theta + h.phase),
+      blobBase
+    );
+  }
+
+  const gridN = rng.int(6, 16);
+  const cell  = (radius * 2) / gridN;
+  const dotR  = cell * rng.float(0.22, 0.42);
+  const x0    = x - radius + cell * 0.5;
+  const y0    = y - radius + cell * 0.5;
+
+  for (let row = 0; row < gridN; row++) {
+    for (let col = 0; col < gridN; col++) {
+      const dx    = x0 + col * cell;
+      const dy    = y0 + row * cell;
+      const dist  = Math.hypot(dx - x, dy - y);
+      const theta = Math.atan2(dy - y, dx - x);
+      if (dist <= blobR(theta)) {
+        ctx.beginPath();
+        ctx.arc(dx, dy, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.88);
+        ctx.fill();
+      } else if (dist <= radius) {
+        ctx.beginPath();
+        ctx.arc(dx, dy, dotR * 0.38, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.08);
+        ctx.fill();
+      }
+    }
+  }
 }
 

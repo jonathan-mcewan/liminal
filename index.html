@@ -103,6 +103,8 @@
             <option value="5">Parallel Lines</option>
             <option value="6">Polygon Nodes</option>
             <option value="7">Polygon Free Nodes</option>
+            <option value="8">Dot Matrix</option>
+            <option value="9">Dot Mask</option>
           </select>
         </div>
         <div class="field">
@@ -207,7 +209,8 @@
       const seedOverrides  = {};  // logoNonce | artifactSeed
 
       const LOGO_NAMES = ['Venn', 'Segmented Ring', 'Radial Spokes', 'Layered Arcs',
-                          'Orbital', 'Parallel Lines', 'Polygon Nodes', 'Polygon Free Nodes'];
+                          'Orbital', 'Parallel Lines', 'Polygon Nodes', 'Polygon Free Nodes',
+                          'Dot Matrix', 'Dot Mask'];
 
       // ── Seed-derived defaults ─────────────────────────────────────────────
       function deriveSeedParams(seed) {
@@ -291,7 +294,7 @@
           logoNameDisplay.textContent = '';
         } else {
           const seed  = parseInt(seedInput.value, 10) | 0;
-          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 7);
+          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 9);
           logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
         }
       }
