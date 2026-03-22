@@ -199,8 +199,7 @@ export function generateCard({
   const symbolX      = landscape ? cardLeft + cardWidth * 0.30 : centerX;
   const isSquare     = Math.abs(cardAspect - 1) < 0.01;
   const symbolY      = landscape ? cardTop + cardHeight * 0.50
-                     : isSquare  ? cardTop + cardHeight * 0.38
-                     :             cardTop + cardHeight * 0.36;
+                     : cardTop + cardHeight * 0.38;
 
   // ── Drawing ───────────────────────────────────────────────────────────────
 
