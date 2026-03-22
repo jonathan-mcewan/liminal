@@ -91,10 +91,16 @@ export function generateCard({
   showShadow         = true,
   showLanyard        = false,
   transparent        = false,
+  ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
-  const canvas = document.getElementById('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
+  let ctx;
+  if (ctxOverride) {
+    ctx = ctxOverride;
+  } else {
+    const canvas = document.getElementById('canvas');
+    canvas.width = canvas.height = size;
+    ctx = canvas.getContext('2d');
+  }
 
   // ── Four independent PRNGs ────────────────────────────────────────────────
   const cardPRNG     = makePRNG(seed);
@@ -144,6 +150,9 @@ export function generateCard({
 
   // Bundled into one object for easy passing to drawing modules
   const geometry = { size, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY };
+
+  // If the ctx supports it (SvgContext), crop the output to the card bounds
+  if (ctx.cropTo) ctx.cropTo(cardLeft, cardTop, cardWidth, cardHeight);
 
   // ── Colour helpers ────────────────────────────────────────────────────────
   // cardColor   — base hue, used for the card body gradient and shadow
