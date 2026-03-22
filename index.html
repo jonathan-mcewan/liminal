@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>liminal</title>
+    <title>LIMINAL</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -30,7 +30,15 @@
         <h2><i data-lucide="fingerprint"></i>Card</h2>
         <div class="field">
           <span>Seed</span>
-          <input id="seed" type="number" value="42" min="0" max="999999" />
+          <input id="seed" type="text" value="42" placeholder="number or text" />
+        </div>
+        <div class="field">
+          <span>Size</span>
+          <select id="card-size">
+            <option value="id">ID Card</option>
+            <option value="square">Square</option>
+            <option value="moo">MOO Card</option>
+          </select>
         </div>
         <div class="field field--row">
           <input id="show-lanyard" type="checkbox" />
@@ -120,7 +128,16 @@
             <option value="12">Starburst</option>
             <option value="13">Lissajous</option>
             <option value="14">Rose Curve</option>
+            <option value="15">Variable Dot Mask</option>
+            <option value="16">Inlaid Rings</option>
           </select>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Scale <span id="logo-scale-display">100%</span></span>
+            <button class="btn-reset" id="logo-scale-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="logo-scale" type="range" min="25" max="200" step="5" value="100" />
         </div>
         <div class="field">
           <div class="field-hdr">
@@ -189,20 +206,21 @@
             </g>
             <circle cx="16" cy="16" r="13.4" fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="1.15"/>
           </svg>
-          <span class="brand-name">liminal</span>
+          <span class="brand-name">LIMINAL</span>
         </div>
-        <canvas id="canvas"></canvas>
-        <div id="svg-output" style="display:none"></div>
+        <canvas id="canvas" style="display:none"></canvas>
+        <div id="svg-output"></div>
         <p class="descriptor" id="card-descriptor"></p>
         <div class="card-actions">
           <button id="btn-render"><i data-lucide="refresh-cw"></i>Render</button>
+          <button id="btn-reset-all" class="btn-action-reset" title="Reset all overrides (keep name, title, seed)"><i data-lucide="rotate-ccw"></i></button>
           <button id="btn-rand"><i data-lucide="shuffle"></i>Shuffle</button>
-          <button id="btn-export"><i data-lucide="download"></i>Export PNG</button>
+          <button id="btn-export"><i data-lucide="download"></i>Export SVG</button>
           <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
         </div>
         <div class="render-mode-toggle">
-          <button id="btn-mode-canvas" class="mode-btn active">Canvas</button>
-          <button id="btn-mode-svg"    class="mode-btn">SVG</button>
+          <button id="btn-mode-canvas" class="mode-btn">Canvas</button>
+          <button id="btn-mode-svg"    class="mode-btn active">SVG</button>
         </div>
       </div>
     </main>
@@ -242,8 +260,21 @@
 
       const logoStyleSelect        = document.getElementById("logo-style");
       const logoNameDisplay        = document.getElementById("logo-name-display");
+      const logoScaleSlider        = document.getElementById("logo-scale");
+      const logoScaleDisplay       = document.getElementById("logo-scale-display");
+      const logoScaleReset         = document.getElementById("logo-scale-reset");
       const logoNonceInput         = document.getElementById("logo-nonce");
       const logoNonceReset         = document.getElementById("logo-nonce-reset");
+
+      const cardSizeSelect         = document.getElementById("card-size");
+
+      // Card size presets — not seed-derived, purely a UI control.
+      // aspect = width/height ratio.  scale = multiplier on the fitted dimension.
+      const CARD_SIZES = {
+        id:     { aspect: 54 / 85.6, scale: 1 },           // standard ID card (85.6 × 54 mm)
+        square: { aspect: 1,         scale: 54 / 85.6 * 0.64 }, // side = 4/5 of ID card width, then 80% of that
+        moo:    { aspect: 84 / 55,   scale: 1 },           // MOO business card (84 × 55 mm)
+      };
 
       const showArtifactsToggle    = document.getElementById("show-artifacts");
       const artifactSeedInput      = document.getElementById("artifact-seed");
@@ -257,6 +288,22 @@
       const showShadowToggle       = document.getElementById("show-shadow");
       const showLanyardToggle      = document.getElementById("show-lanyard");
 
+      // ── Seed helper — accepts numbers or text ──────────────────────────────
+      function hashString(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) {
+          h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+        }
+        return h >>> 0; // unsigned 32-bit
+      }
+
+      function getSeed() {
+        const raw = seedInput.value.trim();
+        const n = parseInt(raw, 10);
+        if (!isNaN(n) && String(n) === raw) return n | 0;
+        return hashString(raw);
+      }
+
       // ── Override state ────────────────────────────────────────────────────
       // Only keys that the user has explicitly set are present.
       // Absent key → use seed-derived default.
@@ -266,7 +313,8 @@
       const LOGO_NAMES = ['Venn', 'Segmented Ring', 'Radial Spokes', 'Layered Arcs',
                           'Orbital', 'Parallel Lines', 'Polygon Nodes', 'Polygon Free Nodes',
                           'Dot Matrix', 'Dot Mask',
-                          'Spiral', 'Wave Field', 'Starburst', 'Lissajous', 'Rose Curve'];
+                          'Spiral', 'Wave Field', 'Starburst', 'Lissajous', 'Rose Curve',
+                          'Variable Dot Mask', 'Inlaid Rings'];
 
       // ── Seed-derived defaults ─────────────────────────────────────────────
       function deriveSeedParams(seed) {
@@ -279,7 +327,7 @@
 
       // ── Effective values (override ?? seed-derived) ───────────────────────
       function getEffectiveColor() {
-        const seed    = parseInt(seedInput.value, 10) | 0;
+        const seed    = getSeed();
         const derived = deriveColorParams(seed);
         const effectiveIsDark = colorOverrides.isDark ?? derived.isDark;
         // When isDark is overridden to the opposite mode, use the alt derived lightness
@@ -298,7 +346,7 @@
       }
 
       function getEffectiveSeeds() {
-        const seed    = parseInt(seedInput.value, 10) | 0;
+        const seed    = getSeed();
         const derived = deriveSeedParams(seed);
         return {
           logoNonce:    seedOverrides.logoNonce    ?? derived.logoNonce,
@@ -340,6 +388,7 @@
         saturationReset.classList.toggle('visible',        colorOverrides.saturation      !== undefined);
         noiseBrightnessReset.classList.toggle('visible',   colorOverrides.noiseBrightness !== undefined);
         noiseContrastReset.classList.toggle('visible',     colorOverrides.noiseContrast   !== undefined);
+        logoScaleReset.classList.toggle('visible',           parseInt(logoScaleSlider.value, 10) !== 100);
         logoNonceReset.classList.toggle('visible',         seedOverrides.logoNonce        !== undefined);
         artifactSeedReset.classList.toggle('visible',      seedOverrides.artifactSeed     !== undefined);
       }
@@ -349,8 +398,8 @@
         if (override >= 0) {
           logoNameDisplay.textContent = '';
         } else {
-          const seed  = parseInt(seedInput.value, 10) | 0;
-          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 14);
+          const seed  = getSeed();
+          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 16);
           logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
         }
       }
@@ -359,12 +408,16 @@
       function params(transparent = false) {
         const color = getEffectiveColor();
         const seeds = getEffectiveSeeds();
+        const sizePreset = CARD_SIZES[cardSizeSelect.value] || CARD_SIZES.id;
         return {
           size:                  1024,
           padding:               0.08,
-          seed:                  parseInt(seedInput.value, 10) | 0,
+          cardAspect:            sizePreset.aspect,
+          cardScale:             sizePreset.scale,
+          seed:                  getSeed(),
           logoNonce:             seeds.logoNonce,
           logoStyle:             parseInt(logoStyleSelect.value, 10),
+          logoScale:             parseInt(logoScaleSlider.value, 10) / 100,
           hue:                   color.hue,
           isDarkOverride:        colorOverrides.isDark          !== undefined ? colorOverrides.isDark          : null,
           cardLightnessOverride: colorOverrides.cardLightness   !== undefined ? colorOverrides.cardLightness   : null,
@@ -392,8 +445,11 @@
         clearAllOverrides();
         const q = new URLSearchParams(location.search);
 
+        if (q.has("csize"))     cardSizeSelect.value          = q.get("csize");
         if (q.has("seed"))      seedInput.value              = q.get("seed");
         if (q.has("lstyle"))    logoStyleSelect.value        = q.get("lstyle");
+        if (q.has("lscale"))  { logoScaleSlider.value        = q.get("lscale");
+                                logoScaleDisplay.textContent = logoScaleSlider.value + '%'; }
         if (q.has("zoom"))    { noiseZoomSlider.value        = q.get("zoom");
                                 noiseZoomDisplay.textContent = noiseZoomSlider.value; }
         if (q.has("name"))      personNameInput.value        = q.get("name");
@@ -426,7 +482,9 @@
       function syncURL(push = false) {
         const q = new URLSearchParams({
           seed:      seedInput.value,
+          csize:     cardSizeSelect.value,
           lstyle:    logoStyleSelect.value,
+          lscale:    logoScaleSlider.value,
           zoom:      noiseZoomSlider.value,
           name:      personNameInput.value.trim(),
           title:     jobTitleInput.value.trim(),
@@ -463,30 +521,56 @@
 
       function getCardDescriptor() {
         const color    = getEffectiveColor();
-        const seed     = parseInt(seedInput.value, 10) | 0;
+        const raw      = seedInput.value.trim();
+        const seed     = getSeed();
+        const isText   = String(seed) !== raw;
+        const seedLabel = isText ? `${raw} (#${seed})` : `#${seed}`;
         const theme    = color.isDark ? 'Dark' : 'Light';
+        const sizeLabel = cardSizeSelect.value !== 'id'
+          ? cardSizeSelect.options[cardSizeSelect.selectedIndex].text
+          : null;
         const name     = personNameInput.value.trim();
-        const parts    = [theme, name && name, `#${seed}`].filter(Boolean);
+        const parts    = [sizeLabel, theme, name && name, seedLabel].filter(Boolean);
         return parts.join(' · ');
       }
 
       function updateDescriptor() {
         const desc = getCardDescriptor();
         document.getElementById('card-descriptor').textContent = desc;
-        document.title = `liminal · ${desc}`;
+        document.title = `LIMINAL · ${desc}`;
       }
 
-      let renderMode = 'canvas'; // 'canvas' | 'svg'
+      let renderMode = 'svg'; // 'canvas' | 'svg'
+
+      /** Compute the tight frame dimensions for the current card size preset. */
+      function getFrameDims() {
+        const sizePreset = CARD_SIZES[cardSizeSelect.value] || CARD_SIZES.id;
+        const sz = 1024, pad = 0.08;
+        const paddingPx = sz * pad;
+        const available = sz - 2 * paddingPx;
+        let cw, ch;
+        if (sizePreset.aspect <= 1) { ch = available * sizePreset.scale; cw = ch * sizePreset.aspect; }
+        else                        { cw = available * sizePreset.scale; ch = cw / sizePreset.aspect; }
+        return { frameW: cw + 2 * paddingPx, frameH: ch + 2 * paddingPx };
+      }
 
       function render(push = false) {
+        const { frameW, frameH } = getFrameDims();
+        const aspect = `${frameW} / ${frameH}`;
+
         if (renderMode === 'svg') {
           const p   = params(true); // transparent: true — no dark bg rect inside SVG
-          const svg = new SvgContext(p.size, p.size);
+          const svg = new SvgContext(frameW, frameH);
           generateCard({ ...p, ctx: svg });
           svgOutputEl.innerHTML = svg.toSVG();
         } else {
           generateCard(params());
         }
+
+        // Keep both containers' aspect ratios in sync with the card frame
+        canvasEl.style.aspectRatio    = aspect;
+        svgOutputEl.style.aspectRatio = aspect;
+
         syncURL(push);
         updateLogoName();
         updateDescriptor();
@@ -498,9 +582,7 @@
         updateColorSliders();
         updateSeedInputs();
         updateResetButtons();
-        generateCard(params()); // render without touching history
-        updateLogoName();
-        updateDescriptor();
+        render(); // render without pushing to history
       });
 
       // ── Seed change: clear all overrides ─────────────────────────────────
@@ -613,6 +695,19 @@
         render(true);
       });
 
+      // ── Logo scale ────────────────────────────────────────────────────────
+      logoScaleSlider.addEventListener("input", () => {
+        logoScaleDisplay.textContent = logoScaleSlider.value + '%';
+        logoScaleReset.classList.toggle('visible', parseInt(logoScaleSlider.value, 10) !== 100);
+        render();
+      });
+      logoScaleReset.addEventListener("click", () => {
+        logoScaleSlider.value        = 100;
+        logoScaleDisplay.textContent = '100%';
+        logoScaleReset.classList.remove('visible');
+        render(true);
+      });
+
       // ── Logo seed ─────────────────────────────────────────────────────────
       document.getElementById("btn-next-logo").addEventListener("click", () => {
         seedOverrides.logoNonce = (parseInt(logoNonceInput.value, 10) | 0) + 1;
@@ -670,6 +765,32 @@
       // ── Other controls ────────────────────────────────────────────────────
       document.getElementById("btn-render").addEventListener("click", () => render(true));
 
+      document.getElementById("btn-reset-all").addEventListener("click", () => {
+        // Clear all override slots
+        for (const k of Object.keys(colorOverrides)) delete colorOverrides[k];
+        for (const k of Object.keys(seedOverrides))  delete seedOverrides[k];
+        // Reset non-override controls to defaults (keep name, title, seed)
+        cardSizeSelect.value        = 'id';
+        logoStyleSelect.value       = '-1';
+        logoScaleSlider.value       = 100;
+        logoScaleDisplay.textContent = '100%';
+        noiseZoomSlider.value       = 4;
+        noiseZoomDisplay.textContent = '4';
+        showArtifactsToggle.checked = true;
+        showShadowToggle.checked    = true;
+        showLanyardToggle.checked   = false;
+        artCountSlider.value        = 5;
+        artCountDisplay.textContent = artCountLabel(5);
+        artOpacitySlider.value      = 20;
+        artOpacityDisplay.textContent = '20';
+        artScaleSlider.value        = 100;
+        artScaleDisplay.textContent = '100%';
+        updateColorSliders();
+        updateSeedInputs();
+        updateResetButtons();
+        render(true);
+      });
+
       document.getElementById("btn-rand").addEventListener("click", () => {
         seedInput.value = (Math.random() * 99999) | 0;
         // Overrides survive shuffle — pinned values stay pinned.
@@ -682,12 +803,25 @@
       document.getElementById("btn-export").addEventListener("click", () => {
         const c = getEffectiveColor();
         const s = getEffectiveSeeds();
-        generateCard(params(true));
-        const link    = document.createElement("a");
-        link.download = `card-s${seedInput.value}-h${c.hue}-l${s.logoNonce}.png`;
-        link.href     = document.getElementById("canvas").toDataURL("image/png");
-        link.click();
-        render();
+        const link = document.createElement("a");
+        if (renderMode === 'svg') {
+          const p   = params(true);
+          const { frameW, frameH } = getFrameDims();
+          const svg = new SvgContext(frameW, frameH);
+          generateCard({ ...p, ctx: svg });
+          const blob = new Blob([svg.toSVG()], { type: 'image/svg+xml' });
+          const url  = URL.createObjectURL(blob);
+          link.download = `card-s${seedInput.value}-h${c.hue}-l${s.logoNonce}.svg`;
+          link.href     = url;
+          link.click();
+          URL.revokeObjectURL(url);
+        } else {
+          generateCard(params(true));
+          link.download = `card-s${seedInput.value}-h${c.hue}-l${s.logoNonce}.png`;
+          link.href     = document.getElementById("canvas").toDataURL("image/png");
+          link.click();
+          render();
+        }
       });
 
       document.getElementById("btn-copy-link").addEventListener("click", (e) => {
@@ -707,12 +841,16 @@
         svgOutputEl.style.display = mode === 'svg'    ? '' : 'none';
         document.getElementById('btn-mode-canvas').classList.toggle('active', mode === 'canvas');
         document.getElementById('btn-mode-svg').classList.toggle('active',    mode === 'svg');
+        const exportBtn = document.getElementById('btn-export');
+        exportBtn.innerHTML = `<i data-lucide="download"></i>Export ${mode === 'svg' ? 'SVG' : 'PNG'}`;
+        lucide.createIcons();
         render();
       }
 
       document.getElementById("btn-mode-canvas").addEventListener("click", () => setRenderMode('canvas'));
       document.getElementById("btn-mode-svg").addEventListener("click",    () => setRenderMode('svg'));
 
+      cardSizeSelect.addEventListener("change",        () => render(true));
       logoStyleSelect.addEventListener("change",      () => render(true));
       showArtifactsToggle.addEventListener("change",  () => render(true));
       showShadowToggle.addEventListener("change",     () => render(true));

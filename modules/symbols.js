@@ -34,6 +34,8 @@ export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng) {
     drawStarburst,
     drawLissajous,
     drawRoseCurve,
+    drawVariableDotMask,
+    drawInlaidRings,
   ];
 
   (variants[style] ?? variants[0])(ctx, x, y, radius, strokeWeight, symbolColor, rng);
@@ -506,6 +508,109 @@ function drawDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
       }
     }
   }
+}
+
+// ── Style 15: Variable Dot Mask ──────────────────────────────────────────────
+// Like Dot Mask but each dot takes a random size from a discrete set of steps
+// lerped between min and max. The number of steps (2–7) is seed-derived,
+// giving some cards uniform-ish dots and others a wide size range.
+function drawVariableDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
+  const harmonicCount = rng.int(2, 5);
+  const harmonics = [];
+  for (let h = 0; h < harmonicCount; h++) {
+    harmonics.push({
+      freq:  rng.int(2, 5),
+      amp:   rng.float(0.06, 0.20),
+      phase: rng.float(0, Math.PI * 2),
+    });
+  }
+  const blobBase = radius * rng.float(0.65, 0.88);
+  function blobR(theta) {
+    return harmonics.reduce(
+      (r, h) => r + blobBase * h.amp * Math.sin(h.freq * theta + h.phase),
+      blobBase
+    );
+  }
+
+  const gridN     = rng.int(5, 13);
+  const cell      = (radius * 2) / gridN;
+  const sizeSteps = rng.int(2, 7);
+  const minDotR   = cell * rng.float(0.20, 0.28);
+  const maxDotR   = cell * rng.float(0.34, 0.44);
+
+  // Precompute discrete size levels
+  const sizes = [];
+  for (let i = 0; i < sizeSteps; i++) {
+    const t = sizeSteps === 1 ? 0.5 : i / (sizeSteps - 1);
+    sizes.push(minDotR + (maxDotR - minDotR) * t);
+  }
+
+  const x0 = x - radius + cell * 0.5;
+  const y0 = y - radius + cell * 0.5;
+
+  for (let row = 0; row < gridN; row++) {
+    for (let col = 0; col < gridN; col++) {
+      const dx    = x0 + col * cell;
+      const dy    = y0 + row * cell;
+      const dist  = Math.hypot(dx - x, dy - y);
+      const theta = Math.atan2(dy - y, dx - x);
+      if (dist <= blobR(theta)) {
+        const dotR = sizes[rng.int(0, sizeSteps - 1)];
+        ctx.beginPath();
+        ctx.arc(dx, dy, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.88);
+        ctx.fill();
+      } else if (dist <= radius) {
+        ctx.beginPath();
+        ctx.arc(dx, dy, sizes[0] * 0.38, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.08);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+// ── Style 16: Inlaid Rings ───────────────────────────────────────────────────
+// 2–7 nested segmented rings, each with its own segment count, rotation, and
+// alternating-opacity colour treatment.  Rings shrink inward with consistent
+// spacing; a hub dot anchors the centre.
+function drawInlaidRings(ctx, x, y, radius, sw, symbolColor, rng) {
+  const ringCount    = rng.int(3, 7);
+  const gapFraction  = rng.float(0.08, 0.15);        // fraction of ring-to-ring space left empty
+  const bandBudget   = radius * 0.88;                 // total radial space for rings
+  const spacing      = bandBudget / ringCount;
+  const bandThick    = spacing * (1 - gapFraction);
+
+  ctx.lineCap = 'butt';
+
+  for (let r = 0; r < ringCount; r++) {
+    const ringRadius   = radius - spacing * r - bandThick / 2;
+    if (ringRadius < radius * 0.06) break;
+
+    const segments     = rng.int(5, 10);
+    const startAngle   = rng.next() * Math.PI * 2;
+    const gapAngle     = Math.PI * rng.float(0.03, 0.09);
+    const baseOpacity  = 0.35 + 0.55 * ((ringCount - r) / ringCount); // outer rings brighter
+    const altDim       = rng.float(0.30, 0.55);                       // how much dimmer the alt segment is
+
+    ctx.lineWidth = bandThick;
+
+    for (let i = 0; i < segments; i++) {
+      const arcStart = startAngle + (Math.PI * 2 / segments) * i       + gapAngle;
+      const arcEnd   = startAngle + (Math.PI * 2 / segments) * (i + 1) - gapAngle;
+      const bright   = i % 2 === 0;
+      const alpha    = bright ? baseOpacity : baseOpacity * altDim;
+      ctx.beginPath();
+      ctx.arc(x, y, ringRadius, arcStart, arcEnd);
+      ctx.strokeStyle = symbolColor(0, alpha);
+      ctx.stroke();
+    }
+  }
+
+  // Hub dot
+  const hubRadius = Math.max(radius * 0.07, spacing * 0.4);
+  ctx.beginPath(); ctx.arc(x, y, hubRadius, 0, Math.PI * 2);
+  ctx.fillStyle = symbolColor(6, 1); ctx.fill();
 }
 
 // ── Style 10: Spiral ──────────────────────────────────────────────────────────

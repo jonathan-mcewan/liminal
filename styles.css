@@ -47,7 +47,7 @@ body {
   height:         100vh;
   display:        flex;
   flex-direction: column;
-  gap:            1.5rem;
+  gap:            0.5rem;
   padding:        1.5rem;
   border-right:   1px solid var(--border);
   overflow-y:     auto;
@@ -57,14 +57,24 @@ body {
   display:        flex;
   flex-direction: column;
   gap:            0.75rem;
+  padding:        1rem 0.75rem;
+  margin:         0 -0.75rem;
+  border-radius:  var(--radius);
 }
+.panel-section:nth-child(even) {
+  background: oklch(1 0 0 / 12%);
+}
+.panel-section:nth-child(odd) {
+  background: oklch(1 0 0 / 6%);
+}
+.panel-section:first-child { padding-top: 0.75rem; }
 
 /* Section heading */
 .panel-section > h2 {
   display:        flex;
   align-items:    center;
   gap:            0.4rem;
-  font-size:      0.6rem;
+  font-size:      0.75rem;
   font-weight:    600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -95,7 +105,7 @@ canvas {
   display:      block;
   width:        100%;
   max-height:   calc(100vh - 6rem); /* leave room for brand + descriptor */
-  aspect-ratio: 1;
+  /* aspect-ratio set dynamically by render() to match the card frame */
 }
 
 /* ── Field — label + input stacked ──────────────────────────────────────── */
@@ -385,17 +395,32 @@ button svg {
   gap:     0.4rem;
 }
 
+.btn-action-reset {
+  padding:     0.25rem 0.45rem;
+  font-size:   0.95rem;
+  line-height: 1;
+  opacity:     0.5;
+}
+.btn-action-reset:hover {
+  opacity: 1;
+}
+
 /* ── SVG output area — mirrors canvas sizing and background ──────────────── */
 #svg-output {
-  display:      block;
-  width:        100%;
-  max-height:   calc(100vh - 6rem);
-  aspect-ratio: 54 / 85.6; /* real card aspect ratio, matches cardWidth/cardHeight */
+  /* Same footprint as the canvas so the layout doesn't shift on toggle */
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  width:          100%;
+  /* aspect-ratio set dynamically by render() to match the card frame */
+  max-height:     calc(100vh - 6rem);
+  background:     #1a1a22;
 }
 
 #svg-output svg {
-  width:  100%;
-  height: 100%;
+  display: block;
+  width:   100%;
+  height:  auto;
 }
 
 /* ── Render mode toggle ───────────────────────────────────────────────────── */
