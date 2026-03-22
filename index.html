@@ -32,14 +32,6 @@
           <span>Seed</span>
           <input id="seed" type="text" value="42" placeholder="number or text" />
         </div>
-        <div class="field">
-          <span>Size</span>
-          <select id="card-size">
-            <option value="id">ID Card</option>
-            <option value="square">Square</option>
-            <option value="moo">MOO Card</option>
-          </select>
-        </div>
         <div class="field field--row">
           <input id="show-lanyard" type="checkbox" />
           <span>Lanyard Hole</span>
@@ -219,6 +211,11 @@
           <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
         </div>
         <div class="render-mode-toggle">
+          <button id="btn-size-id"     class="mode-btn active">ID Card</button>
+          <button id="btn-size-square" class="mode-btn">Square</button>
+          <button id="btn-size-moo"    class="mode-btn">MOO</button>
+        </div>
+        <div class="render-mode-toggle">
           <button id="btn-mode-canvas" class="mode-btn">Canvas</button>
           <button id="btn-mode-svg"    class="mode-btn active">SVG</button>
         </div>
@@ -226,599 +223,344 @@
     </main>
 
     <script type="module">
-      import { generateCard, deriveColorParams } from "./modules/card.js";
-      import { makePRNG }                        from "./modules/prng.js";
-      import { SvgContext }                      from "./modules/svg-ctx.js";
+      import { generateCard }  from "./modules/card.js";
+      import { SvgContext }    from "./modules/svg-ctx.js";
+      import { artCountLabel } from "./modules/constants.js";
+      import { colorOverrides, seedOverrides, clearAllOverrides } from "./modules/state.js";
+      import { getSeed, updateColorSliders, updateSeedInputs, updateResetButtons,
+               updateLogoName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
+      import { applyQueryString, syncURL } from "./modules/url-sync.js";
+      import { getEffectiveColor, getEffectiveSeeds } from "./modules/state.js";
 
-      // ── DOM references ────────────────────────────────────────────────────
-      const seedInput              = document.getElementById("seed");
-
-      const hueSlider              = document.getElementById("hue");
-      const hueDisplay             = document.getElementById("hue-value-display");
-      const hueReset               = document.getElementById("hue-reset");
-      const saturationSlider       = document.getElementById("saturation");
-      const saturationDisplay      = document.getElementById("saturation-value-display");
-      const saturationReset        = document.getElementById("saturation-reset");
-      const themeLightBtn          = document.getElementById("theme-light");
-      const themeDarkBtn           = document.getElementById("theme-dark");
-      const isDarkReset            = document.getElementById("dark-reset");
-      const cardLightnessSlider    = document.getElementById("card-lightness");
-      const cardLightnessDisplay   = document.getElementById("lightness-value-display");
-      const cardLightnessReset     = document.getElementById("lightness-reset");
-
-      const noiseZoomSlider        = document.getElementById("noise-zoom");
-      const noiseZoomDisplay       = document.getElementById("noise-zoom-display");
-      const noiseBrightnessSlider  = document.getElementById("noise-brightness");
-      const noiseBrightnessDisplay = document.getElementById("noise-brightness-display");
-      const noiseBrightnessReset   = document.getElementById("noise-brightness-reset");
-      const noiseContrastSlider    = document.getElementById("noise-contrast");
-      const noiseContrastDisplay   = document.getElementById("noise-contrast-display");
-      const noiseContrastReset     = document.getElementById("noise-contrast-reset");
-
-      const personNameInput        = document.getElementById("person-name");
-      const jobTitleInput          = document.getElementById("job-title");
-
-      const logoStyleSelect        = document.getElementById("logo-style");
-      const logoNameDisplay        = document.getElementById("logo-name-display");
-      const logoScaleSlider        = document.getElementById("logo-scale");
-      const logoScaleDisplay       = document.getElementById("logo-scale-display");
-      const logoScaleReset         = document.getElementById("logo-scale-reset");
-      const logoNonceInput         = document.getElementById("logo-nonce");
-      const logoNonceReset         = document.getElementById("logo-nonce-reset");
-
-      const cardSizeSelect         = document.getElementById("card-size");
-
-      // Card size presets — not seed-derived, purely a UI control.
-      // aspect = width/height ratio.  scale = multiplier on the fitted dimension.
-      const CARD_SIZES = {
-        id:     { aspect: 54 / 85.6, scale: 1 },           // standard ID card (85.6 × 54 mm)
-        square: { aspect: 1,         scale: 54 / 85.6 * 0.64 }, // side = 4/5 of ID card width, then 80% of that
-        moo:    { aspect: 84 / 55,   scale: 1 },           // MOO business card (84 × 55 mm)
+      // ── DOM cache ─────────────────────────────────────────────────────────
+      const dom = {
+        seedInput:              document.getElementById("seed"),
+        hueSlider:              document.getElementById("hue"),
+        hueDisplay:             document.getElementById("hue-value-display"),
+        hueReset:               document.getElementById("hue-reset"),
+        saturationSlider:       document.getElementById("saturation"),
+        saturationDisplay:      document.getElementById("saturation-value-display"),
+        saturationReset:        document.getElementById("saturation-reset"),
+        themeLightBtn:          document.getElementById("theme-light"),
+        themeDarkBtn:           document.getElementById("theme-dark"),
+        isDarkReset:            document.getElementById("dark-reset"),
+        cardLightnessSlider:    document.getElementById("card-lightness"),
+        cardLightnessDisplay:   document.getElementById("lightness-value-display"),
+        cardLightnessReset:     document.getElementById("lightness-reset"),
+        noiseZoomSlider:        document.getElementById("noise-zoom"),
+        noiseZoomDisplay:       document.getElementById("noise-zoom-display"),
+        noiseBrightnessSlider:  document.getElementById("noise-brightness"),
+        noiseBrightnessDisplay: document.getElementById("noise-brightness-display"),
+        noiseBrightnessReset:   document.getElementById("noise-brightness-reset"),
+        noiseContrastSlider:    document.getElementById("noise-contrast"),
+        noiseContrastDisplay:   document.getElementById("noise-contrast-display"),
+        noiseContrastReset:     document.getElementById("noise-contrast-reset"),
+        personNameInput:        document.getElementById("person-name"),
+        jobTitleInput:          document.getElementById("job-title"),
+        logoStyleSelect:        document.getElementById("logo-style"),
+        logoNameDisplay:        document.getElementById("logo-name-display"),
+        logoScaleSlider:        document.getElementById("logo-scale"),
+        logoScaleDisplay:       document.getElementById("logo-scale-display"),
+        logoScaleReset:         document.getElementById("logo-scale-reset"),
+        logoNonceInput:         document.getElementById("logo-nonce"),
+        logoNonceReset:         document.getElementById("logo-nonce-reset"),
+        btnSizeId:              document.getElementById("btn-size-id"),
+        btnSizeSquare:          document.getElementById("btn-size-square"),
+        btnSizeMoo:             document.getElementById("btn-size-moo"),
+        showArtifactsToggle:    document.getElementById("show-artifacts"),
+        artifactSeedInput:      document.getElementById("artifact-seed"),
+        artifactSeedReset:      document.getElementById("artifact-seed-reset"),
+        artCountSlider:         document.getElementById("art-count"),
+        artCountDisplay:        document.getElementById("art-count-display"),
+        artOpacitySlider:       document.getElementById("art-opacity"),
+        artOpacityDisplay:      document.getElementById("art-opacity-display"),
+        artScaleSlider:         document.getElementById("art-scale"),
+        artScaleDisplay:        document.getElementById("art-scale-display"),
+        showShadowToggle:       document.getElementById("show-shadow"),
+        showLanyardToggle:      document.getElementById("show-lanyard"),
+        cardDescriptor:         document.getElementById("card-descriptor"),
+        canvasEl:               document.getElementById("canvas"),
+        svgOutputEl:            document.getElementById("svg-output"),
+        cardSize:               'id',
       };
 
-      const showArtifactsToggle    = document.getElementById("show-artifacts");
-      const artifactSeedInput      = document.getElementById("artifact-seed");
-      const artifactSeedReset      = document.getElementById("artifact-seed-reset");
-      const artCountSlider         = document.getElementById("art-count");
-      const artCountDisplay        = document.getElementById("art-count-display");
-      const artOpacitySlider       = document.getElementById("art-opacity");
-      const artOpacityDisplay      = document.getElementById("art-opacity-display");
-      const artScaleSlider         = document.getElementById("art-scale");
-      const artScaleDisplay        = document.getElementById("art-scale-display");
-      const showShadowToggle       = document.getElementById("show-shadow");
-      const showLanyardToggle      = document.getElementById("show-lanyard");
+      // ── Card size ────────────────────────────────────────────────────────
 
-      // ── Seed helper — accepts numbers or text ──────────────────────────────
-      function hashString(str) {
-        let h = 0;
-        for (let i = 0; i < str.length; i++) {
-          h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
-        }
-        return h >>> 0; // unsigned 32-bit
+      function syncCardSizeButtons() {
+        dom.btnSizeId.classList.toggle('active',     dom.cardSize === 'id');
+        dom.btnSizeSquare.classList.toggle('active', dom.cardSize === 'square');
+        dom.btnSizeMoo.classList.toggle('active',    dom.cardSize === 'moo');
       }
 
-      function getSeed() {
-        const raw = seedInput.value.trim();
-        const n = parseInt(raw, 10);
-        if (!isNaN(n) && String(n) === raw) return n | 0;
-        return hashString(raw);
+      function setCardSize(size) {
+        dom.cardSize = size;
+        syncCardSizeButtons();
+        render(true);
       }
 
-      // ── Override state ────────────────────────────────────────────────────
-      // Only keys that the user has explicitly set are present.
-      // Absent key → use seed-derived default.
-      const colorOverrides = {};  // isDark | cardLightness | hue | saturation | noiseBrightness | noiseContrast
-      const seedOverrides  = {};  // logoNonce | artifactSeed
+      // ── Render mode ───────────────────────────────────────────────────────
+      let renderMode = 'svg';
 
-      const LOGO_NAMES = ['Venn', 'Segmented Ring', 'Radial Spokes', 'Layered Arcs',
-                          'Orbital', 'Parallel Lines', 'Polygon Nodes', 'Polygon Free Nodes',
-                          'Dot Matrix', 'Dot Mask',
-                          'Spiral', 'Wave Field', 'Starburst', 'Lissajous', 'Rose Curve',
-                          'Variable Dot Mask', 'Inlaid Rings'];
-
-      // ── Seed-derived defaults ─────────────────────────────────────────────
-      function deriveSeedParams(seed) {
-        const p = makePRNG(seed ^ 0xDEADBEEF);
-        return {
-          logoNonce:    p.int(0, 99999),
-          artifactSeed: p.int(0, 99999),
-        };
-      }
-
-      // ── Effective values (override ?? seed-derived) ───────────────────────
-      function getEffectiveColor() {
-        const seed    = getSeed();
-        const derived = deriveColorParams(seed);
-        const effectiveIsDark = colorOverrides.isDark ?? derived.isDark;
-        // When isDark is overridden to the opposite mode, use the alt derived lightness
-        // so the slider shows a sensible value for the new mode.
-        const derivedLightness = effectiveIsDark === derived.isDark
-          ? derived.cardLightness
-          : derived.altCardLightness;
-        return {
-          isDark:          effectiveIsDark,
-          cardLightness:   colorOverrides.cardLightness   ?? derivedLightness,
-          hue:             colorOverrides.hue             ?? derived.hue,
-          saturation:      colorOverrides.saturation      ?? derived.saturation,
-          noiseBrightness: colorOverrides.noiseBrightness ?? derived.noiseBrightness,
-          noiseContrast:   colorOverrides.noiseContrast   ?? derived.noiseContrast,
-        };
-      }
-
-      function getEffectiveSeeds() {
-        const seed    = getSeed();
-        const derived = deriveSeedParams(seed);
-        return {
-          logoNonce:    seedOverrides.logoNonce    ?? derived.logoNonce,
-          artifactSeed: seedOverrides.artifactSeed ?? derived.artifactSeed,
-        };
-      }
-
-      // ── Slider / display sync ─────────────────────────────────────────────
-      function updateThemeSeg(isDark) {
-        themeLightBtn.classList.toggle("active", !isDark);
-        themeDarkBtn.classList.toggle("active",   isDark);
-      }
-
-      function updateColorSliders() {
-        const c = getEffectiveColor();
-        updateThemeSeg(c.isDark);
-        cardLightnessSlider.value        = c.cardLightness;
-        cardLightnessDisplay.textContent = c.cardLightness;
-        hueSlider.value                  = c.hue;
-        hueDisplay.textContent           = c.hue;
-        saturationSlider.value           = c.saturation;
-        saturationDisplay.textContent    = c.saturation;
-        noiseBrightnessSlider.value      = Math.round(c.noiseBrightness * 100);
-        noiseBrightnessDisplay.textContent = Math.round(c.noiseBrightness * 100);
-        noiseContrastSlider.value        = Math.round(c.noiseContrast * 100);
-        noiseContrastDisplay.textContent = Math.round(c.noiseContrast * 100);
-      }
-
-      function updateSeedInputs() {
-        const s = getEffectiveSeeds();
-        logoNonceInput.value    = s.logoNonce;
-        artifactSeedInput.value = s.artifactSeed;
-      }
-
-      function updateResetButtons() {
-        isDarkReset.classList.toggle('visible',            colorOverrides.isDark          !== undefined);
-        cardLightnessReset.classList.toggle('visible',     colorOverrides.cardLightness   !== undefined);
-        hueReset.classList.toggle('visible',               colorOverrides.hue             !== undefined);
-        saturationReset.classList.toggle('visible',        colorOverrides.saturation      !== undefined);
-        noiseBrightnessReset.classList.toggle('visible',   colorOverrides.noiseBrightness !== undefined);
-        noiseContrastReset.classList.toggle('visible',     colorOverrides.noiseContrast   !== undefined);
-        logoScaleReset.classList.toggle('visible',           parseInt(logoScaleSlider.value, 10) !== 100);
-        logoNonceReset.classList.toggle('visible',         seedOverrides.logoNonce        !== undefined);
-        artifactSeedReset.classList.toggle('visible',      seedOverrides.artifactSeed     !== undefined);
-      }
-
-      function updateLogoName() {
-        const override = parseInt(logoStyleSelect.value, 10);
-        if (override >= 0) {
-          logoNameDisplay.textContent = '';
-        } else {
-          const seed  = getSeed();
-          const style = makePRNG(seed ^ 0x9E3779B9).int(0, 16);
-          logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
-        }
-      }
-
-      // ── Build params for generateCard ─────────────────────────────────────
-      function params(transparent = false) {
-        const color = getEffectiveColor();
-        const seeds = getEffectiveSeeds();
-        const sizePreset = CARD_SIZES[cardSizeSelect.value] || CARD_SIZES.id;
-        return {
-          size:                  1024,
-          padding:               0.08,
-          cardAspect:            sizePreset.aspect,
-          cardScale:             sizePreset.scale,
-          seed:                  getSeed(),
-          logoNonce:             seeds.logoNonce,
-          logoStyle:             parseInt(logoStyleSelect.value, 10),
-          logoScale:             parseInt(logoScaleSlider.value, 10) / 100,
-          hue:                   color.hue,
-          isDarkOverride:        colorOverrides.isDark          !== undefined ? colorOverrides.isDark          : null,
-          cardLightnessOverride: colorOverrides.cardLightness   !== undefined ? colorOverrides.cardLightness   : null,
-          saturationOverride:    colorOverrides.saturation      !== undefined ? colorOverrides.saturation      : null,
-          noiseZoom:             parseInt(noiseZoomSlider.value, 10) | 0,
-          noiseBrightness:       color.noiseBrightness,
-          noiseContrast:         color.noiseContrast,
-          personName:            personNameInput.value.trim(),
-          jobTitle:              jobTitleInput.value.trim(),
-          artifactSeed:          seeds.artifactSeed,
-          artifactOpacity:       parseInt(artOpacitySlider.value, 10) / 100,
-          artifactCount:         parseInt(artCountSlider.value, 10) === 0 ? null : parseInt(artCountSlider.value, 10),
-          artifactScale:         parseInt(artScaleSlider.value, 10) / 100,
-          showArtifacts:         showArtifactsToggle.checked,
-          showShadow:            showShadowToggle.checked,
-          showLanyard:           showLanyardToggle.checked,
-          transparent,
-        };
-      }
-
-      // ── URL sync ──────────────────────────────────────────────────────────
-      // Named so it can be called again from popstate.
-      // Clears all overrides first so stale values don't bleed through.
-      function applyQueryString() {
-        clearAllOverrides();
-        const q = new URLSearchParams(location.search);
-
-        if (q.has("csize"))     cardSizeSelect.value          = q.get("csize");
-        if (q.has("seed"))      seedInput.value              = q.get("seed");
-        if (q.has("lstyle"))    logoStyleSelect.value        = q.get("lstyle");
-        if (q.has("lscale"))  { logoScaleSlider.value        = q.get("lscale");
-                                logoScaleDisplay.textContent = logoScaleSlider.value + '%'; }
-        if (q.has("zoom"))    { noiseZoomSlider.value        = q.get("zoom");
-                                noiseZoomDisplay.textContent = noiseZoomSlider.value; }
-        if (q.has("name"))      personNameInput.value        = q.get("name");
-        if (q.has("title"))     jobTitleInput.value          = q.get("title");
-        if (q.has("art_show"))    showArtifactsToggle.checked = q.get("art_show")  !== "0";
-        if (q.has("art_count"))  { artCountSlider.value   = q.get("art_count");
-                                    artCountDisplay.textContent = artCountLabel(artCountSlider.value); }
-        if (q.has("art_opacity")){ artOpacitySlider.value  = q.get("art_opacity");
-                                    artOpacityDisplay.textContent = artOpacitySlider.value; }
-        if (q.has("art_scale"))  { artScaleSlider.value    = q.get("art_scale");
-                                    artScaleDisplay.textContent = artScaleSlider.value + '%'; }
-        if (q.has("shadow"))    showShadowToggle.checked     = q.get("shadow")    !== "0";
-        if (q.has("lanyard"))   showLanyardToggle.checked    = q.get("lanyard")   !== "0";
-
-        // Colour overrides — only in URL if user set them
-        if (q.has("dark"))      colorOverrides.isDark          = q.get("dark")     !== "0";
-        if (q.has("litness"))   colorOverrides.cardLightness   = parseInt(q.get("litness"),   10);
-        if (q.has("hue"))       colorOverrides.hue             = parseInt(q.get("hue"),       10);
-        if (q.has("sat"))       colorOverrides.saturation      = parseInt(q.get("sat"),       10);
-        if (q.has("nbright"))   colorOverrides.noiseBrightness = parseInt(q.get("nbright"),   10) / 100;
-        if (q.has("ncontrast")) colorOverrides.noiseContrast   = parseInt(q.get("ncontrast"), 10) / 100;
-
-        // Seed overrides
-        if (q.has("nonce"))     seedOverrides.logoNonce    = parseInt(q.get("nonce"),    10);
-        if (q.has("art_seed")) seedOverrides.artifactSeed = parseInt(q.get("art_seed"), 10);
-      }
-
-      // push=true  → pushState    (navigable: shuffle, seed change, discrete actions)
-      // push=false → replaceState (continuous: slider drag, text typing)
-      function syncURL(push = false) {
-        const q = new URLSearchParams({
-          seed:      seedInput.value,
-          csize:     cardSizeSelect.value,
-          lstyle:    logoStyleSelect.value,
-          lscale:    logoScaleSlider.value,
-          zoom:      noiseZoomSlider.value,
-          name:      personNameInput.value.trim(),
-          title:     jobTitleInput.value.trim(),
-          art_show:    showArtifactsToggle.checked ? "1" : "0",
-          art_count:   artCountSlider.value,
-          art_opacity: artOpacitySlider.value,
-          art_scale:   artScaleSlider.value,
-          shadow:      showShadowToggle.checked   ? "1" : "0",
-          lanyard:   showLanyardToggle.checked    ? "1" : "0",
-        });
-        if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
-        if (colorOverrides.cardLightness   !== undefined) q.set("litness",  colorOverrides.cardLightness);
-        if (colorOverrides.hue             !== undefined) q.set("hue",      colorOverrides.hue);
-        if (colorOverrides.saturation      !== undefined) q.set("sat",      colorOverrides.saturation);
-        if (colorOverrides.noiseBrightness !== undefined) q.set("nbright",  Math.round(colorOverrides.noiseBrightness * 100));
-        if (colorOverrides.noiseContrast   !== undefined) q.set("ncontrast",Math.round(colorOverrides.noiseContrast   * 100));
-        if (seedOverrides.logoNonce        !== undefined) q.set("nonce",    seedOverrides.logoNonce);
-        if (seedOverrides.artifactSeed     !== undefined) q.set("art_seed", seedOverrides.artifactSeed);
-        const url = "?" + q.toString();
-        if (push) history.pushState(null, "", url);
-        else      history.replaceState(null, "", url);
-      }
-
-      // ── Card descriptor ───────────────────────────────────────────────────
-      function hueToColorName(hue) {
-        const stops = [
-          [15, 'Red'], [30, 'Orange'], [55, 'Amber'], [75, 'Yellow'],
-          [150, 'Green'], [175, 'Teal'], [195, 'Cyan'], [225, 'Sky'],
-          [255, 'Blue'], [285, 'Violet'], [315, 'Purple'], [345, 'Rose'],
-        ];
-        for (const [max, name] of stops) if (hue < max) return name;
-        return 'Red';
-      }
-
-      function getCardDescriptor() {
-        const color    = getEffectiveColor();
-        const raw      = seedInput.value.trim();
-        const seed     = getSeed();
-        const isText   = String(seed) !== raw;
-        const seedLabel = isText ? `${raw} (#${seed})` : `#${seed}`;
-        const theme    = color.isDark ? 'Dark' : 'Light';
-        const sizeLabel = cardSizeSelect.value !== 'id'
-          ? cardSizeSelect.options[cardSizeSelect.selectedIndex].text
-          : null;
-        const name     = personNameInput.value.trim();
-        const parts    = [sizeLabel, theme, name && name, seedLabel].filter(Boolean);
-        return parts.join(' · ');
-      }
-
-      function updateDescriptor() {
-        const desc = getCardDescriptor();
-        document.getElementById('card-descriptor').textContent = desc;
-        document.title = `LIMINAL · ${desc}`;
-      }
-
-      let renderMode = 'svg'; // 'canvas' | 'svg'
-
-      /** Compute the tight frame dimensions for the current card size preset. */
-      function getFrameDims() {
-        const sizePreset = CARD_SIZES[cardSizeSelect.value] || CARD_SIZES.id;
-        const sz = 1024, pad = 0.08;
-        const paddingPx = sz * pad;
-        const available = sz - 2 * paddingPx;
-        let cw, ch;
-        if (sizePreset.aspect <= 1) { ch = available * sizePreset.scale; cw = ch * sizePreset.aspect; }
-        else                        { cw = available * sizePreset.scale; ch = cw / sizePreset.aspect; }
-        return { frameW: cw + 2 * paddingPx, frameH: ch + 2 * paddingPx };
+      function setRenderMode(mode) {
+        renderMode = mode;
+        dom.canvasEl.style.display    = mode === 'canvas' ? '' : 'none';
+        dom.svgOutputEl.style.display = mode === 'svg'    ? '' : 'none';
+        document.getElementById('btn-mode-canvas').classList.toggle('active', mode === 'canvas');
+        document.getElementById('btn-mode-svg').classList.toggle('active',    mode === 'svg');
+        const exportBtn = document.getElementById('btn-export');
+        exportBtn.innerHTML = `<i data-lucide="download"></i>Export ${mode === 'svg' ? 'SVG' : 'PNG'}`;
+        lucide.createIcons();
+        render();
       }
 
       function render(push = false) {
-        const { frameW, frameH } = getFrameDims();
+        const { frameW, frameH } = getFrameDims(dom);
         const aspect = `${frameW} / ${frameH}`;
 
         if (renderMode === 'svg') {
-          const p   = params(true); // transparent: true — no dark bg rect inside SVG
+          const p   = buildParams(dom, true);
           const svg = new SvgContext(frameW, frameH);
           generateCard({ ...p, ctx: svg });
-          svgOutputEl.innerHTML = svg.toSVG();
+          dom.svgOutputEl.innerHTML = svg.toSVG();
         } else {
-          generateCard(params());
+          generateCard(buildParams(dom));
         }
 
-        // Keep both containers' aspect ratios in sync with the card frame
-        canvasEl.style.aspectRatio    = aspect;
-        svgOutputEl.style.aspectRatio = aspect;
+        dom.canvasEl.style.aspectRatio    = aspect;
+        dom.svgOutputEl.style.aspectRatio = aspect;
 
-        syncURL(push);
-        updateLogoName();
-        updateDescriptor();
+        syncURL(dom, push);
+        updateLogoName(dom);
+        updateDescriptor(dom);
       }
 
-      // Restore full state when user navigates back/forward.
+      // ── Events ────────────────────────────────────────────────────────────
+
       window.addEventListener("popstate", () => {
-        applyQueryString();
-        updateColorSliders();
-        updateSeedInputs();
-        updateResetButtons();
-        render(); // render without pushing to history
+        applyQueryString(dom);
+        syncCardSizeButtons();
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render();
       });
 
-      // ── Seed change: clear all overrides ─────────────────────────────────
-      function clearAllOverrides() {
-        delete colorOverrides.isDark;
-        delete colorOverrides.cardLightness;
-        delete colorOverrides.hue;
-        delete colorOverrides.saturation;
-        delete colorOverrides.noiseBrightness;
-        delete colorOverrides.noiseContrast;
-        delete seedOverrides.logoNonce;
-        delete seedOverrides.artifactSeed;
-      }
-
-      seedInput.addEventListener("change", () => {
+      dom.seedInput.addEventListener("change", () => {
         clearAllOverrides();
-        updateColorSliders();
-        updateSeedInputs();
-        updateResetButtons();
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
-      // ── Colour events ─────────────────────────────────────────────────────
-      hueSlider.addEventListener("input", () => {
-        colorOverrides.hue     = parseInt(hueSlider.value, 10);
-        hueDisplay.textContent = hueSlider.value;
-        updateResetButtons();
+      // Colour
+      dom.hueSlider.addEventListener("input", () => {
+        colorOverrides.hue          = parseInt(dom.hueSlider.value, 10);
+        dom.hueDisplay.textContent  = dom.hueSlider.value;
+        updateResetButtons(dom);
         render();
       });
-      hueReset.addEventListener("click", () => {
+      dom.hueReset.addEventListener("click", () => {
         delete colorOverrides.hue;
-        updateColorSliders();
-        updateResetButtons();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
-      saturationSlider.addEventListener("input", () => {
-        colorOverrides.saturation       = parseInt(saturationSlider.value, 10);
-        saturationDisplay.textContent   = saturationSlider.value;
-        updateResetButtons();
+      dom.saturationSlider.addEventListener("input", () => {
+        colorOverrides.saturation          = parseInt(dom.saturationSlider.value, 10);
+        dom.saturationDisplay.textContent  = dom.saturationSlider.value;
+        updateResetButtons(dom);
         render();
       });
-      saturationReset.addEventListener("click", () => {
+      dom.saturationReset.addEventListener("click", () => {
         delete colorOverrides.saturation;
-        updateColorSliders();
-        updateResetButtons();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
       function setTheme(isDark) {
         colorOverrides.isDark = isDark;
-        // Clear lightness override when switching mode — altCardLightness kicks in automatically.
         delete colorOverrides.cardLightness;
-        updateColorSliders();
-        updateResetButtons();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
         render(true);
       }
-      themeLightBtn.addEventListener("click", () => setTheme(false));
-      themeDarkBtn.addEventListener("click",  () => setTheme(true));
-      isDarkReset.addEventListener("click", () => {
+      dom.themeLightBtn.addEventListener("click", () => setTheme(false));
+      dom.themeDarkBtn.addEventListener("click",  () => setTheme(true));
+      dom.isDarkReset.addEventListener("click", () => {
         delete colorOverrides.isDark;
-        delete colorOverrides.cardLightness; // coupled: lightness was mode-specific
-        updateColorSliders();
-        updateResetButtons();
-        render(true);
-      });
-
-      cardLightnessSlider.addEventListener("input", () => {
-        colorOverrides.cardLightness     = parseInt(cardLightnessSlider.value, 10);
-        cardLightnessDisplay.textContent = cardLightnessSlider.value;
-        updateResetButtons();
-        render();
-      });
-      cardLightnessReset.addEventListener("click", () => {
         delete colorOverrides.cardLightness;
-        updateColorSliders();
-        updateResetButtons();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
-      // ── Background events ─────────────────────────────────────────────────
-      noiseZoomSlider.addEventListener("input", () => {
-        noiseZoomDisplay.textContent = noiseZoomSlider.value;
+      dom.cardLightnessSlider.addEventListener("input", () => {
+        colorOverrides.cardLightness          = parseInt(dom.cardLightnessSlider.value, 10);
+        dom.cardLightnessDisplay.textContent  = dom.cardLightnessSlider.value;
+        updateResetButtons(dom);
+        render();
+      });
+      dom.cardLightnessReset.addEventListener("click", () => {
+        delete colorOverrides.cardLightness;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      // Background
+      dom.noiseZoomSlider.addEventListener("input", () => {
+        dom.noiseZoomDisplay.textContent = dom.noiseZoomSlider.value;
         render();
       });
 
-      noiseBrightnessSlider.addEventListener("input", () => {
-        colorOverrides.noiseBrightness     = parseInt(noiseBrightnessSlider.value, 10) / 100;
-        noiseBrightnessDisplay.textContent = noiseBrightnessSlider.value;
-        updateResetButtons();
+      dom.noiseBrightnessSlider.addEventListener("input", () => {
+        colorOverrides.noiseBrightness          = parseInt(dom.noiseBrightnessSlider.value, 10) / 100;
+        dom.noiseBrightnessDisplay.textContent  = dom.noiseBrightnessSlider.value;
+        updateResetButtons(dom);
         render();
       });
-      noiseBrightnessReset.addEventListener("click", () => {
+      dom.noiseBrightnessReset.addEventListener("click", () => {
         delete colorOverrides.noiseBrightness;
-        updateColorSliders();
-        updateResetButtons();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
-      noiseContrastSlider.addEventListener("input", () => {
-        colorOverrides.noiseContrast     = parseInt(noiseContrastSlider.value, 10) / 100;
-        noiseContrastDisplay.textContent = noiseContrastSlider.value;
-        updateResetButtons();
+      dom.noiseContrastSlider.addEventListener("input", () => {
+        colorOverrides.noiseContrast          = parseInt(dom.noiseContrastSlider.value, 10) / 100;
+        dom.noiseContrastDisplay.textContent  = dom.noiseContrastSlider.value;
+        updateResetButtons(dom);
         render();
       });
-      noiseContrastReset.addEventListener("click", () => {
+      dom.noiseContrastReset.addEventListener("click", () => {
         delete colorOverrides.noiseContrast;
-        updateColorSliders();
-        updateResetButtons();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
-      // ── Logo scale ────────────────────────────────────────────────────────
-      logoScaleSlider.addEventListener("input", () => {
-        logoScaleDisplay.textContent = logoScaleSlider.value + '%';
-        logoScaleReset.classList.toggle('visible', parseInt(logoScaleSlider.value, 10) !== 100);
+      // Logo scale
+      dom.logoScaleSlider.addEventListener("input", () => {
+        dom.logoScaleDisplay.textContent = dom.logoScaleSlider.value + '%';
+        dom.logoScaleReset.classList.toggle('visible', parseInt(dom.logoScaleSlider.value, 10) !== 100);
         render();
       });
-      logoScaleReset.addEventListener("click", () => {
-        logoScaleSlider.value        = 100;
-        logoScaleDisplay.textContent = '100%';
-        logoScaleReset.classList.remove('visible');
+      dom.logoScaleReset.addEventListener("click", () => {
+        dom.logoScaleSlider.value        = 100;
+        dom.logoScaleDisplay.textContent = '100%';
+        dom.logoScaleReset.classList.remove('visible');
         render(true);
       });
 
-      // ── Logo seed ─────────────────────────────────────────────────────────
+      // Logo seed
       document.getElementById("btn-next-logo").addEventListener("click", () => {
-        seedOverrides.logoNonce = (parseInt(logoNonceInput.value, 10) | 0) + 1;
-        logoNonceInput.value    = seedOverrides.logoNonce;
-        updateResetButtons();
+        seedOverrides.logoNonce  = (parseInt(dom.logoNonceInput.value, 10) | 0) + 1;
+        dom.logoNonceInput.value = seedOverrides.logoNonce;
+        updateResetButtons(dom);
         render(true);
       });
-      logoNonceInput.addEventListener("change", () => {
-        seedOverrides.logoNonce = parseInt(logoNonceInput.value, 10) | 0;
-        updateResetButtons();
+      dom.logoNonceInput.addEventListener("change", () => {
+        seedOverrides.logoNonce = parseInt(dom.logoNonceInput.value, 10) | 0;
+        updateResetButtons(dom);
         render(true);
       });
-      logoNonceReset.addEventListener("click", () => {
+      dom.logoNonceReset.addEventListener("click", () => {
         delete seedOverrides.logoNonce;
-        updateSeedInputs();
-        updateResetButtons();
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
-      // ── Artifact sliders ──────────────────────────────────────────────────
-      function artCountLabel(v) { return parseInt(v) === 0 ? 'auto' : v; }
-
-      artCountSlider.addEventListener("input", () => {
-        artCountDisplay.textContent = artCountLabel(artCountSlider.value);
+      // Artifact sliders
+      dom.artCountSlider.addEventListener("input", () => {
+        dom.artCountDisplay.textContent = artCountLabel(dom.artCountSlider.value);
         render();
       });
-      artOpacitySlider.addEventListener("input", () => {
-        artOpacityDisplay.textContent = artOpacitySlider.value;
+      dom.artOpacitySlider.addEventListener("input", () => {
+        dom.artOpacityDisplay.textContent = dom.artOpacitySlider.value;
         render();
       });
-      artScaleSlider.addEventListener("input", () => {
-        artScaleDisplay.textContent = artScaleSlider.value + '%';
+      dom.artScaleSlider.addEventListener("input", () => {
+        dom.artScaleDisplay.textContent = dom.artScaleSlider.value + '%';
         render();
       });
 
-      // ── Artifact seed ─────────────────────────────────────────────────────
+      // Artifact seed
       document.getElementById("btn-next-artifact").addEventListener("click", () => {
-        seedOverrides.artifactSeed = (parseInt(artifactSeedInput.value, 10) | 0) + 1;
-        artifactSeedInput.value    = seedOverrides.artifactSeed;
-        updateResetButtons();
+        seedOverrides.artifactSeed  = (parseInt(dom.artifactSeedInput.value, 10) | 0) + 1;
+        dom.artifactSeedInput.value = seedOverrides.artifactSeed;
+        updateResetButtons(dom);
         render(true);
       });
-      artifactSeedInput.addEventListener("change", () => {
-        seedOverrides.artifactSeed = parseInt(artifactSeedInput.value, 10) | 0;
-        updateResetButtons();
+      dom.artifactSeedInput.addEventListener("change", () => {
+        seedOverrides.artifactSeed = parseInt(dom.artifactSeedInput.value, 10) | 0;
+        updateResetButtons(dom);
         render(true);
       });
-      artifactSeedReset.addEventListener("click", () => {
+      dom.artifactSeedReset.addEventListener("click", () => {
         delete seedOverrides.artifactSeed;
-        updateSeedInputs();
-        updateResetButtons();
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
-      // ── Other controls ────────────────────────────────────────────────────
+      // Actions
       document.getElementById("btn-render").addEventListener("click", () => render(true));
 
       document.getElementById("btn-reset-all").addEventListener("click", () => {
-        // Clear all override slots
-        for (const k of Object.keys(colorOverrides)) delete colorOverrides[k];
-        for (const k of Object.keys(seedOverrides))  delete seedOverrides[k];
-        // Reset non-override controls to defaults (keep name, title, seed)
-        cardSizeSelect.value        = 'id';
-        logoStyleSelect.value       = '-1';
-        logoScaleSlider.value       = 100;
-        logoScaleDisplay.textContent = '100%';
-        noiseZoomSlider.value       = 4;
-        noiseZoomDisplay.textContent = '4';
-        showArtifactsToggle.checked = true;
-        showShadowToggle.checked    = true;
-        showLanyardToggle.checked   = false;
-        artCountSlider.value        = 5;
-        artCountDisplay.textContent = artCountLabel(5);
-        artOpacitySlider.value      = 20;
-        artOpacityDisplay.textContent = '20';
-        artScaleSlider.value        = 100;
-        artScaleDisplay.textContent = '100%';
-        updateColorSliders();
-        updateSeedInputs();
-        updateResetButtons();
+        clearAllOverrides();
+        setCardSize('id');
+        dom.logoStyleSelect.value         = '-1';
+        dom.logoScaleSlider.value         = 100;
+        dom.logoScaleDisplay.textContent  = '100%';
+        dom.noiseZoomSlider.value         = 4;
+        dom.noiseZoomDisplay.textContent  = '4';
+        dom.showArtifactsToggle.checked   = true;
+        dom.showShadowToggle.checked      = true;
+        dom.showLanyardToggle.checked     = false;
+        dom.artCountSlider.value          = 5;
+        dom.artCountDisplay.textContent   = artCountLabel(5);
+        dom.artOpacitySlider.value        = 20;
+        dom.artOpacityDisplay.textContent = '20';
+        dom.artScaleSlider.value          = 100;
+        dom.artScaleDisplay.textContent   = '100%';
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
       document.getElementById("btn-rand").addEventListener("click", () => {
-        seedInput.value = (Math.random() * 99999) | 0;
-        // Overrides survive shuffle — pinned values stay pinned.
-        updateColorSliders();
-        updateSeedInputs();
-        updateResetButtons();
+        dom.seedInput.value = (Math.random() * 99999) | 0;
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
         render(true);
       });
 
       document.getElementById("btn-export").addEventListener("click", () => {
-        const c = getEffectiveColor();
-        const s = getEffectiveSeeds();
+        const seed = getSeed(dom);
+        const c = getEffectiveColor(seed);
+        const s = getEffectiveSeeds(seed);
         const link = document.createElement("a");
         if (renderMode === 'svg') {
-          const p   = params(true);
-          const { frameW, frameH } = getFrameDims();
+          const p   = buildParams(dom, true);
+          const { frameW, frameH } = getFrameDims(dom);
           const svg = new SvgContext(frameW, frameH);
           generateCard({ ...p, ctx: svg });
           const blob = new Blob([svg.toSVG()], { type: 'image/svg+xml' });
           const url  = URL.createObjectURL(blob);
-          link.download = `card-s${seedInput.value}-h${c.hue}-l${s.logoNonce}.svg`;
+          link.download = `card-s${dom.seedInput.value}-h${c.hue}-l${s.logoNonce}.svg`;
           link.href     = url;
           link.click();
           URL.revokeObjectURL(url);
         } else {
-          generateCard(params(true));
-          link.download = `card-s${seedInput.value}-h${c.hue}-l${s.logoNonce}.png`;
-          link.href     = document.getElementById("canvas").toDataURL("image/png");
+          generateCard(buildParams(dom, true));
+          link.download = `card-s${dom.seedInput.value}-h${c.hue}-l${s.logoNonce}.png`;
+          link.href     = dom.canvasEl.toDataURL("image/png");
           link.click();
           render();
         }
@@ -831,43 +573,30 @@
         setTimeout(() => { btn.innerHTML = '<i data-lucide="link"></i>Copy Link'; lucide.createIcons(); }, 1500);
       });
 
-      // ── Render mode toggle ────────────────────────────────────────────────
-      const canvasEl    = document.getElementById('canvas');
-      const svgOutputEl = document.getElementById('svg-output');
-
-      function setRenderMode(mode) {
-        renderMode = mode;
-        canvasEl.style.display    = mode === 'canvas' ? '' : 'none';
-        svgOutputEl.style.display = mode === 'svg'    ? '' : 'none';
-        document.getElementById('btn-mode-canvas').classList.toggle('active', mode === 'canvas');
-        document.getElementById('btn-mode-svg').classList.toggle('active',    mode === 'svg');
-        const exportBtn = document.getElementById('btn-export');
-        exportBtn.innerHTML = `<i data-lucide="download"></i>Export ${mode === 'svg' ? 'SVG' : 'PNG'}`;
-        lucide.createIcons();
-        render();
-      }
-
       document.getElementById("btn-mode-canvas").addEventListener("click", () => setRenderMode('canvas'));
       document.getElementById("btn-mode-svg").addEventListener("click",    () => setRenderMode('svg'));
 
-      cardSizeSelect.addEventListener("change",        () => render(true));
-      logoStyleSelect.addEventListener("change",      () => render(true));
-      showArtifactsToggle.addEventListener("change",  () => render(true));
-      showShadowToggle.addEventListener("change",     () => render(true));
-      showLanyardToggle.addEventListener("change",    () => render(true));
-      personNameInput.addEventListener("input", render);   // replaceState — continuous typing
-      jobTitleInput.addEventListener("input",   render);   // replaceState — continuous typing
+      dom.btnSizeId.addEventListener("click",     () => setCardSize('id'));
+      dom.btnSizeSquare.addEventListener("click", () => setCardSize('square'));
+      dom.btnSizeMoo.addEventListener("click",    () => setCardSize('moo'));
+      dom.logoStyleSelect.addEventListener("change",      () => render(true));
+      dom.showArtifactsToggle.addEventListener("change",  () => render(true));
+      dom.showShadowToggle.addEventListener("change",     () => render(true));
+      dom.showLanyardToggle.addEventListener("change",    () => render(true));
+      dom.personNameInput.addEventListener("input", render);
+      dom.jobTitleInput.addEventListener("input",   render);
 
       // ── Init ──────────────────────────────────────────────────────────────
-      artCountDisplay.textContent   = artCountLabel(artCountSlider.value);
-      artOpacityDisplay.textContent = artOpacitySlider.value;
-      artScaleDisplay.textContent   = artScaleSlider.value + '%';
+      dom.artCountDisplay.textContent   = artCountLabel(dom.artCountSlider.value);
+      dom.artOpacityDisplay.textContent = dom.artOpacitySlider.value;
+      dom.artScaleDisplay.textContent   = dom.artScaleSlider.value + '%';
       lucide.createIcons();
-      applyQueryString();
-      updateColorSliders();
-      updateSeedInputs();
-      updateResetButtons();
-      render(); // replaceState on first load — initial URL is already canonical
+      applyQueryString(dom);
+      syncCardSizeButtons();
+      updateColorSliders(dom);
+      updateSeedInputs(dom);
+      updateResetButtons(dom);
+      render();
     </script>
 
   </body>
