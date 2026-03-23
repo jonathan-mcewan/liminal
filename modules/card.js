@@ -71,9 +71,12 @@ export function deriveColorParams(seed) {
 export function generateCard({
   size               = 1024,
   padding            = 0.08,
+  cardAspect         = 54 / 85.6,  // width/height ratio; default = ID card (85.6 × 54 mm)
+  cardScale          = 1,           // multiplier on the fitted dimension
   seed               = 42,
   logoNonce          = 0,
   logoStyle          = -1,
+  logoScale          = 1,
   hue                   = 220,
   isDarkOverride        = null,
   cardLightnessOverride = null,
@@ -91,10 +94,26 @@ export function generateCard({
   showShadow         = true,
   showLanyard        = false,
   transparent        = false,
+  ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
-  const canvas = document.getElementById('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
+  // ── Compute frame dimensions early so we can size the canvas ──────────
+  const _paddingPx = size * padding;
+  const _available = size - 2 * _paddingPx;
+  let _cw, _ch;
+  if (cardAspect <= 1) { _ch = _available * cardScale; _cw = _ch * cardAspect; }
+  else                 { _cw = _available * cardScale; _ch = _cw / cardAspect; }
+  const _frameW = _cw + 2 * _paddingPx;
+  const _frameH = _ch + 2 * _paddingPx;
+
+  let ctx;
+  if (ctxOverride) {
+    ctx = ctxOverride;
+  } else {
+    const canvas = document.getElementById('canvas');
+    canvas.width  = Math.round(_frameW);
+    canvas.height = Math.round(_frameH);
+    ctx = canvas.getContext('2d');
+  }
 
   // ── Four independent PRNGs ────────────────────────────────────────────────
   const cardPRNG     = makePRNG(seed);
@@ -126,24 +145,46 @@ export function generateCard({
   const symbolLightness = modeFlipped ? (isDark ? 87 : 15) : symbolLightnessFromSeed;
 
   // ── Symbol style: seed-derived or explicit override ───────────────────────
-  const autoStyle   = stylePRNG.int(0, 14);
-  const symbolStyle = (logoStyle >= 0 && logoStyle <= 14) ? logoStyle : autoStyle;
+  const autoStyle   = stylePRNG.int(0, 16);
+  const symbolStyle = (logoStyle >= 0 && logoStyle <= 16) ? logoStyle : autoStyle;
 
   // ── Logo variation: drawn from logoPRNG (internals only, not style) ───────
   const symbolRadiusFactor = logoPRNG.float(0.169, 0.286); // radius as fraction of card width
 
   // ── Card geometry (pure math, no PRNG) ───────────────────────────────────
-  const paddingPx    = size * padding;
-  const cardHeight   = size - 2 * paddingPx;
-  const cardWidth    = cardHeight / 1.586;  // real-card aspect ratio (85.6 × 54 mm)
-  const centerX      = size / 2;
-  const centerY      = size / 2;
-  const cardLeft     = centerX - cardWidth / 2;
+  const paddingPx  = size * padding;
+  const available  = size - 2 * paddingPx;          // reference dimension for card fitting
+  let cardWidth, cardHeight;
+  if (cardAspect <= 1) {
+    // Portrait or square: height fills the available space (scaled)
+    cardHeight = available * cardScale;
+    cardWidth  = cardHeight * cardAspect;
+  } else {
+    // Landscape: width fills the available space (scaled)
+    cardWidth  = available * cardScale;
+    cardHeight = cardWidth / cardAspect;
+  }
+
+  // Frame tightly around the card with equal padding on all sides
+  const frameW       = cardWidth  + 2 * paddingPx;
+  const frameH       = cardHeight + 2 * paddingPx;
+  const centerX      = frameW / 2;
+  const centerY      = frameH / 2;
+  const cardLeft     = paddingPx;
   const cardTop      = paddingPx;
   const cornerRadius = cardWidth * 0.1;
 
+  // Short side — used for proportional sizing (font, symbol radius, etc.)
+  // so elements stay visually consistent across portrait, square, and landscape cards.
+  const shortSide = Math.min(cardWidth, cardHeight);
+  const landscape = cardAspect > 1;
+
   // Bundled into one object for easy passing to drawing modules
-  const geometry = { size, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY };
+  const geometry = { frameW, frameH, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY, shortSide, landscape };
+
+  // If the ctx supports it (SvgContext), set the viewBox to the full frame
+  // so the SVG output matches the canvas framing (card + padding).
+  if (ctx.cropTo) ctx.cropTo(0, 0, frameW, frameH);
 
   // ── Colour helpers ────────────────────────────────────────────────────────
   // cardColor   — base hue, used for the card body gradient and shadow
@@ -154,14 +195,17 @@ export function generateCard({
     hsla(hue + symbolHueDrift, saturation, symbolLightness + lightnessAdjust, alpha);
 
   // ── Derived logo metrics ──────────────────────────────────────────────────
-  const symbolRadius = cardWidth * symbolRadiusFactor;
-  const symbolX      = centerX;
-  const symbolY      = cardTop + cardHeight * 0.36;  // upper half, below lanyard notch
+  const symbolRadius = shortSide * symbolRadiusFactor * logoScale;
+  const symbolX      = landscape ? cardLeft + cardWidth * 0.30 : centerX;
+  const isSquare     = Math.abs(cardAspect - 1) < 0.01;
+  const symbolY      = landscape ? cardTop + cardHeight * 0.50
+                     : isSquare  ? cardTop + cardHeight * 0.38
+                     :             cardTop + cardHeight * 0.36;
 
   // ── Drawing ───────────────────────────────────────────────────────────────
 
   if (!transparent) {
-    drawCanvasBackground(ctx, size);
+    drawCanvasBackground(ctx, frameW, frameH);
   }
 
   // Shadow must go before the card clip (so it can bleed outside the card shape)

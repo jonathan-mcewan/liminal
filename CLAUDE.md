@@ -2,15 +2,29 @@
 
 ## Architecture Overview
 
-Vanilla ES modules, Canvas 2D, no build step. Served via local HTTP (ES modules need a server).
+Vanilla ES modules, Canvas 2D + SVG, no build step. Served via local HTTP (ES modules need a server).
 
 **Module layout:**
 - `modules/prng.js`       — mulberry32 PRNG + seed mixer
 - `modules/card.js`       — orchestrator; four PRNGs; exports `generateCard` + `deriveColorParams`
 - `modules/background.js` — canvas bg, shadow, noise blobs, artifacts, gloss, edge
-- `modules/symbols.js`    — 8 logo variants (0–7)
+- `modules/symbols.js`    — 16 logo variants (0–15)
 - `modules/text.js`       — name + job title layout
 - `modules/utils.js`      — `hsla()`, `roundedRectPath()`
+- `modules/svg-ctx.js`    — `SvgContext` — Canvas 2D API shim that emits SVG markup
+
+---
+
+## Render Modes
+
+Two render modes: **Canvas** (raster) and **SVG** (vector). SVG is the default.
+
+- `renderMode` variable in `index.html` — `'svg'` or `'canvas'`
+- `setRenderMode(mode)` toggles display of `#canvas` / `#svg-output`, updates the export button label, and re-renders
+- SVG mode creates a `SvgContext` from `svg-ctx.js`, passes it as `ctx` to `generateCard`, then sets `svgOutputEl.innerHTML`
+- Canvas mode uses the standard `<canvas>` element's 2D context
+
+**SVG limitations (POC):** No shadow, no `globalCompositeOperation` (lanyard hole punch-through absent), filter only honoured in `drawImage` (blur).
 
 ---
 
@@ -34,6 +48,16 @@ When adding a new seed-derived color/theme param, use `deriveColorParams()` with
 ## Seed-Derived Override Pattern
 
 **Concept:** Every visual parameter has a seed-derived default. Users can override individual params via sliders/inputs. Overrides are preserved in the URL. Resetting an override reverts to the seed-derived value.
+
+### Override Slot
+
+An **override slot** is the full bundle needed to make a single parameter user-overridable:
+
+1. **State variable** — a key in `colorOverrides` or `seedOverrides` (only present when the user has explicitly set a value)
+2. **UI control** — a slider/input + ↺ reset button (`.field-hdr` + `.btn-reset`) that sets/clears the override
+3. **URL query param** — written to the URL only when overridden, read back in `applyQueryString`
+
+When adding a new overridable param, you wire up all three parts of the slot (see "Adding a New Overridable Param" below).
 
 **Implementation (index.html):**
 
@@ -97,7 +121,7 @@ When the user toggles isDark, the lightness override is automatically cleared so
 
 ---
 
-## Adding a New Overridable Param
+## Adding a New Overridable Param (Override Slot)
 
 1. **If param is in `cardPRNG` sequence** (like saturation):
    - Add `fooOverride = null` to `generateCard` signature
@@ -108,12 +132,11 @@ When the user toggles isDark, the lightness override is automatically cleared so
    - Add it to `deriveColorParams` using `colorPRNG` (keyed `seed ^ 0xC0FFEE42`)
    - It's passed into `generateCard` as a plain param — no override null-check needed there
 
-3. **In index.html:**
-   - Add key to `colorOverrides` (or `seedOverrides`)
-   - Add slider + ↺ reset button using `.field-hdr` structure
-   - Add to `getEffectiveColor()` (or `getEffectiveSeeds()`)
-   - Add to `updateColorSliders()` and `updateResetButtons()`
-   - Add URL read in `applyQueryString` and write in `syncURL`
+3. **In index.html** (the three parts of the override slot):
+   - **State:** Add key to `colorOverrides` (or `seedOverrides`)
+   - **UI:** Add slider + ↺ reset button using `.field-hdr` structure
+   - **URL:** Add read in `applyQueryString` and write in `syncURL`
+   - Also: add to `getEffectiveColor()` (or `getEffectiveSeeds()`), `updateColorSliders()`, and `updateResetButtons()`
 
 ---
 
@@ -155,14 +178,27 @@ Global opacity multiplier: `const opacity = 0.2`.
 | 5 | Parallel Lines |
 | 6 | Polygon Nodes |
 | 7 | Polygon Free Nodes |
+| 8 | Dot Matrix |
+| 9 | Dot Mask |
+| 10 | Spiral |
+| 11 | Wave Field |
+| 12 | Starburst |
+| 13 | Lissajous |
+| 14 | Rose Curve |
+| 15 | Variable Dot Mask |
 
-Style is selected by `stylePRNG.int(0, 7)` in auto mode, or forced via `logoStyle` param (0–7).
-Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 7)` — must match `stylePRNG` seed exactly.
+Style is selected by `stylePRNG.int(0, 15)` in auto mode, or forced via `logoStyle` param (0–15).
+Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 15)` — must match `stylePRNG` seed exactly.
+
+**Dot Mask vs Variable Dot Mask:** Dot Mask (9) uses a single dot size across the grid. Variable Dot Mask (15) seed-derives 2–7 discrete size steps lerped between a min and max radius; each dot randomly picks a step, producing varied dot sizes within the same harmonic blob boundary.
+
+**`logoScale` override slot:** Controls the scale multiplier for the symbol radius. Default is 1 (100%). Not seed-derived — purely a UI control. URL param: `lscale`. The reset-all button resets it to 100%.
 
 ---
 
 ## Export
 
-- `transparent: true` skips `drawCanvasBackground` (dark page fill) for a transparent-background PNG.
+- **SVG mode (default):** Export renders a fresh `SvgContext`, serializes via `toSVG()`, downloads as `.svg` Blob.
+- **Canvas mode:** Export re-renders with `transparent: true` (skips `drawCanvasBackground`), downloads as `.png` via `canvas.toDataURL()`, then re-renders normally.
 - `showShadow: false` skips `drawCardShadow` for a shadow-free export (or preview).
-- The "Export PNG" button re-renders with `transparent: true`, triggers download, then re-renders normally.
+- The export button label dynamically updates to "Export SVG" or "Export PNG" based on the active render mode.

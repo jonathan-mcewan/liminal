@@ -4,9 +4,9 @@ import { hsla, roundedRectPath } from './utils.js';
  * Fills the entire canvas with the dark page background.
  * Skipped when rendering for transparent export.
  */
-export function drawCanvasBackground(ctx, size) {
+export function drawCanvasBackground(ctx, w, h) {
   ctx.fillStyle = '#1a1a22';
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, w, h ?? w);
 }
 
 /**
