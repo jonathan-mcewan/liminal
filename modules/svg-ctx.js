@@ -105,6 +105,7 @@ export class SvgContext {
       textBaseline: this.textBaseline,
       textAlign:   this.textAlign,
       globalCompositeOperation: this.globalCompositeOperation,
+      filter:      this.filter,
     });
     this._clipStack.push(0);
   }
@@ -123,6 +124,7 @@ export class SvgContext {
     this.textBaseline = s.textBaseline;
     this.textAlign   = s.textAlign;
     this.globalCompositeOperation = s.globalCompositeOperation;
+    this.filter      = s.filter;
   }
 
   // ── Path construction ────────────────────────────────────────────────────────
@@ -401,7 +403,7 @@ function splitColor(css) {
     const [, r, g, b, a = '1'] = rgba;
     return { c: `rgb(${r},${g},${b})`, o: parseFloat(a) };
   }
-  const hsla = css.match(/^hsla?\s*\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%(?:\s*,\s*([\d.]+))?\s*\)$/);
+  const hsla = css.match(/^hsla?\s*\(\s*(-?[\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%(?:\s*,\s*([\d.]+))?\s*\)$/);
   if (hsla) {
     const [, h, s, l, a = '1'] = hsla;
     return { c: `hsl(${h},${s}%,${l}%)`, o: parseFloat(a) };
