@@ -104,8 +104,7 @@ body {
 canvas {
   display:      block;
   width:        100%;
-  max-height:   calc(100vh - 6rem); /* leave room for brand + descriptor */
-  /* aspect-ratio set dynamically by render() to match the card frame */
+  height:       100%;
 }
 
 /* ── Field — label + input stacked ──────────────────────────────────────── */
@@ -411,19 +410,48 @@ button svg {
   opacity: 1;
 }
 
-/* ── SVG output area — mirrors canvas sizing and background ──────────────── */
-#svg-output {
-  /* Same footprint as the canvas so the layout doesn't shift on toggle */
-  display:        flex;
-  align-items:    center;
-  justify-content: center;
-  width:          100%;
-  /* aspect-ratio set dynamically by render() to match the card frame */
-  max-height:     calc(100vh - 6rem);
-  background:     #1a1a22;
+/* ── 3D card scene ──────────────────────────────────────────────────────── */
+.card-scene {
+  perspective:  1200px;
+  width:        100%;
+  /* aspect-ratio set dynamically by render() */
+  max-height:   calc(100vh - 6rem);
+  cursor:       pointer;
+  position:     relative;
 }
 
-#svg-output svg {
+.card-body {
+  position:        relative;
+  width:           100%;
+  height:          100%;
+  transform-style: preserve-3d;
+}
+
+.card-face {
+  position:                      absolute;
+  inset:                         0;
+  backface-visibility:           hidden;
+  -webkit-backface-visibility:   hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+
+/* ── SVG output area — mirrors canvas sizing and background ──────────────── */
+#svg-output,
+#svg-output-back {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           100%;
+  height:          100%;
+  background:      #1a1a22;
+}
+
+#svg-output svg,
+#svg-output-back svg {
   display: block;
   width:   100%;
   height:  auto;
@@ -539,7 +567,7 @@ button svg {
     overflow: visible;
   }
 
-  canvas {
+  .card-scene {
     max-height: none;
     max-width:  calc(100vw - 2rem);
     width:      calc(100vw - 2rem);

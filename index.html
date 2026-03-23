@@ -200,8 +200,18 @@
           </svg>
           <span class="brand-name">LIMINAL</span>
         </div>
-        <canvas id="canvas" style="display:none"></canvas>
-        <div id="svg-output"></div>
+        <div class="card-scene">
+          <div class="card-body">
+            <div class="card-face card-front">
+              <canvas id="canvas" style="display:none"></canvas>
+              <div id="svg-output"></div>
+            </div>
+            <div class="card-face card-back">
+              <canvas id="canvas-back" style="display:none"></canvas>
+              <div id="svg-output-back"></div>
+            </div>
+          </div>
+        </div>
         <p class="descriptor" id="card-descriptor"></p>
         <div class="card-actions">
           <button id="btn-render"><i data-lucide="refresh-cw"></i>Render</button>
@@ -231,6 +241,8 @@
                updateLogoName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
       import { applyQueryString, syncURL } from "./modules/url-sync.js";
       import { getEffectiveColor, getEffectiveSeeds } from "./modules/state.js";
+      import { initCard3D }    from "./modules/card-3d.js";
+      import { generateCardBack } from "./modules/card-back.js";
 
       // ── DOM cache ─────────────────────────────────────────────────────────
       const dom = {
@@ -281,6 +293,10 @@
         cardDescriptor:         document.getElementById("card-descriptor"),
         canvasEl:               document.getElementById("canvas"),
         svgOutputEl:            document.getElementById("svg-output"),
+        canvasBackEl:           document.getElementById("canvas-back"),
+        svgOutputBackEl:        document.getElementById("svg-output-back"),
+        cardScene:              document.querySelector(".card-scene"),
+        cardBody:               document.querySelector(".card-body"),
         cardSize:               'id',
       };
 
@@ -303,8 +319,10 @@
 
       function setRenderMode(mode) {
         renderMode = mode;
-        dom.canvasEl.style.display    = mode === 'canvas' ? '' : 'none';
-        dom.svgOutputEl.style.display = mode === 'svg'    ? '' : 'none';
+        dom.canvasEl.style.display        = mode === 'canvas' ? '' : 'none';
+        dom.svgOutputEl.style.display     = mode === 'svg'    ? '' : 'none';
+        dom.canvasBackEl.style.display    = mode === 'canvas' ? '' : 'none';
+        dom.svgOutputBackEl.style.display = mode === 'svg'    ? '' : 'none';
         document.getElementById('btn-mode-canvas').classList.toggle('active', mode === 'canvas');
         document.getElementById('btn-mode-svg').classList.toggle('active',    mode === 'svg');
         const exportBtn = document.getElementById('btn-export');
@@ -319,15 +337,26 @@
 
         if (renderMode === 'svg') {
           const p   = buildParams(dom, true);
+          // Front
           const svg = new SvgContext(frameW, frameH);
           generateCard({ ...p, ctx: svg });
           dom.svgOutputEl.innerHTML = svg.toSVG();
+          // Back
+          const svgBack = new SvgContext(frameW, frameH);
+          generateCardBack({ ...p, ctx: svgBack });
+          dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
         } else {
+          // Front
           generateCard(buildParams(dom));
+          // Back
+          const backCtx = dom.canvasBackEl.getContext('2d');
+          const bp = buildParams(dom);
+          dom.canvasBackEl.width  = Math.round(frameW);
+          dom.canvasBackEl.height = Math.round(frameH);
+          generateCardBack({ ...bp, ctx: backCtx });
         }
 
-        dom.canvasEl.style.aspectRatio    = aspect;
-        dom.svgOutputEl.style.aspectRatio = aspect;
+        dom.cardScene.style.aspectRatio = aspect;
 
         syncURL(dom, push);
         updateLogoName(dom);
@@ -596,6 +625,7 @@
       updateColorSliders(dom);
       updateSeedInputs(dom);
       updateResetButtons(dom);
+      initCard3D(dom.cardScene, dom.cardBody);
       render();
     </script>
 
