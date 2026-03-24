@@ -839,7 +839,7 @@
         // One cell per artifact type — toggle on/off
         for (let i = 0; i < ART_COUNT; i++) {
           const cell = document.createElement('button');
-          cell.className = 'logo-cell' + (active.has(i) ? ' active' : '');
+          cell.className = 'logo-cell' + (show && active.has(i) ? ' active' : '');
           cell.title = ARTIFACT_NAMES[i];
           cell.dataset.style = String(i);
 
