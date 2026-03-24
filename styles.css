@@ -467,15 +467,18 @@ button svg {
 
 /* ── 3D card scene ──────────────────────────────────────────────────────── */
 .card-scene {
+  --card-ar:    0.63;          /* overridden by JS; fallback ≈ ID-card ratio */
   perspective:  1200px;
-  width:        84%;           /* visual breathing room (mirrors old 8% padding) */
+  /* Width is the smaller of 84% (breathing room) or the width that,
+     given the card's aspect-ratio, keeps the height ≤ available space. */
+  width:        min(84%, calc((100vh - 16rem) * var(--card-ar)));
+  max-height:   calc(100vh - 16rem);  /* safety net */
   /* aspect-ratio set dynamically by render() */
-  max-height:   calc(100vh - 16rem);  /* room for brand, buttons, toggles, gaps, main padding */
   cursor:       pointer;
   position:     relative;
   filter:       drop-shadow(0 12px 32px rgba(0,0,0,0.55));
-  padding:      clamp(0.5rem, 5vh, 3rem);  /* scale padding down on short viewports */
-  box-sizing:   border-box;   /* padding included in max-height */
+  padding:      clamp(0.5rem, 5vh, 3rem);
+  box-sizing:   border-box;
 }
 
 .card-body {
@@ -632,8 +635,8 @@ button svg {
   }
 
   .card-scene {
-    max-height:  none;
     width:       100%;
+    max-height:  none;
     padding:     1rem;
   }
 

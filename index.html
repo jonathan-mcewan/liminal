@@ -649,6 +649,7 @@
         }
 
         dom.cardScene.style.aspectRatio = aspect;
+        dom.cardScene.style.setProperty('--card-ar', (frameW / frameH).toFixed(6));
 
         syncURL(dom, push);
         updateLogoName(dom);
