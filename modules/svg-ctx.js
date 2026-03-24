@@ -67,6 +67,12 @@ export class SvgContext {
     this.textBaseline = 'alphabetic';
     this.textAlign   = 'left';
 
+    // 2D affine transform: [a, b, c, d, e, f] — column-major
+    // | a c e |
+    // | b d f |
+    // | 0 0 1 |
+    this._transform  = [1, 0, 0, 1, 0, 0];
+
     // No-op properties — kept so drawing code can set them without errors
     this.globalCompositeOperation = 'source-over';
     this.globalAlpha   = 1;
@@ -82,7 +88,8 @@ export class SvgContext {
     this._clipStack  = [];       // clip-group open count per save level
 
     this._path  = [];            // current path command tokens
-    this._pt    = null;          // current point { x, y }
+    this._pt    = null;          // current point { x, y } in transformed space
+    this._ptU   = null;          // current point in user (untransformed) space
 
     this._idSeq   = 0;
     this._gradIds = new Map();   // gradient object → defs id
@@ -105,6 +112,7 @@ export class SvgContext {
       textBaseline: this.textBaseline,
       textAlign:   this.textAlign,
       globalCompositeOperation: this.globalCompositeOperation,
+      transform:   this._transform.slice(),
     });
     this._clipStack.push(0);
   }
@@ -123,6 +131,44 @@ export class SvgContext {
     this.textBaseline = s.textBaseline;
     this.textAlign   = s.textAlign;
     this.globalCompositeOperation = s.globalCompositeOperation;
+    this._transform  = s.transform;
+  }
+
+  // ── Transforms ──────────────────────────────────────────────────────────────
+
+  /** Multiply current transform by [a2,b2,c2,d2,e2,f2]. */
+  _multiplyTransform(a2, b2, c2, d2, e2, f2) {
+    const [a1, b1, c1, d1, e1, f1] = this._transform;
+    this._transform = [
+      a1*a2 + c1*b2,       b1*a2 + d1*b2,
+      a1*c2 + c1*d2,       b1*c2 + d1*d2,
+      a1*e2 + c1*f2 + e1,  b1*e2 + d1*f2 + f1,
+    ];
+  }
+
+  translate(tx, ty) {
+    this._multiplyTransform(1, 0, 0, 1, tx, ty);
+  }
+
+  rotate(angle) {
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    this._multiplyTransform(cos, sin, -sin, cos, 0, 0);
+  }
+
+  scale(sx, sy) {
+    this._multiplyTransform(sx, 0, 0, sy ?? sx, 0, 0);
+  }
+
+  /** Apply current transform to a point, returning [x', y']. */
+  _tx(x, y) {
+    const [a, b, c, d, e, ff] = this._transform;
+    return [a*x + c*y + e, b*x + d*y + ff];
+  }
+
+  /** True when the transform is identity (no work needed). */
+  _isIdentity() {
+    const [a, b, c, d, e, ff] = this._transform;
+    return a === 1 && b === 0 && c === 0 && d === 1 && e === 0 && ff === 0;
   }
 
   // ── Path construction ────────────────────────────────────────────────────────
@@ -130,6 +176,7 @@ export class SvgContext {
   beginPath() {
     this._path = [];
     this._pt   = null;
+    this._ptU  = null;
   }
 
   closePath() {
@@ -139,20 +186,36 @@ export class SvgContext {
   }
 
   moveTo(x, y) {
-    this._path.push(`M ${f(x)} ${f(y)}`);
-    this._pt = { x, y };
+    const [tx, ty] = this._tx(x, y);
+    this._path.push(`M ${f(tx)} ${f(ty)}`);
+    this._pt  = { x: tx, y: ty };
+    this._ptU = { x, y };
   }
 
   lineTo(x, y) {
-    if (!this._pt) this._path.push(`M ${f(x)} ${f(y)}`);
-    else           this._path.push(`L ${f(x)} ${f(y)}`);
-    this._pt = { x, y };
+    const [tx, ty] = this._tx(x, y);
+    if (!this._pt) this._path.push(`M ${f(tx)} ${f(ty)}`);
+    else           this._path.push(`L ${f(tx)} ${f(ty)}`);
+    this._pt  = { x: tx, y: ty };
+    this._ptU = { x, y };
   }
 
   arc(cx, cy, r, startAngle, endAngle, ccw = false) {
     const TAU = Math.PI * 2;
-    const sx  = cx + r * Math.cos(startAngle);
-    const sy  = cy + r * Math.sin(startAngle);
+    // Transform the center and compute effective radius from transform scale
+    const [tcx, tcy] = this._tx(cx, cy);
+    const [a, b, c, d] = this._transform;
+    const scaleX = Math.hypot(a, b);
+    const scaleY = Math.hypot(c, d);
+    const tr = r * (scaleX + scaleY) / 2; // average scale for radius
+    // Compute rotation offset from the transform
+    const tAngle = Math.atan2(b, a);
+
+    const sa = startAngle + tAngle;
+    const ea = endAngle + tAngle;
+
+    const sx  = tcx + tr * Math.cos(sa);
+    const sy  = tcy + tr * Math.sin(sa);
 
     // Connect current point to arc start (Canvas behaviour: line if not at start)
     if (!this._pt) {
@@ -169,23 +232,25 @@ export class SvgContext {
 
     if (span >= TAU - 0.001) {
       // Full circle — SVG can't do it in one arc command, use two semicircles
-      const mx = cx + r * Math.cos(startAngle + Math.PI);
-      const my = cy + r * Math.sin(startAngle + Math.PI);
+      const mx = tcx + tr * Math.cos(sa + Math.PI);
+      const my = tcy + tr * Math.sin(sa + Math.PI);
       const sw = ccw ? 0 : 1;
       this._path.push(
-        `A ${f(r)} ${f(r)} 0 1 ${sw} ${f(mx)} ${f(my)}`,
-        `A ${f(r)} ${f(r)} 0 1 ${sw} ${f(sx)} ${f(sy)}`,
+        `A ${f(tr)} ${f(tr)} 0 1 ${sw} ${f(mx)} ${f(my)}`,
+        `A ${f(tr)} ${f(tr)} 0 1 ${sw} ${f(sx)} ${f(sy)}`,
       );
-      this._pt = { x: sx, y: sy };
+      this._pt  = { x: sx, y: sy };
+      this._ptU = { x: cx + r * Math.cos(startAngle), y: cy + r * Math.sin(startAngle) };
       return;
     }
 
-    const ex       = cx + r * Math.cos(endAngle);
-    const ey       = cy + r * Math.sin(endAngle);
+    const ex       = tcx + tr * Math.cos(ea);
+    const ey       = tcy + tr * Math.sin(ea);
     const largeArc = span > Math.PI ? 1 : 0;
     const sweep    = ccw ? 0 : 1;
-    this._path.push(`A ${f(r)} ${f(r)} 0 ${largeArc} ${sweep} ${f(ex)} ${f(ey)}`);
-    this._pt = { x: ex, y: ey };
+    this._path.push(`A ${f(tr)} ${f(tr)} 0 ${largeArc} ${sweep} ${f(ex)} ${f(ey)}`);
+    this._pt  = { x: ex, y: ey };
+    this._ptU = { x: cx + r * Math.cos(endAngle), y: cy + r * Math.sin(endAngle) };
   }
 
   /**
@@ -194,8 +259,8 @@ export class SvgContext {
    * preceded by a straight line from P0 to the first tangent point.
    */
   arcTo(x1, y1, x2, y2, radius) {
-    if (!this._pt) { this.moveTo(x1, y1); return; }
-    const { x: x0, y: y0 } = this._pt;
+    if (!this._ptU) { this.moveTo(x1, y1); return; }
+    const { x: x0, y: y0 } = this._ptU;
 
     if ((x0 === x1 && y0 === y1) || (x1 === x2 && y1 === y2) || radius === 0) {
       this.lineTo(x1, y1);
@@ -238,8 +303,13 @@ export class SvgContext {
   }
 
   rect(x, y, w, h) {
-    this._path.push(`M ${f(x)} ${f(y)} L ${f(x+w)} ${f(y)} L ${f(x+w)} ${f(y+h)} L ${f(x)} ${f(y+h)} Z`);
-    this._pt = { x, y };
+    const [x0, y0] = this._tx(x, y);
+    const [x1, y1] = this._tx(x + w, y);
+    const [x2, y2] = this._tx(x + w, y + h);
+    const [x3, y3] = this._tx(x, y + h);
+    this._path.push(`M ${f(x0)} ${f(y0)} L ${f(x1)} ${f(y1)} L ${f(x2)} ${f(y2)} L ${f(x3)} ${f(y3)} Z`);
+    this._pt  = { x: x0, y: y0 };
+    this._ptU = { x, y };
   }
 
   // ── Rendering commands ───────────────────────────────────────────────────────
@@ -275,10 +345,19 @@ export class SvgContext {
   }
 
   fillRect(x, y, w, h) {
-    this._body.push(
-      `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}"` +
-      ` fill="${this._paint(this.fillStyle)}" stroke="none"/>`,
-    );
+    if (this._isIdentity()) {
+      this._body.push(
+        `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}"` +
+        ` fill="${this._paint(this.fillStyle)}" stroke="none"/>`,
+      );
+    } else {
+      const [x0, y0] = this._tx(x, y);
+      const [x1, y1] = this._tx(x + w, y);
+      const [x2, y2] = this._tx(x + w, y + h);
+      const [x3, y3] = this._tx(x, y + h);
+      const d = `M ${f(x0)} ${f(y0)} L ${f(x1)} ${f(y1)} L ${f(x2)} ${f(y2)} L ${f(x3)} ${f(y3)} Z`;
+      this._body.push(`<path d="${d}" fill="${this._paint(this.fillStyle)}" stroke="none"/>`);
+    }
   }
 
   fillText(text, x, y) {
@@ -287,9 +366,12 @@ export class SvgContext {
                    : this.textBaseline === 'middle' ? 'central' : 'auto';
     const anchor   = this.textAlign === 'center' ? 'middle'
                    : this.textAlign === 'right'  ? 'end' : 'start';
+    const [tx, ty] = this._tx(x, y);
+    const [a, b] = this._transform;
+    const tScale = Math.hypot(a, b);
     this._body.push(
-      `<text x="${f(x)}" y="${f(y)}"` +
-      ` font-size="${f(size)}" font-weight="${weight}" font-family="${family}"` +
+      `<text x="${f(tx)}" y="${f(ty)}"` +
+      ` font-size="${f(size * tScale)}" font-weight="${weight}" font-family="${family}"` +
       ` dominant-baseline="${baseline}" text-anchor="${anchor}"` +
       ` fill="${this._paint(this.fillStyle)}">${escXml(text)}</text>`,
     );

@@ -4,8 +4,8 @@ import { deriveColorParams } from "./card.js";
 // ── Override state ──────────────────────────────────────────────────────
 // Only keys that the user has explicitly set are present.
 // Absent key → use seed-derived default.
-export const colorOverrides = {};  // isDark | cardLightness | hue | saturation | noiseBrightness | noiseContrast
-export const seedOverrides  = {};  // logoNonce | artifactSeed
+export const colorOverrides = {};  // isDark | cardLightness | hue | saturation | noiseBrightness | noiseContrast | patternTwoTone
+export const seedOverrides  = {};  // logoNonce | artifactSeed | patternSeed
 
 export function clearAllOverrides() {
   delete colorOverrides.isDark;
@@ -14,8 +14,10 @@ export function clearAllOverrides() {
   delete colorOverrides.saturation;
   delete colorOverrides.noiseBrightness;
   delete colorOverrides.noiseContrast;
+  delete colorOverrides.patternTwoTone;
   delete seedOverrides.logoNonce;
   delete seedOverrides.artifactSeed;
+  delete seedOverrides.patternSeed;
 }
 
 // ── Seed-derived defaults ───────────────────────────────────────────────
@@ -25,6 +27,7 @@ export function deriveSeedParams(seed) {
   return {
     logoNonce:    p.int(0, 99999),
     artifactSeed: p.int(0, 99999),
+    patternSeed:  p.int(0, 99999),
   };
 }
 
@@ -44,7 +47,8 @@ export function getEffectiveColor(seed) {
     hue:             colorOverrides.hue             ?? derived.hue,
     saturation:      colorOverrides.saturation      ?? derived.saturation,
     noiseBrightness: colorOverrides.noiseBrightness ?? derived.noiseBrightness,
-    noiseContrast:   colorOverrides.noiseContrast   ?? derived.noiseContrast,
+    noiseContrast:      colorOverrides.noiseContrast   ?? derived.noiseContrast,
+    patternTwoTone:    colorOverrides.patternTwoTone  ?? derived.patternTwoTone,
   };
 }
 
@@ -53,5 +57,6 @@ export function getEffectiveSeeds(seed) {
   return {
     logoNonce:    seedOverrides.logoNonce    ?? derived.logoNonce,
     artifactSeed: seedOverrides.artifactSeed ?? derived.artifactSeed,
+    patternSeed:  seedOverrides.patternSeed  ?? derived.patternSeed,
   };
 }

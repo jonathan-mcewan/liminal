@@ -24,6 +24,11 @@ export function applyQueryString(dom) {
                               dom.artOpacityDisplay.textContent = dom.artOpacitySlider.value; }
   if (q.has("art_scale"))  { dom.artScaleSlider.value    = q.get("art_scale");
                               dom.artScaleDisplay.textContent = dom.artScaleSlider.value + '%'; }
+  if (q.has("pat_type"))  { dom.patternTypeSelect.value     = q.get("pat_type"); }
+  if (q.has("pat_opacity")){ dom.patternOpacitySlider.value = q.get("pat_opacity");
+                              dom.patternOpacityDisplay.textContent = dom.patternOpacitySlider.value; }
+  if (q.has("pat_scale"))  { dom.patternScaleSlider.value   = q.get("pat_scale");
+                              dom.patternScaleDisplay.textContent = dom.patternScaleSlider.value + '%'; }
   if (q.has("lanyard"))   dom.showLanyardToggle.checked    = q.get("lanyard")   !== "0";
 
   // Colour overrides — only in URL if user set them
@@ -37,6 +42,8 @@ export function applyQueryString(dom) {
   // Seed overrides
   if (q.has("nonce"))     seedOverrides.logoNonce    = parseInt(q.get("nonce"),    10);
   if (q.has("art_seed"))  seedOverrides.artifactSeed = parseInt(q.get("art_seed"), 10);
+  if (q.has("pat_seed")) seedOverrides.patternSeed  = parseInt(q.get("pat_seed"), 10);
+  if (q.has("pat_2t"))  colorOverrides.patternTwoTone = q.get("pat_2t") !== "0";
 }
 
 // ── State → URL ─────────────────────────────────────────────────────────
@@ -56,6 +63,9 @@ export function syncURL(dom, push = false) {
     art_count:   dom.artCountSlider.value,
     art_opacity: dom.artOpacitySlider.value,
     art_scale:   dom.artScaleSlider.value,
+    pat_type:    dom.patternTypeSelect.value,
+    pat_opacity: dom.patternOpacitySlider.value,
+    pat_scale:   dom.patternScaleSlider.value,
     lanyard:     dom.showLanyardToggle.checked   ? "1" : "0",
   });
   if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
@@ -66,6 +76,8 @@ export function syncURL(dom, push = false) {
   if (colorOverrides.noiseContrast   !== undefined) q.set("ncontrast",Math.round(colorOverrides.noiseContrast   * 100));
   if (seedOverrides.logoNonce        !== undefined) q.set("nonce",    seedOverrides.logoNonce);
   if (seedOverrides.artifactSeed     !== undefined) q.set("art_seed", seedOverrides.artifactSeed);
+  if (seedOverrides.patternSeed      !== undefined) q.set("pat_seed", seedOverrides.patternSeed);
+  if (colorOverrides.patternTwoTone  !== undefined) q.set("pat_2t",   colorOverrides.patternTwoTone ? "1" : "0");
   const url = "?" + q.toString();
   if (push) history.pushState(null, "", url);
   else      history.replaceState(null, "", url);

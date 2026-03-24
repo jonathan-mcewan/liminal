@@ -219,6 +219,16 @@ select option {
   pointer-events: none;
 }
 
+.logo-cell svg {
+  position:       absolute;
+  inset:          0;
+  margin:         auto;
+  width:          50%;
+  height:         50%;
+  opacity:        0.6;
+  pointer-events: none;
+}
+
 .logo-cell:hover {
   border-color: var(--ring);
   background:   oklch(1 0 0 / 6%);

@@ -121,7 +121,39 @@
       </div>
 
       <div class="panel-section">
-        <h2><i data-lucide="sparkles"></i>Effects</h2>
+        <h2><i data-lucide="grid-3x3"></i>Patterns</h2>
+        <div class="field">
+          <span>Type <span id="pattern-name-display"></span></span>
+          <div id="pattern-style-grid" class="logo-grid"></div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Seed</span>
+            <button class="btn-reset" id="pattern-seed-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="inline-row">
+            <input id="pattern-seed" type="number" value="0" min="0" max="999999" />
+            <button id="btn-next-pattern">Next</button>
+          </div>
+        </div>
+        <div class="field">
+          <span>Opacity <span id="pattern-opacity-display">15</span></span>
+          <input id="pattern-opacity" type="range" min="0" max="60" step="1" value="15" />
+        </div>
+        <div class="field">
+          <span>Scale <span id="pattern-scale-display">100%</span></span>
+          <input id="pattern-scale" type="range" min="25" max="200" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span class="field--row"><input id="pattern-two-tone" type="checkbox" checked /> Two-Tone</span>
+            <button class="btn-reset" id="pattern-two-tone-reset" title="Reset to seed default">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2><i data-lucide="sparkles"></i>Artifacts</h2>
         <div class="field field--row">
           <input id="show-artifacts" type="checkbox" checked />
           <span>Artifacts</span>
@@ -231,13 +263,14 @@
     <script type="module">
       import { generateCard }  from "./modules/card.js";
       import { SvgContext }    from "./modules/svg-ctx.js";
-      import { artCountLabel, LOGO_NAMES } from "./modules/constants.js";
+      import { artCountLabel, LOGO_NAMES, PATTERN_NAMES } from "./modules/constants.js";
+      import { drawPatterns } from "./modules/patterns.js";
       import { drawSymbol }   from "./modules/symbols.js";
       import { makePRNG }     from "./modules/prng.js";
       import { hsla }         from "./modules/utils.js";
       import { colorOverrides, seedOverrides, clearAllOverrides } from "./modules/state.js";
       import { getSeed, updateColorSliders, updateSeedInputs, updateResetButtons,
-               updateLogoName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
+               updateLogoName, updatePatternName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
       import { applyQueryString, syncURL } from "./modules/url-sync.js";
       import { getEffectiveColor, getEffectiveSeeds } from "./modules/state.js";
       import { initCard3D, isFlipped, setFlipped } from "./modules/card-3d.js";
@@ -279,6 +312,17 @@
         btnSizeId:              document.getElementById("btn-size-id"),
         btnSizeSquare:          document.getElementById("btn-size-square"),
         btnSizeMoo:             document.getElementById("btn-size-moo"),
+        patternStyleGrid:       document.getElementById("pattern-style-grid"),
+        patternTypeSelect:      { value: '-1' },  // virtual select — grid sets this
+        patternNameDisplay:     document.getElementById("pattern-name-display"),
+        patternSeedInput:       document.getElementById("pattern-seed"),
+        patternSeedReset:       document.getElementById("pattern-seed-reset"),
+        patternOpacitySlider:   document.getElementById("pattern-opacity"),
+        patternOpacityDisplay:  document.getElementById("pattern-opacity-display"),
+        patternScaleSlider:     document.getElementById("pattern-scale"),
+        patternScaleDisplay:    document.getElementById("pattern-scale-display"),
+        patternTwoToneToggle:   document.getElementById("pattern-two-tone"),
+        patternTwoToneReset:    document.getElementById("pattern-two-tone-reset"),
         showArtifactsToggle:    document.getElementById("show-artifacts"),
         artifactSeedInput:      document.getElementById("artifact-seed"),
         artifactSeedReset:      document.getElementById("artifact-seed-reset"),
@@ -346,12 +390,21 @@
         const grid = dom.logoStyleGrid;
         grid.innerHTML = '';
 
+        // "None" cell — no logo
+        const noneCell = document.createElement('button');
+        noneCell.className = 'logo-cell' + (dom.logoStyleSelect.value === '-2' ? ' active' : '');
+        noneCell.title = 'No Logo';
+        noneCell.dataset.style = '-2';
+        noneCell.innerHTML = '<i data-lucide="ban"></i>';
+        noneCell.addEventListener('click', () => selectLogoStyle('-2'));
+        grid.appendChild(noneCell);
+
         // "Auto" cell
         const autoCell = document.createElement('button');
         autoCell.className = 'logo-cell' + (dom.logoStyleSelect.value === '-1' ? ' active' : '');
         autoCell.title = 'Auto';
         autoCell.dataset.style = '-1';
-        autoCell.textContent = 'Auto';
+        autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
         autoCell.addEventListener('click', () => selectLogoStyle('-1'));
         grid.appendChild(autoCell);
 
@@ -387,6 +440,7 @@
           cell.addEventListener('click', () => selectLogoStyle(String(i)));
           grid.appendChild(cell);
         }
+        lucide.createIcons();
       }
 
       function selectLogoStyle(val, doRender = true) {
@@ -398,8 +452,85 @@
         if (doRender) render(true);
       }
 
+      // ── Pattern style grid ──────────────────────────────────────────────
+      const PAT_THUMB = 48;
+      const PAT_COUNT = PATTERN_NAMES.length;  // 16 (0-15)
+      let _lastPatGridKey = null;
+
+      function buildPatternGrid(force = false) {
+        const seed = getSeed(dom);
+        const seeds = getEffectiveSeeds(seed);
+        const pseed = seeds.patternSeed;
+        const key = `${seed}:${pseed}`;
+        if (!force && key === _lastPatGridKey) return;
+        _lastPatGridKey = key;
+
+        const grid = dom.patternStyleGrid;
+        grid.innerHTML = '';
+
+        // "None" cell — no pattern
+        const noneCell = document.createElement('button');
+        noneCell.className = 'logo-cell' + (dom.patternTypeSelect.value === '-2' ? ' active' : '');
+        noneCell.title = 'No Pattern';
+        noneCell.dataset.style = '-2';
+        noneCell.innerHTML = '<i data-lucide="ban"></i>';
+        noneCell.addEventListener('click', () => selectPatternType('-2'));
+        grid.appendChild(noneCell);
+
+        // "Auto" cell
+        const autoCell = document.createElement('button');
+        autoCell.className = 'logo-cell' + (dom.patternTypeSelect.value === '-1' ? ' active' : '');
+        autoCell.title = 'Auto';
+        autoCell.dataset.style = '-1';
+        autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
+        autoCell.addEventListener('click', () => selectPatternType('-1'));
+        grid.appendChild(autoCell);
+
+        // One cell per pattern
+        for (let i = 0; i < PAT_COUNT; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'logo-cell' + (dom.patternTypeSelect.value === String(i) ? ' active' : '');
+          cell.title = PATTERN_NAMES[i];
+          cell.dataset.style = String(i);
+
+          const cvs = document.createElement('canvas');
+          cvs.width  = PAT_THUMB * 2;
+          cvs.height = PAT_THUMB * 2;
+          const tctx = cvs.getContext('2d');
+
+          // Draw pattern thumbnail on a dark background
+          const geo = {
+            cardWidth: PAT_THUMB * 2, cardHeight: PAT_THUMB * 2,
+            cardLeft: 0, cardTop: 0,
+            centerX: PAT_THUMB, centerY: PAT_THUMB,
+            cornerRadius: 4, shortSide: PAT_THUMB * 2,
+            landscape: false, frameW: PAT_THUMB * 2, frameH: PAT_THUMB * 2,
+          };
+
+          tctx.fillStyle = 'rgba(255,255,255,0.03)';
+          tctx.fillRect(0, 0, PAT_THUMB * 2, PAT_THUMB * 2);
+
+          const rng = makePRNG(pseed);
+          drawPatterns(tctx, geo, rng, i, 0.9, 1, true, 0, 0, 15, true);
+
+          cell.appendChild(cvs);
+          cell.addEventListener('click', () => selectPatternType(String(i)));
+          grid.appendChild(cell);
+        }
+        lucide.createIcons();
+      }
+
+      function selectPatternType(val, doRender = true) {
+        dom.patternTypeSelect.value = val;
+        dom.patternStyleGrid.querySelectorAll('.logo-cell').forEach(c =>
+          c.classList.toggle('active', c.dataset.style === val)
+        );
+        if (doRender) render(true);
+      }
+
       function render(push = false) {
         buildLogoGrid();
+        buildPatternGrid();
         const { frameW, frameH } = getFrameDims(dom);
         const aspect = `${frameW} / ${frameH}`;
 
@@ -428,6 +559,7 @@
 
         syncURL(dom, push);
         updateLogoName(dom);
+        updatePatternName(dom);
         updateDescriptor(dom);
       }
 
@@ -440,6 +572,7 @@
         updateSeedInputs(dom);
         updateResetButtons(dom);
         buildLogoGrid(true);
+        buildPatternGrid(true);
         render();
       });
 
@@ -616,6 +749,11 @@
         dom.logoScaleDisplay.textContent  = '100%';
         dom.noiseZoomSlider.value         = 4;
         dom.noiseZoomDisplay.textContent  = '4';
+        dom.patternTypeSelect.value      = '-1';
+        dom.patternOpacitySlider.value   = 15;
+        dom.patternOpacityDisplay.textContent = '15';
+        dom.patternScaleSlider.value     = 100;
+        dom.patternScaleDisplay.textContent = '100%';
         dom.showArtifactsToggle.checked   = true;
         dom.showLanyardToggle.checked     = false;
         dom.artCountSlider.value          = 5;
@@ -675,6 +813,45 @@
       dom.btnSizeId.addEventListener("click",     () => setCardSize('id'));
       dom.btnSizeSquare.addEventListener("click", () => setCardSize('square'));
       dom.btnSizeMoo.addEventListener("click",    () => setCardSize('moo'));
+      // Pattern controls
+      dom.patternOpacitySlider.addEventListener("input", () => {
+        dom.patternOpacityDisplay.textContent = dom.patternOpacitySlider.value;
+        render();
+      });
+      dom.patternScaleSlider.addEventListener("input", () => {
+        dom.patternScaleDisplay.textContent = dom.patternScaleSlider.value + '%';
+        render();
+      });
+      document.getElementById("btn-next-pattern").addEventListener("click", () => {
+        seedOverrides.patternSeed  = (parseInt(dom.patternSeedInput.value, 10) | 0) + 1;
+        dom.patternSeedInput.value = seedOverrides.patternSeed;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.patternSeedInput.addEventListener("change", () => {
+        seedOverrides.patternSeed = parseInt(dom.patternSeedInput.value, 10) | 0;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.patternSeedReset.addEventListener("click", () => {
+        delete seedOverrides.patternSeed;
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      dom.patternTwoToneToggle.addEventListener("change", () => {
+        colorOverrides.patternTwoTone = dom.patternTwoToneToggle.checked;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.patternTwoToneReset.addEventListener("click", () => {
+        delete colorOverrides.patternTwoTone;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
       dom.showArtifactsToggle.addEventListener("change",  () => render(true));
       dom.showLanyardToggle.addEventListener("change",    () => render(true));
       dom.personNameInput.addEventListener("input", render);

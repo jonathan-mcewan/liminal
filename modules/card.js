@@ -9,6 +9,7 @@ import {
   drawLanyardHole,
   drawCardEdge,
 } from './background.js';
+import { drawPatterns }  from './patterns.js';
 import { drawSymbol }   from './symbols.js';
 import { drawCardText } from './text.js';
 
@@ -38,8 +39,9 @@ export function deriveColorParams(seed) {
   // Lightness for the opposite mode — used by UI when the dark/light toggle is flipped
   // without an explicit lightness override, so the slider shows a sensible value.
   const altCardLightness = isDark ? colorPRNG.int(72, 86) : colorPRNG.int(11, 22);
+  const patternTwoTone   = colorPRNG.next() > 0.35; // ~65% chance of two-tone
 
-  return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast };
+  return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast, patternTwoTone };
 }
 
 /**
@@ -87,6 +89,11 @@ export function generateCard({
   artifactCount      = null,
   artifactScale      = 1,
   showArtifacts      = true,
+  patternSeed        = 0,
+  patternType        = -1,      // -1 = auto, -2 = none
+  patternOpacity     = 0.15,
+  patternScale       = 1,
+  patternTwoTone     = true,
   showLanyard        = false,
   ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
@@ -111,6 +118,7 @@ export function generateCard({
   const stylePRNG    = makePRNG(seed ^ 0x9E3779B9); // independent sequence, same seed
   const logoPRNG     = makePRNG(logoNonce);          // seeded only by logoNonce; base seed feeds in via deriveSeedParams default
   const artifactPRNG = makePRNG(artifactSeed);       // seeded only by artifactSeed; same pattern
+  const patternPRNG  = makePRNG(patternSeed);        // seeded only by patternSeed; same pattern
 
   // ── Theme: drawn from cardPRNG ────────────────────────────────────────────
   // Always consume cardPRNG in the same order to preserve downstream sequence.
@@ -137,7 +145,7 @@ export function generateCard({
 
   // ── Symbol style: seed-derived or explicit override ───────────────────────
   const autoStyle   = stylePRNG.int(0, 24);
-  const symbolStyle = (logoStyle >= 0 && logoStyle <= 24) ? logoStyle : autoStyle;
+  const symbolStyle = logoStyle === -2 ? -2 : (logoStyle >= 0 && logoStyle <= 24) ? logoStyle : autoStyle;
 
   // ── Logo variation: drawn from logoPRNG (internals only, not style) ───────
   const symbolRadiusFactor = logoPRNG.float(0.169, 0.286); // radius as fraction of card width
@@ -192,12 +200,18 @@ export function generateCard({
   drawCardBodyGradient(ctx, geometry, isDark, cardColor);
   drawVignette(ctx, geometry, isDark);
   drawNoise(ctx, geometry, cardPRNG, noiseZoom, noiseBrightness, noiseContrast);
+  if (patternType !== -2) {
+    const effectivePatternType = patternType < 0 ? patternPRNG.int(0, 15) : patternType;
+    drawPatterns(ctx, geometry, patternPRNG, effectivePatternType, patternOpacity, patternScale, isDark, hue, saturation, cardLightness, patternTwoTone);
+  }
   if (showArtifacts) drawArtifacts(ctx, geometry, isDark, artifactPRNG, artifactOpacity, artifactCount, artifactScale);
 
   // Symbol — drawn with its own save/restore so ctx state leaks don't affect text
-  ctx.save();
-  drawSymbol(ctx, symbolX, symbolY, symbolRadius, symbolStyle, symbolColor, logoPRNG);
-  ctx.restore();
+  if (symbolStyle >= 0) {
+    ctx.save();
+    drawSymbol(ctx, symbolX, symbolY, symbolRadius, symbolStyle, symbolColor, logoPRNG);
+    ctx.restore();
+  }
 
   drawCardText(ctx, geometry, personName, jobTitle, symbolColor);
   drawTopGloss(ctx, geometry);

@@ -7,6 +7,13 @@ export const CARD_SIZES = {
   moo:    { aspect: 84 / 55,   scale: 1 },           // MOO business card (84 × 55 mm)
 };
 
+export const PATTERN_NAMES = [
+  'Halftone Dots', 'Guilloche', 'Concentric Rings', 'Scanlines',
+  'Topographic', 'Moiré', 'Chevron', 'Hexagonal Grid',
+  'Radial Burst', 'Diamond Lattice', 'Wave Interference', 'Stipple',
+  'Crosshatch', 'Zigzag', 'Spiral Field', 'Brick Wall',
+];
+
 export const LOGO_NAMES = [
   'Venn', 'Segmented Ring', 'Radial Spokes', 'Layered Arcs',
   'Orbital', 'Parallel Lines', 'Polygon Nodes', 'Polygon Free Nodes',

@@ -1,5 +1,5 @@
 import { makePRNG }                          from "./prng.js";
-import { CARD_SIZES, LOGO_NAMES, hashString, hueToColorName } from "./constants.js";
+import { CARD_SIZES, LOGO_NAMES, PATTERN_NAMES, hashString, hueToColorName } from "./constants.js";
 import { colorOverrides, seedOverrides, getEffectiveColor, getEffectiveSeeds } from "./state.js";
 
 // ── Seed helper — accepts numbers or text ───────────────────────────────
@@ -31,12 +31,14 @@ export function updateColorSliders(dom) {
   dom.noiseBrightnessDisplay.textContent = Math.round(c.noiseBrightness * 100);
   dom.noiseContrastSlider.value        = Math.round(c.noiseContrast * 100);
   dom.noiseContrastDisplay.textContent = Math.round(c.noiseContrast * 100);
+  dom.patternTwoToneToggle.checked    = c.patternTwoTone;
 }
 
 export function updateSeedInputs(dom) {
   const s = getEffectiveSeeds(getSeed(dom));
   dom.logoNonceInput.value    = s.logoNonce;
   dom.artifactSeedInput.value = s.artifactSeed;
+  dom.patternSeedInput.value  = s.patternSeed;
 }
 
 export function updateResetButtons(dom) {
@@ -49,11 +51,29 @@ export function updateResetButtons(dom) {
   dom.logoScaleReset.classList.toggle('visible',         parseInt(dom.logoScaleSlider.value, 10) !== 100);
   dom.logoNonceReset.classList.toggle('visible',         seedOverrides.logoNonce        !== undefined);
   dom.artifactSeedReset.classList.toggle('visible',      seedOverrides.artifactSeed     !== undefined);
+  dom.patternSeedReset.classList.toggle('visible',       seedOverrides.patternSeed      !== undefined);
+  dom.patternTwoToneReset.classList.toggle('visible',   colorOverrides.patternTwoTone  !== undefined);
+}
+
+export function updatePatternName(dom) {
+  const override = parseInt(dom.patternTypeSelect.value, 10);
+  if (override === -2) {
+    dom.patternNameDisplay.textContent = '[None]';
+  } else if (override >= 0) {
+    dom.patternNameDisplay.textContent = '';
+  } else {
+    const seed  = getSeed(dom);
+    const seeds = getEffectiveSeeds(seed);
+    const style = makePRNG(seeds.patternSeed).int(0, 15);
+    dom.patternNameDisplay.textContent = `[${PATTERN_NAMES[style]}]`;
+  }
 }
 
 export function updateLogoName(dom) {
   const override = parseInt(dom.logoStyleSelect.value, 10);
-  if (override >= 0) {
+  if (override === -2) {
+    dom.logoNameDisplay.textContent = '[None]';
+  } else if (override >= 0) {
     dom.logoNameDisplay.textContent = '';
   } else {
     const seed  = getSeed(dom);
@@ -92,6 +112,11 @@ export function buildParams(dom) {
     artifactCount:         parseInt(dom.artCountSlider.value, 10) === 0 ? null : parseInt(dom.artCountSlider.value, 10),
     artifactScale:         parseInt(dom.artScaleSlider.value, 10) / 100,
     showArtifacts:         dom.showArtifactsToggle.checked,
+    patternSeed:           seeds.patternSeed,
+    patternType:           parseInt(dom.patternTypeSelect.value, 10),
+    patternOpacity:        parseInt(dom.patternOpacitySlider.value, 10) / 100,
+    patternScale:          parseInt(dom.patternScaleSlider.value, 10) / 100,
+    patternTwoTone:        color.patternTwoTone,
     showLanyard:           dom.showLanyardToggle.checked,
   };
 }
