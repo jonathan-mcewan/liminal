@@ -94,8 +94,6 @@ body {
 .main {
   flex:            1;
   display:         flex;
-  align-items:     center;
-  justify-content: center;
   padding:         1.5rem;
   overflow-x:      hidden;
   overflow-y:      auto;
@@ -545,6 +543,7 @@ button svg {
   gap:            0.75rem;
   max-width:      min(540px, 100%);
   width:          100%;
+  margin:         auto;
 }
 
 .brand {
@@ -610,9 +609,6 @@ button svg {
   /* Section headings span both columns */
   .panel-section {
     break-inside: avoid;
-  }
-
-  .panel-section {
     margin: 0;          /* reset negative margins that cause overlap in grid */
   }
 
