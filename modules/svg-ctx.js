@@ -201,6 +201,25 @@ export class SvgContext {
     this._ptU = { x, y };
   }
 
+  bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
+    const [t1x, t1y] = this._tx(cp1x, cp1y);
+    const [t2x, t2y] = this._tx(cp2x, cp2y);
+    const [tx, ty]    = this._tx(x, y);
+    if (!this._pt) this._path.push(`M ${f(t1x)} ${f(t1y)}`);
+    this._path.push(`C ${f(t1x)} ${f(t1y)} ${f(t2x)} ${f(t2y)} ${f(tx)} ${f(ty)}`);
+    this._pt  = { x: tx, y: ty };
+    this._ptU = { x, y };
+  }
+
+  quadraticCurveTo(cpx, cpy, x, y) {
+    const [tcx, tcy] = this._tx(cpx, cpy);
+    const [tx, ty]   = this._tx(x, y);
+    if (!this._pt) this._path.push(`M ${f(tcx)} ${f(tcy)}`);
+    this._path.push(`Q ${f(tcx)} ${f(tcy)} ${f(tx)} ${f(ty)}`);
+    this._pt  = { x: tx, y: ty };
+    this._ptU = { x, y };
+  }
+
   arc(cx, cy, r, startAngle, endAngle, ccw = false) {
     const TAU = Math.PI * 2;
     // Transform the center and compute effective radius from transform scale

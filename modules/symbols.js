@@ -1,3 +1,6 @@
+import { ICONS } from './icon-paths.js';
+import { replayPath } from './svg-path.js';
+
 /**
  * Draws the generative brand symbol onto the card.
  *
@@ -1387,184 +1390,46 @@ function drawCrossHatch(ctx, cx, cy, radius, sw, symbolColor, rng) {
   ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.stroke();
 }
 
-// ── Style 22: Icons ──────────────────────────────────────────────────────────
-// Curated set of simple icon shapes drawn with lines and arcs.
-// Each icon is defined in unit coordinates (-1..1), then rotated and scaled.
+// ── Style 22: Icons (Phosphor Duotone) ──────────────────────────────────────
+// Renders a randomly-selected Phosphor Duotone icon.
+// Each icon has two SVG path layers: a filled secondary (background) and a
+// detailed primary (outline), replayed through the Canvas 2D path API via
+// the svg-path module so it works with both Canvas and SvgContext.
 function drawIcons(ctx, cx, cy, radius, sw, symbolColor, rng) {
-  const TAU = Math.PI * 2;
-  const iconIdx   = rng.int(0, 9);
-  const rotAngle  = rng.float(0, TAU);
-  rng.next(); // consume for PRNG sequence stability
-  const scale     = rng.float(0.55, 0.78) * radius;
-  const filled    = rng.next() > 0.5;
+  const iconIdx  = rng.int(0, ICONS.length - 1);
+  rng.float(0, Math.PI * 2);        // consume to preserve PRNG sequence
+  rng.next();                        // consume for PRNG sequence stability
+  const scale    = rng.float(0.55, 0.78) * radius;
+  const filled   = rng.next() > 0.5;
 
-  function rp(ux, uy) {
-    const c = Math.cos(rotAngle), s = Math.sin(rotAngle);
-    return [cx + (ux * c - uy * s) * scale, cy + (ux * s + uy * c) * scale];
-  }
+  const icon = ICONS[iconIdx];
+  const s = (scale * 2) / 256;      // map 256×256 viewBox → diameter
 
-  // Each icon is a function that traces a path (doesn't stroke/fill)
-  const icons = [
-    // 0: Shield
-    () => {
-      ctx.beginPath();
-      const [ax, ay] = rp(0, -0.9);
-      const [bx, by] = rp(0.7, -0.4);
-      const [dx, dy] = rp(0, 0.9);
-      const [ex, ey] = rp(-0.7, -0.4);
-      ctx.moveTo(ax, ay);
-      ctx.lineTo(bx, by);
-      ctx.lineTo(...rp(0.7, 0.1));
-      ctx.lineTo(dx, dy);
-      ctx.lineTo(...rp(-0.7, 0.1));
-      ctx.lineTo(ex, ey);
-      ctx.closePath();
-    },
-    // 1: Star (5-pointed)
-    () => {
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const a = (i * Math.PI / 5) - Math.PI / 2;
-        const r = i % 2 === 0 ? 0.9 : 0.4;
-        const [px, py] = rp(Math.cos(a) * r, Math.sin(a) * r);
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-    },
-    // 2: Hexagon
-    () => {
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const a = (i * Math.PI / 3) - Math.PI / 6;
-        const [px, py] = rp(Math.cos(a) * 0.85, Math.sin(a) * 0.85);
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-    },
-    // 3: Eye
-    () => {
-      ctx.beginPath();
-      // Upper lid
-      const pts = 20;
-      for (let i = 0; i <= pts; i++) {
-        const t = i / pts;
-        const ux = -0.9 + t * 1.8;
-        const uy = -0.4 * Math.sin(t * Math.PI);
-        const [px, py] = rp(ux, uy);
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      // Lower lid
-      for (let i = pts; i >= 0; i--) {
-        const t = i / pts;
-        const ux = -0.9 + t * 1.8;
-        const uy = 0.4 * Math.sin(t * Math.PI);
-        const [px, py] = rp(ux, uy);
-        ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-    },
-    // 4: Diamond
-    () => {
-      ctx.beginPath();
-      const [tx, ty] = rp(0, -0.9);
-      const [rx, ry] = rp(0.6, 0);
-      const [bx, by] = rp(0, 0.9);
-      const [lx, ly] = rp(-0.6, 0);
-      ctx.moveTo(tx, ty); ctx.lineTo(rx, ry);
-      ctx.lineTo(bx, by); ctx.lineTo(lx, ly);
-      ctx.closePath();
-    },
-    // 5: Heart
-    () => {
-      ctx.beginPath();
-      const [bx, by] = rp(0, 0.85);
-      ctx.moveTo(bx, by);
-      const steps = 30;
-      for (let i = 0; i <= steps; i++) {
-        const t = (i / steps) * Math.PI;
-        const ux = 0.45 * Math.sin(t) * -1;
-        const uy = -0.3 + 0.55 * -Math.cos(t);
-        const [px, py] = rp(ux - 0.45, uy);
-        ctx.lineTo(px, py);
-      }
-      for (let i = 0; i <= steps; i++) {
-        const t = (i / steps) * Math.PI;
-        const ux = 0.45 * Math.sin(t);
-        const uy = -0.3 + 0.55 * -Math.cos(t);
-        const [px, py] = rp(ux + 0.45, uy);
-        ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-    },
-    // 6: Lightning bolt
-    () => {
-      ctx.beginPath();
-      const shape = [[0.1, -0.9], [0.4, -0.9], [-0.05, -0.1], [0.35, -0.1], [-0.2, 0.9], [0.05, 0.15], [-0.35, 0.15]];
-      for (let i = 0; i < shape.length; i++) {
-        const [px, py] = rp(shape[i][0], shape[i][1]);
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-    },
-    // 7: Globe (circle + lat/long lines)
-    () => {
-      // Outer circle
-      ctx.beginPath(); ctx.arc(cx, cy, scale * 0.85, 0, TAU);
-      // Elliptical meridians approximated with lines
-      const steps = 24;
-      for (let m = 0; m < 3; m++) {
-        const squeeze = 0.3 + m * 0.3;
-        ctx.moveTo(...rp(0, -0.85));
-        for (let i = 1; i <= steps; i++) {
-          const a = (i / steps) * TAU;
-          const [px, py] = rp(Math.sin(a) * squeeze * 0.85, -Math.cos(a) * 0.85);
-          ctx.lineTo(px, py);
-        }
-      }
-      // Latitude lines
-      for (let l = -1; l <= 1; l++) {
-        const ly = l * 0.35;
-        const w = Math.sqrt(1 - (ly / 0.85) * (ly / 0.85)) * 0.85;
-        ctx.moveTo(...rp(-w, ly));
-        ctx.lineTo(...rp(w, ly));
-      }
-    },
-    // 8: Key
-    () => {
-      ctx.beginPath();
-      // Bow (circle part)
-      const [kx, ky] = rp(0, -0.45);
-      ctx.arc(kx, ky, scale * 0.35, 0, TAU);
-      // Shaft
-      ctx.moveTo(...rp(0, -0.1));
-      ctx.lineTo(...rp(0, 0.85));
-      // Teeth
-      ctx.moveTo(...rp(0, 0.5)); ctx.lineTo(...rp(0.25, 0.5));
-      ctx.moveTo(...rp(0, 0.7)); ctx.lineTo(...rp(0.2, 0.7));
-    },
-    // 9: Crown
-    () => {
-      ctx.beginPath();
-      const pts = [[-0.7, 0.3], [-0.7, -0.1], [-0.35, 0.15], [0, -0.5], [0.35, 0.15], [0.7, -0.1], [0.7, 0.3]];
-      for (let i = 0; i < pts.length; i++) {
-        const [px, py] = rp(pts[i][0], pts[i][1]);
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-    },
-  ];
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(s, s);
+  ctx.translate(-128, -128);         // centre the 256×256 viewBox
 
-  icons[iconIdx]();
+  // Secondary (duotone background) — always filled at low alpha
+  ctx.beginPath();
+  replayPath(ctx, icon.secondary);
+  ctx.fillStyle = symbolColor(0, 0.18);
+  ctx.fill();
 
+  // Primary (outline) — stroke always, conditional fill
+  ctx.beginPath();
+  replayPath(ctx, icon.primary);
   if (filled) {
     ctx.fillStyle = symbolColor(0, 0.15);
     ctx.fill();
   }
-  ctx.lineWidth   = filled ? sw * 0.8 : sw * 1.0;
+  ctx.lineWidth   = (filled ? sw * 0.8 : sw) / s; // compensate for transform
   ctx.strokeStyle = symbolColor(0, 0.82);
   ctx.lineCap     = 'round';
   ctx.lineJoin    = 'round';
   ctx.stroke();
+
+  ctx.restore();
 
 }
 
