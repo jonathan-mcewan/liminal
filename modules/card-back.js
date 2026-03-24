@@ -31,6 +31,7 @@ export function generateCardBack({
   isDarkOverride        = null,
   cardLightnessOverride = null,
   saturationOverride    = null,
+  borderRadius       = 0.2,
   ctx: ctxOverride = null,
 } = {}) {
 
@@ -43,7 +44,8 @@ export function generateCardBack({
   const centerY      = cardHeight / 2;
   const cardLeft     = 0;
   const cardTop      = 0;
-  const cornerRadius = cardWidth * 0.1;
+  const maxRadius    = Math.min(cardWidth, cardHeight) / 2;
+  const cornerRadius = maxRadius * borderRadius;
   const geometry = { frameW: cardWidth, frameH: cardHeight, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY };
 
   // ── Resolve colours (mirrors generateCard PRNG sequence) ───────────────

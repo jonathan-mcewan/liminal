@@ -11,7 +11,8 @@ Vanilla ES modules, Canvas 2D + SVG, no build step. Served via local HTTP (ES mo
 - `modules/symbols.js`    — 16 logo variants (0–15)
 - `modules/text.js`       — name + job title layout
 - `modules/utils.js`      — `hsla()`, `roundedRectPath()`
-- `modules/svg-ctx.js`    — `SvgContext` — Canvas 2D API shim that emits SVG markup
+- `modules/svg-ctx.js`    — `SvgContext` — Canvas 2D API shim that emits SVG markup (supports `mix-blend-mode`)
+- `modules/constants.js`  — `CARD_SIZES`, `LOGO_NAMES`, `THEME_PRESETS`, helpers
 
 ---
 
@@ -24,7 +25,7 @@ Two render modes: **Canvas** (raster) and **SVG** (vector). SVG is the default.
 - SVG mode creates a `SvgContext` from `svg-ctx.js`, passes it as `ctx` to `generateCard`, then sets `svgOutputEl.innerHTML`
 - Canvas mode uses the standard `<canvas>` element's 2D context
 
-**SVG limitations (POC):** No `globalCompositeOperation` (lanyard hole punch-through absent), filter only honoured in `drawImage` (blur).
+**SVG limitations (POC):** No `globalCompositeOperation` for compositing ops like `destination-out` (lanyard hole punch-through absent), filter only honoured in `drawImage` (blur). Blend modes (`multiply`, `screen`, `overlay`, etc.) are supported via `mix-blend-mode` on SVG elements.
 
 ---
 
@@ -83,7 +84,7 @@ function getEffectiveColor() {
 - URL only includes overridden colour params (not seed-derived defaults)
 
 **URL param strategy:**
-- Standard params always in URL: `seed`, `lstyle`, `zoom`, `name`, `title`, `artifacts`
+- Standard params always in URL: `seed`, `lstyle`, `zoom`, `name`, `title`, `artifacts`, `bradius`, `bblend`, `pat_rot`
 - Colour overrides only if set: `hue`, `sat`, `nbright`, `ncontrast`
 - Seed overrides only if set: `nonce`, `aseed`
 
@@ -105,7 +106,7 @@ const saturation = saturationOverride ?? saturationFromSeed;
 const cardPRNG = makePRNG(seed);
 const isDark        = cardPRNG.next() > 0.35;
 const saturation    = cardPRNG.int(38, 60);
-cardPRNG.float(-9, 9);              // symbolHueDrift — consume to reach cardLightness
+const symbolHueDrift = cardPRNG.float(-9, 9);
 const cardLightness = isDark ? cardPRNG.int(11, 22) : cardPRNG.int(72, 86);
 // Separate PRNG for values not in cardPRNG:
 const colorPRNG = makePRNG(seed ^ 0xC0FFEE42);
@@ -113,7 +114,7 @@ const hue = colorPRNG.int(0, 359);
 // ...
 // Lightness for the opposite mode — used by UI when isDark is toggled without a lightness override:
 const altCardLightness = isDark ? colorPRNG.int(72, 86) : colorPRNG.int(11, 22);
-return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast };
+return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast, symbolHueDrift };
 ```
 
 **isDark + cardLightness override interaction:**
@@ -203,12 +204,20 @@ Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 24)` — mu
 
 **`logoScale` override slot:** Controls the scale multiplier for the symbol radius. Default is 1 (100%). Not seed-derived — purely a UI control. URL param: `lscale`. The reset-all button resets it to 100%.
 
+**`borderRadius` control:** Controls the corner rounding of the card. 0 = sharp, 100 = pill shape (`shortSide / 2`). Default is 100% (which equals the original `cardWidth * 0.1` default). Not seed-derived — purely a UI control. URL param: `bradius`. Affects card clip path, card edge, and card back.
+
+**`bgBlendMode` control:** Chooses how background textures composite onto the card body. Values: `source-over` (Normal), `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`. Default: `source-over`. URL param: `bblend`. In SVG mode, emits `mix-blend-mode` CSS on affected elements.
+
+**`patternRotation` control:** Rotates the pattern layer independently (0–360°). Default: 0. URL param: `pat_rot`. Applied as a `translate→rotate→translate` transform around the card centre before drawing patterns. Card clip path ensures rotated patterns are clipped to the card boundary.
+
 ---
 
 ## Export
 
 - **SVG mode (default):** Export renders a fresh `SvgContext`, serializes via `toSVG()`, downloads as `.svg` Blob.
-- **Canvas mode:** Downloads `.png` directly from the current canvas via `canvas.toDataURL()`.
+- **Canvas mode:** Creates an offscreen canvas at the selected DPI multiplier (1×, 2×, 3×), renders via `generateCard({ size: 1024 * dpi })`, downloads as `.png`.
+- **High-DPI PNG:** DPI selector (`#export-dpi`) next to the Export button. Default: 2×. Multiplies the `size` param, which naturally scales all internal geometry and offscreen canvases.
+- **Copy as Image:** Clipboard copy (PNG) via `navigator.clipboard.write(ClipboardItem)`. Uses the DPI selector. Works in both SVG and Canvas modes (always renders to an offscreen canvas). Keyboard shortcut: `I`. Requires secure context (HTTPS/localhost).
 - Drop shadow is CSS-only (on `.card-body`), not part of the exported card.
 - The export button label dynamically updates to "Export SVG" or "Export PNG" based on the active render mode.
 
@@ -223,6 +232,16 @@ Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 24)` — mu
 - Flip: 0.6s CSS transition, dispatches `card-flip` CustomEvent
 - **`modules/card-back.js`** — Back face renderer (magnetic stripe, hatched pattern, brand mark, barcode)
 - DOM structure: `.card-scene > .card-body > .card-face.card-front + .card-face.card-back`
+
+---
+
+## Card Descriptor
+
+The text below the card (`#card-descriptor`) and the page title summarise the current card state. Built by `getCardDescriptor(dom)` in `ui-sync.js`.
+
+**Parts shown (in order):** card size (if not ID), theme (Dark/Light), colour name (from `hueToColorName`), person name, logo style name, background style name + "bg", blend mode label (if not Normal), seed.
+
+Example: `Dark · Blue · Alex Reeves · Celtic Knot · Marble bg · Multiply · #42`
 
 ---
 
@@ -244,6 +263,17 @@ All shortcuts are disabled when an `<input>`, `<select>`, or `<textarea>` is foc
 | S | SVG mode |
 | V | Canvas mode |
 | D | Toggle dark/light |
+| I | Copy image to clipboard |
 | ? | Toggle hotkey legend |
 
 Hotkey legend: collapsible panel at `position: fixed; top-right`, toggled by `?` button or key.
+
+---
+
+## Theme Presets
+
+Curated colour presets in a collapsible `<details>` section within the Colour panel. Defined as an array in `modules/constants.js` (`THEME_PRESETS`). Each preset has a `name` and sets `hue`, `saturation`, `isDark`, `cardLightness`, `noiseBrightness`, `noiseContrast`.
+
+Applying a preset populates `colorOverrides` for the specified keys. No URL param for the preset name — the individual overrides are persisted via the existing override URL system. Reset All clears all overrides, undoing any preset.
+
+**Colour previews:** A row of swatches below the Colour panel header shows the active palette: card base, card highlight, card shadow, symbol/text colour, and noise tint. Updates on every render.

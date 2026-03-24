@@ -346,10 +346,17 @@ export class SvgContext {
     return `url(#${this._gradIds.get(style)})`;
   }
 
+  /** Returns a style attribute string for mix-blend-mode, or '' */
+  _blendAttr() {
+    const op = this.globalCompositeOperation;
+    if (!op || op === 'source-over') return '';
+    return ` style="mix-blend-mode:${op}"`;
+  }
+
   fill() {
     const d = this._path.join(' ');
     if (!d) return;
-    this._body.push(`<path d="${d}" fill="${this._paint(this.fillStyle)}" stroke="none"/>`);
+    this._body.push(`<path d="${d}" fill="${this._paint(this.fillStyle)}" stroke="none"${this._blendAttr()}/>`);
   }
 
   stroke() {
@@ -360,15 +367,16 @@ export class SvgContext {
       ` stroke="${this._paint(this.strokeStyle)}"` +
       ` stroke-width="${f(this.lineWidth)}"` +
       ` stroke-linecap="${this.lineCap}"` +
-      ` stroke-linejoin="${this.lineJoin}"/>`,
+      ` stroke-linejoin="${this.lineJoin}"${this._blendAttr()}/>`,
     );
   }
 
   fillRect(x, y, w, h) {
+    const blend = this._blendAttr();
     if (this._isIdentity()) {
       this._body.push(
         `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}"` +
-        ` fill="${this._paint(this.fillStyle)}" stroke="none"/>`,
+        ` fill="${this._paint(this.fillStyle)}" stroke="none"${blend}/>`,
       );
     } else {
       const [x0, y0] = this._tx(x, y);
@@ -376,7 +384,7 @@ export class SvgContext {
       const [x2, y2] = this._tx(x + w, y + h);
       const [x3, y3] = this._tx(x, y + h);
       const d = `M ${f(x0)} ${f(y0)} L ${f(x1)} ${f(y1)} L ${f(x2)} ${f(y2)} L ${f(x3)} ${f(y3)} Z`;
-      this._body.push(`<path d="${d}" fill="${this._paint(this.fillStyle)}" stroke="none"/>`);
+      this._body.push(`<path d="${d}" fill="${this._paint(this.fillStyle)}" stroke="none"${blend}/>`);
     }
   }
 
@@ -444,8 +452,9 @@ export class SvgContext {
     }
 
     const renderAttr = this.imageSmoothingEnabled ? '' : ' image-rendering="pixelated"';
+    const blendAttr  = this._blendAttr();
     this._body.push(
-      `<image href="${dataUrl}" x="${f(dx)}" y="${f(dy)}" width="${f(w)}" height="${f(h)}"${filterAttr}${renderAttr}/>`,
+      `<image href="${dataUrl}" x="${f(dx)}" y="${f(dy)}" width="${f(w)}" height="${f(h)}"${filterAttr}${renderAttr}${blendAttr}/>`,
     );
   }
 

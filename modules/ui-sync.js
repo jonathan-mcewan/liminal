@@ -56,6 +56,7 @@ export function updateResetButtons(dom) {
   dom.patternSeedReset.classList.toggle('visible',       seedOverrides.patternSeed      !== undefined);
   dom.patternTwoToneReset.classList.toggle('visible',   colorOverrides.patternTwoTone  !== undefined);
   dom.bgBlurReset.classList.toggle('visible',           colorOverrides.bgBlur          !== undefined);
+  dom.borderRadiusReset.classList.toggle('visible',    parseInt(dom.borderRadiusSlider.value, 10) !== 20);
 }
 
 export function updatePatternName(dom) {
@@ -135,7 +136,10 @@ export function buildParams(dom) {
     patternOpacity:        parseInt(dom.patternOpacitySlider.value, 10) / 100,
     patternScale:          parseInt(dom.patternScaleSlider.value, 10) / 100,
     patternTwoTone:        color.patternTwoTone,
+    patternRotation:       parseInt(dom.patternRotationSlider.value, 10),
     showLanyard:           dom.showLanyardToggle.checked,
+    borderRadius:          parseInt(dom.borderRadiusSlider.value, 10) / 100,
+    bgBlendMode:           dom.bgBlendMode.value,
   };
 }
 
@@ -151,7 +155,39 @@ export function getCardDescriptor(dom) {
   const SIZE_LABELS = { id: null, square: 'Square', moo: 'MOO' };
   const sizeLabel = SIZE_LABELS[dom.cardSize] ?? null;
   const name     = dom.personNameInput.value.trim();
-  const parts    = [sizeLabel, theme, name && name, seedLabel].filter(Boolean);
+  const colourName = hueToColorName(color.hue);
+
+  // Logo style name
+  const logoVal = parseInt(dom.logoStyleSelect.value, 10);
+  const logoName = logoVal === -2 ? null
+    : logoVal >= 0 ? LOGO_NAMES[logoVal]
+    : LOGO_NAMES[makePRNG(seed ^ 0x9E3779B9).int(0, 24)];
+
+  // Background style name
+  const bgVal = parseInt(dom.bgStyleSelect.value, 10);
+  const bgName = bgVal === -2 ? null
+    : bgVal >= 0 ? BG_NAMES[bgVal]
+    : BG_NAMES[makePRNG(seed ^ 0xBACE0000).int(0, 15)];
+
+  // Blend mode (only show if not default)
+  const BLEND_LABELS = {
+    'multiply': 'Multiply', 'screen': 'Screen', 'overlay': 'Overlay',
+    'darken': 'Darken', 'lighten': 'Lighten', 'color-dodge': 'Dodge',
+    'color-burn': 'Burn', 'hard-light': 'Hard Light', 'soft-light': 'Soft Light',
+    'difference': 'Difference', 'exclusion': 'Exclusion',
+  };
+  const blendLabel = BLEND_LABELS[dom.bgBlendMode.value] ?? null;
+
+  const parts = [
+    sizeLabel,
+    theme,
+    colourName,
+    name && name,
+    logoName,
+    bgName && `${bgName} bg`,
+    blendLabel,
+    seedLabel,
+  ].filter(Boolean);
   return parts.join(' · ');
 }
 

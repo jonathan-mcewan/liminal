@@ -30,6 +30,31 @@ export const LOGO_NAMES = [
   'Cross Hatch', 'Icons', 'ASCII Art', 'Organic Tree',
 ];
 
+// ── Theme presets ──────────────────────────────────────────────────────
+// Each preset sets colorOverrides values. Not seed-derived — a meta-control.
+export const THEME_PRESETS = [
+  { name: 'Corporate',   hue: 215, saturation: 45, isDark: true,  cardLightness: 16, noiseBrightness: 0.05, noiseContrast: 0.03 },
+  { name: 'Midnight',    hue: 240, saturation: 50, isDark: true,  cardLightness: 8,  noiseBrightness: 0.06, noiseContrast: 0.05 },
+  { name: 'Warm',        hue: 20,  saturation: 60, isDark: true,  cardLightness: 18, noiseBrightness: 0.08, noiseContrast: 0.04 },
+  { name: 'Forest',      hue: 140, saturation: 40, isDark: true,  cardLightness: 14, noiseBrightness: 0.07, noiseContrast: 0.05 },
+  { name: 'Deep Sea',    hue: 195, saturation: 55, isDark: true,  cardLightness: 10, noiseBrightness: 0.06, noiseContrast: 0.04 },
+  { name: 'Charcoal',    hue: 0,   saturation: 3,  isDark: true,  cardLightness: 12, noiseBrightness: 0.03, noiseContrast: 0.02 },
+  { name: 'Noir',        hue: 260, saturation: 15, isDark: true,  cardLightness: 6,  noiseBrightness: 0.04, noiseContrast: 0.03 },
+  { name: 'Neon',        hue: 290, saturation: 85, isDark: true,  cardLightness: 12, noiseBrightness: 0.08, noiseContrast: 0.07 },
+  { name: 'Ember',       hue: 5,   saturation: 70, isDark: true,  cardLightness: 15, noiseBrightness: 0.09, noiseContrast: 0.05 },
+  { name: 'Plum',        hue: 310, saturation: 45, isDark: true,  cardLightness: 14, noiseBrightness: 0.06, noiseContrast: 0.04 },
+  { name: 'Retro',       hue: 35,  saturation: 55, isDark: false, cardLightness: 78, noiseBrightness: 0.10, noiseContrast: 0.06 },
+  { name: 'Pastel',      hue: 180, saturation: 30, isDark: false, cardLightness: 82, noiseBrightness: 0.04, noiseContrast: 0.02 },
+  { name: 'Brutalist',   hue: 0,   saturation: 5,  isDark: false, cardLightness: 90, noiseBrightness: 0.02, noiseContrast: 0.01 },
+  { name: 'Cream',       hue: 45,  saturation: 25, isDark: false, cardLightness: 88, noiseBrightness: 0.05, noiseContrast: 0.02 },
+  { name: 'Blush',       hue: 345, saturation: 35, isDark: false, cardLightness: 80, noiseBrightness: 0.05, noiseContrast: 0.03 },
+  { name: 'Sky',         hue: 200, saturation: 40, isDark: false, cardLightness: 84, noiseBrightness: 0.04, noiseContrast: 0.03 },
+  { name: 'Mint',        hue: 155, saturation: 35, isDark: false, cardLightness: 83, noiseBrightness: 0.04, noiseContrast: 0.02 },
+  { name: 'Lavender',    hue: 270, saturation: 30, isDark: false, cardLightness: 82, noiseBrightness: 0.04, noiseContrast: 0.03 },
+  { name: 'Sunset',      hue: 15,  saturation: 65, isDark: false, cardLightness: 75, noiseBrightness: 0.08, noiseContrast: 0.05 },
+  { name: 'Slate',       hue: 210, saturation: 15, isDark: false, cardLightness: 76, noiseBrightness: 0.03, noiseContrast: 0.02 },
+];
+
 // ── Pure helpers ────────────────────────────────────────────────────────
 
 /** Knuth-style hash — converts arbitrary text to a 32-bit unsigned int. */

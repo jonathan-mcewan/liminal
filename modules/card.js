@@ -28,7 +28,7 @@ export function deriveColorParams(seed) {
   const cardPRNG = makePRNG(seed);
   const isDark        = cardPRNG.next() > 0.35;
   const saturation    = cardPRNG.int(38, 60);
-  cardPRNG.float(-9, 9);                 // symbolHueDrift — consume to reach cardLightness position
+  const symbolHueDrift = cardPRNG.float(-9, 9);
   const cardLightness = isDark ? cardPRNG.int(11, 22) : cardPRNG.int(72, 86);
 
   // Separate PRNG for params not in cardPRNG
@@ -42,7 +42,7 @@ export function deriveColorParams(seed) {
   const patternTwoTone   = colorPRNG.next() > 0.35; // ~65% chance of two-tone
   const bgBlur           = colorPRNG.float(0.02, 0.06); // fraction of card max dim
 
-  return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast, patternTwoTone, bgBlur };
+  return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast, patternTwoTone, bgBlur, symbolHueDrift };
 }
 
 /**
@@ -98,6 +98,9 @@ export function generateCard({
   patternScale       = 1,
   patternTwoTone     = true,
   showLanyard        = false,
+  borderRadius       = 0.2,         // 0 = sharp, 0.2 = default, 1 = pill
+  bgBlendMode        = 'source-over',
+  patternRotation    = 0,           // degrees
   ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
   // ── Compute card dimensions early so we can size the canvas ───────────
@@ -169,7 +172,8 @@ export function generateCard({
   const centerY      = cardHeight / 2;
   const cardLeft     = 0;
   const cardTop      = 0;
-  const cornerRadius = cardWidth * 0.1;
+  const maxRadius    = Math.min(cardWidth, cardHeight) / 2;
+  const cornerRadius = maxRadius * borderRadius;
 
   const shortSide = Math.min(cardWidth, cardHeight);
   const landscape = cardAspect > 1;
@@ -218,11 +222,21 @@ export function generateCard({
     }
   }
   if (bgStyle !== -2) {
+    ctx.save();
+    ctx.globalCompositeOperation = bgBlendMode;
     drawBackgroundTexture(ctx, geometry, bgPRNG, effectiveBgStyle, noiseBrightness, noiseContrast, noiseZoom, bgBlur);
+    ctx.restore();
   }
   if (patternType !== -2) {
     const effectivePatternType = patternType < 0 ? patternPRNG.int(0, 15) : patternType;
+    if (patternRotation !== 0) {
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(patternRotation * Math.PI / 180);
+      ctx.translate(-centerX, -centerY);
+    }
     drawPatterns(ctx, geometry, patternPRNG, effectivePatternType, patternOpacity, patternScale, isDark, hue, saturation, cardLightness, patternTwoTone);
+    if (patternRotation !== 0) ctx.restore();
   }
   if (showArtifacts) drawArtifacts(ctx, geometry, isDark, artifactPRNG, artifactOpacity, artifactCount, artifactScale);
 

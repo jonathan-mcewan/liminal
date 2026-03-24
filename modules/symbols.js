@@ -1410,24 +1410,17 @@ function drawIcons(ctx, cx, cy, radius, sw, symbolColor, rng) {
   ctx.scale(s, s);
   ctx.translate(-128, -128);         // centre the 256×256 viewBox
 
-  // Secondary (duotone background) — always filled at low alpha
+  // Secondary (duotone background) — always filled at medium alpha
   ctx.beginPath();
   replayPath(ctx, icon.secondary);
-  ctx.fillStyle = symbolColor(0, 0.18);
+  ctx.fillStyle = symbolColor(0, 0.35);
   ctx.fill();
 
-  // Primary (outline) — stroke always, conditional fill
+  // Primary (detail) — filled; paths already encode outline via counter-cutouts
   ctx.beginPath();
   replayPath(ctx, icon.primary);
-  if (filled) {
-    ctx.fillStyle = symbolColor(0, 0.15);
-    ctx.fill();
-  }
-  ctx.lineWidth   = (filled ? sw * 0.8 : sw) / s; // compensate for transform
-  ctx.strokeStyle = symbolColor(0, 0.82);
-  ctx.lineCap     = 'round';
-  ctx.lineJoin    = 'round';
-  ctx.stroke();
+  ctx.fillStyle = symbolColor(0, 0.82);
+  ctx.fill();
 
   ctx.restore();
 

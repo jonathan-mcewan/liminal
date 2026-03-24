@@ -31,6 +31,11 @@ export function applyQueryString(dom) {
   if (q.has("pat_scale"))  { dom.patternScaleSlider.value   = q.get("pat_scale");
                               dom.patternScaleDisplay.textContent = dom.patternScaleSlider.value + '%'; }
   if (q.has("lanyard"))   dom.showLanyardToggle.checked    = q.get("lanyard")   !== "0";
+  if (q.has("bradius")) { dom.borderRadiusSlider.value     = q.get("bradius");
+                           dom.borderRadiusDisplay.textContent = dom.borderRadiusSlider.value + '%'; }
+  if (q.has("bblend"))   dom.bgBlendMode.value             = q.get("bblend");
+  if (q.has("pat_rot")) { dom.patternRotationSlider.value  = q.get("pat_rot");
+                           dom.patternRotationDisplay.textContent = dom.patternRotationSlider.value; }
 
   // Colour overrides — only in URL if user set them
   if (q.has("dark"))      colorOverrides.isDark          = q.get("dark")     !== "0";
@@ -70,6 +75,9 @@ export function syncURL(dom, push = false) {
     pat_opacity: dom.patternOpacitySlider.value,
     pat_scale:   dom.patternScaleSlider.value,
     lanyard:     dom.showLanyardToggle.checked   ? "1" : "0",
+    bradius:     dom.borderRadiusSlider.value,
+    bblend:      dom.bgBlendMode.value,
+    pat_rot:     dom.patternRotationSlider.value,
   });
   if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
   if (colorOverrides.cardLightness   !== undefined) q.set("litness",  colorOverrides.cardLightness);

@@ -2,7 +2,7 @@
  * Phosphor Duotone icon path data (MIT License).
  * https://github.com/phosphor-icons/core
  *
- * Each entry: { name, secondary (filled bg, opacity 0.2), primary (outline) }
+ * Each entry: { name, secondary (filled bg, opacity 0.2), primary (detail) }
  * All icons use viewBox 0 0 256 256.
  */
 
