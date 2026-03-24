@@ -42,6 +42,13 @@
           <button id="btn-copy-img"><i data-lucide="clipboard-copy"></i>Copy Image</button>
           <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
         </div>
+        <div class="card-actions">
+          <button id="btn-export-json"><i data-lucide="file-json"></i>Export JSON</button>
+          <button id="btn-import-json"><i data-lucide="file-input"></i>Import JSON</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-favourites"><i data-lucide="bookmark"></i>Favourites</button>
+        </div>
       </div>
 
       <div class="panel-section">
@@ -63,7 +70,7 @@
           <input id="seed" type="text" value="42" placeholder="number or text" />
         </div>
         <div class="field field--row">
-          <input id="show-lanyard" type="checkbox" />
+          <label class="toggle-switch"><input id="show-lanyard" type="checkbox" /><span class="toggle-track"></span></label>
           <span>Lanyard Hole</span>
         </div>
         <div class="field">
@@ -188,6 +195,14 @@
           </div>
           <input id="logo-scale" type="range" min="25" max="200" step="5" value="100" />
         </div>
+        <div class="field">
+          <span>Effect</span>
+          <div class="seg-control">
+            <button id="emboss-none" class="mode-btn active">None</button>
+            <button id="emboss-emboss" class="mode-btn">Emboss</button>
+            <button id="emboss-deboss" class="mode-btn">Deboss</button>
+          </div>
+        </div>
       </div>
 
       <div class="panel-section">
@@ -216,11 +231,12 @@
         </div>
         <div class="field">
           <span>Opacity <span id="pattern-opacity-display">15</span></span>
-          <input id="pattern-opacity" type="range" min="0" max="60" step="1" value="15" />
+          <input id="pattern-opacity" type="range" min="0" max="100" step="1" value="15" />
         </div>
         <div class="field">
-          <div class="field-hdr">
-            <span class="field--row"><input id="pattern-two-tone" type="checkbox" checked /> Two-Tone</span>
+          <div class="field field--row">
+            <label class="toggle-switch"><input id="pattern-two-tone" type="checkbox" checked /><span class="toggle-track"></span></label>
+            <span>Two-Tone</span>
             <button class="btn-reset" id="pattern-two-tone-reset" title="Reset to seed default">↺</button>
           </div>
         </div>
@@ -229,7 +245,7 @@
       <div class="panel-section">
         <h2><i data-lucide="sparkles"></i>Artifacts</h2>
         <div class="field field--row">
-          <input id="show-artifacts" type="checkbox" />
+          <label class="toggle-switch"><input id="show-artifacts" type="checkbox" /><span class="toggle-track"></span></label>
           <span>Artifacts</span>
         </div>
         <div class="field">
@@ -243,15 +259,28 @@
           </div>
         </div>
         <div class="field">
-          <span>Count <span id="art-count-display"></span></span>
+          <span>Type</span>
+          <div id="art-type-grid" class="logo-grid"></div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Count <span id="art-count-display"></span></span>
+            <button class="btn-reset" id="art-count-reset" title="Reset to default">↺</button>
+          </div>
           <input id="art-count" type="range" min="0" max="14" step="1" value="5" />
         </div>
         <div class="field">
-          <span>Scale <span id="art-scale-display"></span></span>
+          <div class="field-hdr">
+            <span>Scale <span id="art-scale-display"></span></span>
+            <button class="btn-reset" id="art-scale-reset" title="Reset to default">↺</button>
+          </div>
           <input id="art-scale" type="range" min="25" max="200" step="5" value="100" />
         </div>
         <div class="field">
-          <span>Opacity <span id="art-opacity-display"></span></span>
+          <div class="field-hdr">
+            <span>Opacity <span id="art-opacity-display"></span></span>
+            <button class="btn-reset" id="art-opacity-reset" title="Reset to default">↺</button>
+          </div>
           <input id="art-opacity" type="range" min="0" max="60" step="1" value="20" />
         </div>
       </div>
@@ -295,9 +324,58 @@
             </div>
           </div>
         </div>
-        <p class="descriptor" id="card-descriptor"></p>
+        <div class="descriptor-row">
+          <button id="btn-favourite" class="btn-star" title="Save to favourites"><i data-lucide="star"></i></button>
+          <p class="descriptor" id="card-descriptor"></p>
+        </div>
       </div>
     </main>
+
+    <!-- ── Favourites dialog ──────────────────────────────────────────────── -->
+    <dialog id="favourites-dialog" class="app-dialog app-dialog--wide">
+      <div class="dialog-header">
+        <h3>Favourites</h3>
+        <button id="favourites-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <div id="favourites-grid" class="favourites-grid"></div>
+      <p id="favourites-empty" class="dialog-hint" style="text-align:center; padding:2rem 0;">No favourites saved yet. Click the star below the card to save one.</p>
+      <div class="favourites-footer">
+        <button id="favourites-clear-all" class="btn-danger">Clear All</button>
+      </div>
+    </dialog>
+
+    <!-- ── Import dialog ─────────────────────────────────────────────────── -->
+    <dialog id="import-dialog" class="app-dialog">
+      <div class="dialog-header">
+        <h3>Import Settings</h3>
+        <button id="import-dialog-cancel-x" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <p class="dialog-hint">Paste JSON or choose a file</p>
+      <textarea id="import-textarea" rows="8" placeholder='{"v":1, "seed":"42", ...}'></textarea>
+      <div class="dialog-actions">
+        <button id="import-file-btn" class="btn-secondary">Choose File…</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" />
+        <div class="dialog-actions-right">
+          <button id="import-dialog-cancel" class="btn-secondary">Cancel</button>
+          <button id="import-dialog-apply" class="btn-primary">Apply</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ── Confirm dialog (reusable) ───────────────────────────────────────── -->
+    <dialog id="confirm-dialog" class="app-dialog">
+      <div class="dialog-header">
+        <h3 id="confirm-title">Confirm</h3>
+        <button id="confirm-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <p id="confirm-body" class="confirm-body"></p>
+      <div class="dialog-actions">
+        <div class="dialog-actions-right">
+          <button id="confirm-cancel" class="btn-secondary">Cancel</button>
+          <button id="confirm-ok" class="btn-danger">Delete</button>
+        </div>
+      </div>
+    </dialog>
 
     <!-- ── Hotkey legend ──────────────────────────────────────────────────── -->
     <div class="hotkey-legend" id="hotkey-legend">
@@ -316,14 +394,17 @@
         <div class="hotkey-row"><kbd>V</kbd><span>Canvas mode</span></div>
         <div class="hotkey-row"><kbd>D</kbd><span>Toggle theme</span></div>
         <div class="hotkey-row"><kbd>I</kbd><span>Copy image</span></div>
+        <div class="hotkey-row"><kbd>J</kbd><span>Export JSON</span></div>
+        <div class="hotkey-row"><kbd>B</kbd><span>Favourites</span></div>
       </div>
     </div>
 
     <script type="module">
       import { generateCard, deriveColorParams }  from "./modules/card.js";
       import { SvgContext }    from "./modules/svg-ctx.js";
-      import { artCountLabel, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, THEME_PRESETS } from "./modules/constants.js";
+      import { artCountLabel, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, ARTIFACT_NAMES, THEME_PRESETS } from "./modules/constants.js";
       import { drawBackgroundTexture } from "./modules/bg-styles.js";
+      import { drawArtifacts, getArtifactTypesForSeed } from "./modules/background.js";
       import { drawPatterns } from "./modules/patterns.js";
       import { drawSymbol }   from "./modules/symbols.js";
       import { makePRNG }     from "./modules/prng.js";
@@ -332,6 +413,8 @@
       import { getSeed, updateColorSliders, updateSeedInputs, updateResetButtons,
                updateLogoName, updatePatternName, updateBgName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
       import { applyQueryString, syncURL } from "./modules/url-sync.js";
+      import { gatherSettings, applySettings } from "./modules/settings-io.js";
+      import { loadFavourites, saveFavourite, deleteFavourite, clearAllFavourites, findMatchingFavourite } from "./modules/favourites.js";
       import { getEffectiveColor, getEffectiveSeeds } from "./modules/state.js";
       import { initCard3D, isFlipped, setFlipped } from "./modules/card-3d.js";
       import { generateCardBack } from "./modules/card-back.js";
@@ -375,6 +458,7 @@
         logoScaleReset:         document.getElementById("logo-scale-reset"),
         logoNonceInput:         document.getElementById("logo-nonce"),
         logoNonceReset:         document.getElementById("logo-nonce-reset"),
+        embossMode:             'none',  // 'none' | 'emboss' | 'deboss'
         btnSizeId:              document.getElementById("btn-size-id"),
         btnSizeSquare:          document.getElementById("btn-size-square"),
         btnSizeMoo:             document.getElementById("btn-size-moo"),
@@ -398,6 +482,8 @@
         artOpacityDisplay:      document.getElementById("art-opacity-display"),
         artScaleSlider:         document.getElementById("art-scale"),
         artScaleDisplay:        document.getElementById("art-scale-display"),
+        artTypeLock:            null,  // null = auto, [0,3] = only these types
+        artTypeGrid:            document.getElementById("art-type-grid"),
         showLanyardToggle:      document.getElementById("show-lanyard"),
         borderRadiusSlider:     document.getElementById("border-radius"),
         borderRadiusDisplay:    document.getElementById("border-radius-display"),
@@ -677,6 +763,113 @@
         if (doRender) render(true);
       }
 
+      // ── Artifact type grid ──────────────────────────────────────────────
+      const ART_THUMB = 48;
+      const ART_COUNT = ARTIFACT_NAMES.length;  // 7 (0-6)
+      let _lastArtGridKey = null;
+
+      // Compute which artifact types the seed would produce in auto mode
+      function getSeedArtTypes(dom) {
+        const seeds = getEffectiveSeeds(getSeed(dom));
+        return getArtifactTypesForSeed(makePRNG(seeds.artifactSeed));
+      }
+
+      function getActiveArtTypes(dom) {
+        if (dom.artTypeLock) return new Set(dom.artTypeLock);
+        return getSeedArtTypes(dom);
+      }
+
+      function buildArtTypeGrid(force = false) {
+        const seed = getSeed(dom);
+        const seeds = getEffectiveSeeds(seed);
+        const aseed = seeds.artifactSeed;
+        const active = getActiveArtTypes(dom);
+        const key = `${seed}:${aseed}:${dom.artTypeLock ? dom.artTypeLock.join(',') : 'auto'}`;
+        if (!force && key === _lastArtGridKey) return;
+        _lastArtGridKey = key;
+
+        const grid = dom.artTypeGrid;
+        grid.innerHTML = '';
+
+        // "Auto" cell — active when no types are manually locked
+        const autoCell = document.createElement('button');
+        autoCell.className = 'logo-cell' + (!dom.artTypeLock ? ' active' : '');
+        autoCell.title = 'Auto (seed picks types)';
+        autoCell.dataset.style = 'auto';
+        autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
+        autoCell.addEventListener('click', () => {
+          dom.artTypeLock = null;
+          syncArtTypeGrid();
+          render(true);
+        });
+        grid.appendChild(autoCell);
+
+        // One cell per artifact type — toggle on/off
+        for (let i = 0; i < ART_COUNT; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'logo-cell' + (active.has(i) ? ' active' : '');
+          cell.title = ARTIFACT_NAMES[i];
+          cell.dataset.style = String(i);
+
+          const cvs = document.createElement('canvas');
+          cvs.width  = ART_THUMB * 2;
+          cvs.height = ART_THUMB * 2;
+          const tctx = cvs.getContext('2d');
+
+          const sz = ART_THUMB * 2;
+          const geo = {
+            cardWidth: sz, cardHeight: sz,
+            cardLeft: 0, cardTop: 0,
+            centerX: ART_THUMB, centerY: ART_THUMB,
+            cornerRadius: 4, shortSide: sz,
+          };
+
+          tctx.fillStyle = 'rgba(255,255,255,0.03)';
+          tctx.fillRect(0, 0, sz, sz);
+
+          const rng = makePRNG(aseed + i * 7);
+          drawArtifacts(tctx, geo, true, rng, 0.7, 3, 1, [i]);
+
+          cell.appendChild(cvs);
+          cell.addEventListener('click', () => toggleArtType(i));
+          grid.appendChild(cell);
+        }
+        lucide.createIcons();
+      }
+
+      function syncArtTypeGrid() {
+        const active = getActiveArtTypes(dom);
+        dom.artTypeGrid.querySelectorAll('.logo-cell').forEach(c => {
+          if (c.dataset.style === 'auto') {
+            c.classList.toggle('active', !dom.artTypeLock);
+          } else {
+            c.classList.toggle('active', active.has(parseInt(c.dataset.style, 10)));
+          }
+        });
+      }
+
+      function toggleArtType(i) {
+        if (!dom.artTypeLock) {
+          // Switching from auto — start with the seed's types, then toggle
+          const seedTypes = getSeedArtTypes(dom);
+          if (seedTypes.has(i)) {
+            seedTypes.delete(i);
+            dom.artTypeLock = [...seedTypes];
+          } else {
+            seedTypes.add(i);
+            dom.artTypeLock = [...seedTypes];
+          }
+        } else if (dom.artTypeLock.includes(i)) {
+          dom.artTypeLock = dom.artTypeLock.filter(t => t !== i);
+        } else {
+          dom.artTypeLock = [...dom.artTypeLock, i];
+        }
+        if (dom.artTypeLock && dom.artTypeLock.length === 0) dom.artTypeLock = null;
+        dom.artTypeLock?.sort((a, b) => a - b);
+        syncArtTypeGrid();
+        render(true);
+      }
+
       // ── Colour swatches ────────────────────────────────────────────────
       function updateColourSwatches() {
         const seed = getSeed(dom);
@@ -739,6 +932,7 @@
         buildLogoGrid();
         buildPatternGrid();
         buildBgGrid();
+        buildArtTypeGrid();
         const { frameW, frameH } = getFrameDims(dom);
         const aspect = `${frameW} / ${frameH}`;
 
@@ -764,6 +958,7 @@
         }
 
         dom.cardScene.style.setProperty('--card-ar', (frameW / frameH).toFixed(6));
+        fitCardBody();
 
         syncURL(dom, push);
         updateLogoName(dom);
@@ -771,6 +966,8 @@
         updateBgName(dom);
         updateDescriptor(dom);
         updateColourSwatches();
+        updateArtResetButtons();
+        updateStarButton();
       }
 
       // ── Events ────────────────────────────────────────────────────────────
@@ -781,9 +978,11 @@
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);
+        for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
         buildLogoGrid(true);
         buildPatternGrid(true);
         buildBgGrid(true);
+        buildArtTypeGrid(true);
         render();
       });
 
@@ -930,17 +1129,49 @@
       });
 
       // Artifact sliders
+      const artCountReset   = document.getElementById("art-count-reset");
+      const artScaleReset   = document.getElementById("art-scale-reset");
+      const artOpacityReset = document.getElementById("art-opacity-reset");
+
+      function updateArtResetButtons() {
+        artCountReset.classList.toggle('visible',   parseInt(dom.artCountSlider.value, 10) !== 0);
+        artScaleReset.classList.toggle('visible',   parseInt(dom.artScaleSlider.value, 10) !== 100);
+        artOpacityReset.classList.toggle('visible', parseInt(dom.artOpacitySlider.value, 10) !== 20);
+      }
+
       dom.artCountSlider.addEventListener("input", () => {
         dom.artCountDisplay.textContent = artCountLabel(dom.artCountSlider.value);
+        updateArtResetButtons();
         render();
       });
       dom.artOpacitySlider.addEventListener("input", () => {
         dom.artOpacityDisplay.textContent = dom.artOpacitySlider.value;
+        updateArtResetButtons();
         render();
       });
       dom.artScaleSlider.addEventListener("input", () => {
         dom.artScaleDisplay.textContent = dom.artScaleSlider.value + '%';
+        updateArtResetButtons();
         render();
+      });
+
+      artCountReset.addEventListener("click", () => {
+        dom.artCountSlider.value = 0;
+        dom.artCountDisplay.textContent = artCountLabel(0);
+        updateArtResetButtons();
+        render(true);
+      });
+      artScaleReset.addEventListener("click", () => {
+        dom.artScaleSlider.value = 100;
+        dom.artScaleDisplay.textContent = '100%';
+        updateArtResetButtons();
+        render(true);
+      });
+      artOpacityReset.addEventListener("click", () => {
+        dom.artOpacitySlider.value = 20;
+        dom.artOpacityDisplay.textContent = '20';
+        updateArtResetButtons();
+        render(true);
       });
 
       // Artifact seed
@@ -961,6 +1192,23 @@
         updateResetButtons(dom);
         render(true);
       });
+
+      // Artifact type lock — handled by grid select below
+
+      // Emboss mode
+      const embossBtns = {
+        none:   document.getElementById("emboss-none"),
+        emboss: document.getElementById("emboss-emboss"),
+        deboss: document.getElementById("emboss-deboss"),
+      };
+      function setEmbossMode(mode) {
+        dom.embossMode = mode;
+        for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === mode);
+        render(true);
+      }
+      embossBtns.none.addEventListener("click", () => setEmbossMode('none'));
+      embossBtns.emboss.addEventListener("click", () => setEmbossMode('emboss'));
+      embossBtns.deboss.addEventListener("click", () => setEmbossMode('deboss'));
 
       // Actions
       document.getElementById("btn-render").addEventListener("click", () => render(true));
@@ -993,6 +1241,9 @@
         dom.bgBlendMode.value             = 'source-over';
         dom.patternRotationSlider.value   = 0;
         dom.patternRotationDisplay.textContent = '0';
+        dom.artTypeLock = null;
+        dom.embossMode = 'none';
+        for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === 'none');
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);
@@ -1064,6 +1315,228 @@
           console.error('Copy image failed:', err);
           btn.textContent = "Failed";
           setTimeout(() => { btn.innerHTML = '<i data-lucide="clipboard-copy"></i>Copy Image'; lucide.createIcons(); }, 1500);
+        }
+      });
+
+      // ── JSON import/export ──────────────────────────────────────────────
+      document.getElementById("btn-export-json").addEventListener("click", (e) => {
+        const settings = gatherSettings(dom);
+        const json = JSON.stringify(settings, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = `liminal-settings-s${dom.seedInput.value}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        const btn = e.currentTarget;
+        btn.textContent = "Exported!";
+        setTimeout(() => { btn.innerHTML = '<i data-lucide="file-json"></i>Export JSON'; lucide.createIcons(); }, 1500);
+      });
+
+      // ── Click-on-backdrop to close for all dialogs ────────────────────────
+      document.querySelectorAll('.app-dialog').forEach(dialog => {
+        dialog.addEventListener('click', (e) => {
+          if (e.target === dialog) dialog.close();
+        });
+      });
+
+      const importDialog   = document.getElementById("import-dialog");
+      const importTextarea = document.getElementById("import-textarea");
+      const importFileInput = document.getElementById("import-file");
+
+      document.getElementById("btn-import-json").addEventListener("click", () => {
+        importTextarea.value = '';
+        importDialog.showModal();
+      });
+
+      document.getElementById("import-file-btn").addEventListener("click", () => importFileInput.click());
+
+      importFileInput.addEventListener("change", () => {
+        const file = importFileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => { importTextarea.value = reader.result; };
+        reader.readAsText(file);
+        importFileInput.value = ''; // reset so same file can be re-selected
+      });
+
+      document.getElementById("import-dialog-cancel").addEventListener("click", () => importDialog.close());
+      document.getElementById("import-dialog-cancel-x").addEventListener("click", () => importDialog.close());
+
+      // Styled error toast inside a dialog (replaces native alert)
+      function showImportError(msg) {
+        const el = importTextarea.parentElement.querySelector('.import-error');
+        if (el) el.remove();
+        const err = document.createElement('p');
+        err.className = 'import-error';
+        err.style.cssText = 'color:#f08080; font-size:0.78rem; margin:0.5rem 0 0;';
+        err.textContent = msg;
+        importTextarea.after(err);
+        setTimeout(() => err.remove(), 5000);
+      }
+
+      function applyImportedSettings() {
+        try {
+          const json = JSON.parse(importTextarea.value);
+          applySettings(json, dom);
+          syncCardSizeButtons();
+          updateColorSliders(dom);
+          updateSeedInputs(dom);
+          updateResetButtons(dom);
+          for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
+          buildLogoGrid(true);
+          buildPatternGrid(true);
+          buildBgGrid(true);
+          buildArtTypeGrid(true);
+          render(true);
+          importDialog.close();
+        } catch (err) {
+          showImportError('Invalid settings JSON: ' + err.message);
+        }
+      }
+
+      document.getElementById("import-dialog-apply").addEventListener("click", applyImportedSettings);
+
+      // ── Favourites ──────────────────────────────────────────────────────
+      const favDialog    = document.getElementById("favourites-dialog");
+      const favGrid      = document.getElementById("favourites-grid");
+      const favEmpty     = document.getElementById("favourites-empty");
+      const btnFavourite = document.getElementById("btn-favourite");
+
+      function generateThumbnail() {
+        const thumbCanvas = document.createElement('canvas');
+        const thumbSize   = 300;
+        const p = buildParams(dom);
+        // Let generateCard compute geometry, then match canvas to it
+        const padding = 0.08;
+        const refDim  = thumbSize * (1 - 2 * padding);
+        let tw, th;
+        if (p.cardAspect <= 1) { th = refDim * p.cardScale; tw = th * p.cardAspect; }
+        else                    { tw = refDim * p.cardScale; th = tw / p.cardAspect; }
+        thumbCanvas.width  = Math.round(tw);
+        thumbCanvas.height = Math.round(th);
+        const thumbCtx = thumbCanvas.getContext('2d');
+        generateCard({ ...p, size: thumbSize, ctx: thumbCtx });
+        return thumbCanvas.toDataURL('image/png', 0.8);
+      }
+
+      function updateStarButton() {
+        const settings = gatherSettings(dom);
+        const match = findMatchingFavourite(settings);
+        btnFavourite.classList.toggle('starred', !!match);
+        btnFavourite.dataset.matchId = match || '';
+      }
+
+      btnFavourite.addEventListener("click", () => {
+        const settings = gatherSettings(dom);
+        const matchId = findMatchingFavourite(settings);
+        if (matchId) {
+          deleteFavourite(matchId);
+        } else {
+          const descriptor = dom.cardDescriptor.textContent;
+          const thumbnail  = generateThumbnail();
+          saveFavourite({
+            id:         crypto.randomUUID(),
+            settings,
+            descriptor,
+            thumbnail,
+            savedAt:    Date.now(),
+          });
+        }
+        updateStarButton();
+      });
+
+      function renderFavouritesGrid() {
+        const favs = loadFavourites();
+        favGrid.innerHTML = '';
+        favEmpty.style.display = favs.length === 0 ? '' : 'none';
+        favGrid.style.display  = favs.length === 0 ? 'none' : '';
+
+        for (const fav of favs) {
+          const card = document.createElement('div');
+          card.className = 'fav-card';
+          card.dataset.id = fav.id;
+
+          const date = new Date(fav.savedAt);
+          const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+          card.innerHTML = `
+            <img class="fav-thumb" src="${fav.thumbnail}" alt="" />
+            <div class="fav-info">
+              <span class="fav-descriptor">${fav.descriptor}</span>
+              <span class="fav-date">${dateStr}</span>
+            </div>
+            <div class="fav-actions">
+              <button class="fav-load btn-secondary" title="Load">Load</button>
+              <button class="fav-delete btn-secondary" title="Delete">&times;</button>
+            </div>
+          `;
+
+          card.querySelector('.fav-load').addEventListener('click', () => {
+            applySettings(fav.settings, dom);
+            syncCardSizeButtons();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
+            buildLogoGrid(true);
+            buildPatternGrid(true);
+            buildBgGrid(true);
+            buildArtTypeGrid(true);
+            render(true);
+            favDialog.close();
+          });
+
+          card.querySelector('.fav-delete').addEventListener('click', () => {
+            deleteFavourite(fav.id);
+            renderFavouritesGrid();
+            updateStarButton();
+          });
+
+          favGrid.appendChild(card);
+        }
+      }
+
+      document.getElementById("btn-favourites").addEventListener("click", () => {
+        renderFavouritesGrid();
+        favDialog.showModal();
+      });
+
+      document.getElementById("favourites-close").addEventListener("click", () => favDialog.close());
+
+      // ── Styled confirm dialog (replaces native confirm()) ────────────────
+      const confirmDialog = document.getElementById("confirm-dialog");
+      const confirmTitle  = document.getElementById("confirm-title");
+      const confirmBody   = document.getElementById("confirm-body");
+      const confirmOk     = document.getElementById("confirm-ok");
+      let confirmResolve  = null;
+
+      function showConfirm({ title = 'Confirm', body = '', okLabel = 'OK', okClass = 'btn-danger' }) {
+        confirmTitle.textContent = title;
+        confirmBody.textContent  = body;
+        confirmOk.textContent    = okLabel;
+        confirmOk.className      = okClass;
+        confirmDialog.showModal();
+        return new Promise(resolve => { confirmResolve = resolve; });
+      }
+
+      confirmOk.addEventListener("click", () => { confirmDialog.close(); confirmResolve?.(true);  confirmResolve = null; });
+      document.getElementById("confirm-cancel").addEventListener("click", () => { confirmDialog.close(); confirmResolve?.(false); confirmResolve = null; });
+      document.getElementById("confirm-close").addEventListener("click",  () => { confirmDialog.close(); confirmResolve?.(false); confirmResolve = null; });
+      confirmDialog.addEventListener("close", () => { if (confirmResolve) { confirmResolve(false); confirmResolve = null; } });
+
+      document.getElementById("favourites-clear-all").addEventListener("click", async () => {
+        const ok = await showConfirm({
+          title: 'Clear favourites',
+          body: 'Delete all saved favourites? This cannot be undone.',
+          okLabel: 'Delete All',
+          okClass: 'btn-danger',
+        });
+        if (ok) {
+          clearAllFavourites();
+          renderFavouritesGrid();
+          updateStarButton();
         }
       });
 
@@ -1237,6 +1710,12 @@
           case 'i':
             document.getElementById('btn-copy-img').click();
             break;
+          case 'j':
+            document.getElementById('btn-export-json').click();
+            break;
+          case 'b':
+            document.getElementById('btn-favourites').click();
+            break;
           case '?':
             hotkeyPanel.classList.toggle('open');
             break;
@@ -1253,31 +1732,31 @@
       updateColorSliders(dom);
       updateSeedInputs(dom);
       updateResetButtons(dom);
+      // Sync emboss buttons from URL-loaded state
+      for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
       initCard3D(dom.cardScene, dom.cardBody);
       buildThemePresetGrid();
 
       // ── Fit card-body inside card-scene while maintaining aspect ratio ───
-      (function initCardFit() {
-        const ro = new ResizeObserver(() => {
-          const ar = parseFloat(
-            getComputedStyle(dom.cardScene).getPropertyValue('--card-ar')
-          ) || 0.63;
-          const cs = getComputedStyle(dom.cardScene);
-          const w  = dom.cardScene.clientWidth
-                   - (parseFloat(cs.paddingLeft) || 0)
-                   - (parseFloat(cs.paddingRight) || 0);
-          const h  = dom.cardScene.clientHeight
-                   - (parseFloat(cs.paddingTop) || 0)
-                   - (parseFloat(cs.paddingBottom) || 0);
-          if (w <= 0 || h <= 0) return;
-          let bw, bh;
-          if (w / h > ar) { bh = h; bw = h * ar; }
-          else             { bw = w; bh = w / ar; }
-          dom.cardBody.style.width  = bw + 'px';
-          dom.cardBody.style.height = bh + 'px';
-        });
-        ro.observe(dom.cardScene);
-      })();
+      function fitCardBody() {
+        const ar = parseFloat(
+          getComputedStyle(dom.cardScene).getPropertyValue('--card-ar')
+        ) || 0.63;
+        const cs = getComputedStyle(dom.cardScene);
+        const w  = dom.cardScene.clientWidth
+                 - (parseFloat(cs.paddingLeft) || 0)
+                 - (parseFloat(cs.paddingRight) || 0);
+        const h  = dom.cardScene.clientHeight
+                 - (parseFloat(cs.paddingTop) || 0)
+                 - (parseFloat(cs.paddingBottom) || 0);
+        if (w <= 0 || h <= 0) return;
+        let bw, bh;
+        if (w / h > ar) { bh = h; bw = h * ar; }
+        else             { bw = w; bh = w / ar; }
+        dom.cardBody.style.width  = bw + 'px';
+        dom.cardBody.style.height = bh + 'px';
+      }
+      new ResizeObserver(fitCardBody).observe(dom.cardScene);
 
       buildLogoGrid();
       render();

@@ -12,7 +12,9 @@ Vanilla ES modules, Canvas 2D + SVG, no build step. Served via local HTTP (ES mo
 - `modules/text.js`       — name + job title layout
 - `modules/utils.js`      — `hsla()`, `roundedRectPath()`
 - `modules/svg-ctx.js`    — `SvgContext` — Canvas 2D API shim that emits SVG markup (supports `mix-blend-mode`)
-- `modules/constants.js`  — `CARD_SIZES`, `LOGO_NAMES`, `THEME_PRESETS`, helpers
+- `modules/constants.js`  — `CARD_SIZES`, `LOGO_NAMES`, `ARTIFACT_NAMES`, `THEME_PRESETS`, helpers
+- `modules/settings-io.js` — `gatherSettings` / `applySettings` for JSON import/export
+- `modules/favourites.js` — localStorage CRUD for favourited card configs
 
 ---
 
@@ -84,9 +86,9 @@ function getEffectiveColor() {
 - URL only includes overridden colour params (not seed-derived defaults)
 
 **URL param strategy:**
-- Standard params always in URL: `seed`, `lstyle`, `zoom`, `name`, `title`, `artifacts`, `bradius`, `bblend`, `pat_rot`
-- Colour overrides only if set: `hue`, `sat`, `nbright`, `ncontrast`
-- Seed overrides only if set: `nonce`, `aseed`
+- Standard params always in URL: `seed`, `lstyle`, `lscale`, `zoom`, `name`, `title`, `art_show`, `art_count`, `art_opacity`, `art_scale`, `art_type`, `pat_type`, `pat_opacity`, `pat_scale`, `lanyard`, `bradius`, `bblend`, `pat_rot`, `emboss`
+- Colour overrides only if set: `dark`, `litness`, `hue`, `sat`, `nbright`, `ncontrast`, `pat_2t`, `bblur`
+- Seed overrides only if set: `nonce`, `art_seed`, `pat_seed`
 
 **card.js rule for PRNG-sequence params (e.g. saturation):**
 ```js
@@ -157,13 +159,21 @@ When the user toggles isDark, the lightness override is automatically cleared so
 
 | Type | Shape |
 |------|-------|
-| 0 | Streak band — wide filled parallelogram |
-| 1 | Line bundle — 3–5 parallel lines, butt caps |
-| 2 | Corner wedge — filled triangle from a card corner |
-| 3 | Arc slice — thick partial arc, butt caps |
-| 4 | Grid fragment — dot grid clipped to a rectangle |
+| 0 | Streak band — wide filled parallelogram at a clean angle |
+| 1 | Line bundle — 3–4 uniform parallel lines |
+| 2 | Corner wedge — filled triangle anchored to a card corner |
+| 3 | Arc slice — thick partial arc, square caps |
+| 4 | Dot grid — regular grid of dots clipped to a rectangle |
+| 5 | Concentric rings — 2–4 clean circle strokes |
+| 6 | Cross / plus — two perpendicular filled rectangles |
+| 7 | Chevron — open V-shape pointing in a clean direction |
+| 8 | Diamond — rotated filled square, optionally elongated |
+| 9 | Dashes — row of evenly-spaced short dashes |
+| 10 | Bracket — thick L-shaped corner bracket |
 
 Global opacity multiplier: `const opacity = 0.2`.
+
+**`artifactTypeLock` control:** Restricts artifacts to selected types. `null` = auto (all 7 types), `[0,3]` = only those types. Multi-select grid in UI — click type cells to toggle on/off, click Auto to reset. URL param: `art_type` (comma-separated, e.g. `0,3,5`). Not seed-derived — purely a UI control. Always consumes PRNG for type to preserve sequence when locked; locked type is chosen as `allowedTypes[prngValue % count]`.
 
 ---
 
@@ -209,6 +219,34 @@ Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 24)` — mu
 **`bgBlendMode` control:** Chooses how background textures composite onto the card body. Values: `source-over` (Normal), `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`. Default: `source-over`. URL param: `bblend`. In SVG mode, emits `mix-blend-mode` CSS on affected elements.
 
 **`patternRotation` control:** Rotates the pattern layer independently (0–360°). Default: 0. URL param: `pat_rot`. Applied as a `translate→rotate→translate` transform around the card centre before drawing patterns. Card clip path ensures rotated patterns are clipped to the card boundary.
+
+**`embossMode` control:** Adds a stamped-in/raised look to the logo. Values: `none`, `emboss`, `deboss`. Default: `none`. URL param: `emboss`. Works in both Canvas and SVG modes — uses triple-draw technique (shadow copy + highlight copy + main) with offset and baked-in alpha on `symbolColor`, no shadow API required. Uses `logoPRNG.clone()` for the effect passes to match the main symbol shape.
+
+---
+
+## Import / Export Settings
+
+`modules/settings-io.js` provides `gatherSettings(dom)` and `applySettings(json, dom)`.
+
+- **Export:** Serialises all card state (standard params + overrides) to a JSON object with `v: 1` version field. Key names match URL params.
+- **Import:** Parses JSON, calls `clearAllOverrides()`, applies all params to DOM and override state. Mirrors `applyQueryString` logic.
+- **When adding new params:** Add them to both `gatherSettings` and `applySettings` in `settings-io.js`, as well as the usual `syncURL`/`applyQueryString` in `url-sync.js`.
+
+Keyboard shortcut: `J` to export JSON.
+
+---
+
+## Favourites
+
+`modules/favourites.js` provides localStorage CRUD for saved card configurations.
+
+- Storage key: `liminal_favourites`
+- Each favourite stores: `id` (UUID), `settings` (same JSON as import/export), `descriptor` (text label), `thumbnail` (200px PNG dataURL), `savedAt` (timestamp)
+- Star button below the card toggles save/unsave
+- Favourites browser: modal dialog with thumbnail grid, load and delete actions
+- Identity check: `findMatchingFavourite(settings)` compares via `JSON.stringify` equality
+
+Keyboard shortcut: `B` to open favourites browser.
 
 ---
 
@@ -264,6 +302,8 @@ All shortcuts are disabled when an `<input>`, `<select>`, or `<textarea>` is foc
 | V | Canvas mode |
 | D | Toggle dark/light |
 | I | Copy image to clipboard |
+| J | Export settings JSON |
+| B | Open favourites browser |
 | ? | Toggle hotkey legend |
 
 Hotkey legend: collapsible panel at `position: fixed; top-right`, toggled by `?` button or key.

@@ -496,12 +496,52 @@ button:active {
   gap:            0.5rem;
 }
 
-.field--row input[type="checkbox"] {
-  width:  1rem;
-  height: 1rem;
+/* ── Toggle switch (replaces bare checkboxes) ──────────────────────────── */
+
+.toggle-switch {
+  position:   relative;
+  width:      2rem;
+  height:     1.1rem;
   flex-shrink: 0;
-  accent-color: var(--foreground);
-  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity:  0;
+  width:    0;
+  height:   0;
+  position: absolute;
+}
+
+.toggle-track {
+  position:      absolute;
+  inset:         0;
+  background:    rgba(255,255,255,0.10);
+  border-radius: 0.55rem;
+  border:        1px solid rgba(255,255,255,0.10);
+  cursor:        pointer;
+  transition:    background 0.2s, border-color 0.2s;
+}
+
+.toggle-track::after {
+  content:       '';
+  position:      absolute;
+  top:           2px;
+  left:          2px;
+  width:         0.7rem;
+  height:        0.7rem;
+  background:    rgba(255,255,255,0.5);
+  border-radius: 50%;
+  transition:    transform 0.2s, background 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-track {
+  background:   rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.toggle-switch input:checked + .toggle-track::after {
+  transform:  translateX(0.9rem);
+  background: rgba(255,255,255,0.85);
 }
 
 /* Logo name readout beside nonce label */
@@ -810,4 +850,266 @@ button svg {
 
 .hotkey-row span {
   color: var(--muted-foreground);
+}
+
+/* ── Dialogs ───────────────────────────────────────────────────────────── */
+
+.app-dialog {
+  background:    #1e1e26;
+  color:         #e0e0e0;
+  border:        1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding:       1.5rem;
+  max-width:     480px;
+  width:         90vw;
+  box-shadow:    0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+  margin:        auto;
+  position:      fixed;
+  inset:         0;
+  height:        fit-content;
+}
+
+.app-dialog::backdrop {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ── Dialog header — consistent across all dialogs ─────────────────────── */
+
+.dialog-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   1rem;
+}
+
+.dialog-header h3 {
+  margin:      0;
+  font-size:   1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.btn-dialog-close {
+  background:    none;
+  border:        none;
+  color:         rgba(255,255,255,0.35);
+  font-size:     0.75rem;
+  cursor:        pointer;
+  padding:       0.2rem 0.3rem;
+  line-height:   1;
+  border-radius: 4px;
+  transition:    color 0.15s, background 0.15s;
+}
+
+.btn-dialog-close:hover {
+  color:      rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.08);
+}
+
+/* Legacy h3 without .dialog-header (import dialog) */
+.app-dialog > h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.app-dialog .dialog-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+}
+
+.app-dialog textarea {
+  width:         100%;
+  background:    rgba(255,255,255,0.05);
+  color:         #e0e0e0;
+  border:        1px solid rgba(255,255,255,0.10);
+  border-radius: 6px;
+  padding:       0.6rem 0.5rem;
+  font-family:   'SF Mono', 'Cascadia Code', monospace;
+  font-size:     0.75rem;
+  resize:        vertical;
+  box-sizing:    border-box;
+  transition:    border-color 0.15s;
+}
+
+.app-dialog textarea:focus {
+  outline:      none;
+  border-color: rgba(255,255,255,0.25);
+}
+
+.dialog-actions {
+  display:         flex;
+  align-items:     center;
+  gap:             0.5rem;
+  margin-top:      1rem;
+}
+
+.dialog-actions-right {
+  display: flex;
+  gap:     0.5rem;
+  margin-left: auto;
+}
+
+/* ── Shared button styles ──────────────────────────────────────────────── */
+
+.btn-secondary {
+  background: rgba(255,255,255,0.07);
+  color:      #e0e0e0;
+  border:     1px solid rgba(255,255,255,0.10);
+  border-radius: 6px;
+  padding:    0.4rem 0.85rem;
+  cursor:     pointer;
+  font-size:  0.8rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-secondary:hover {
+  background:   rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.btn-primary {
+  background:    rgba(255,255,255,0.14);
+  color:         #fff;
+  border:        1px solid rgba(255,255,255,0.18);
+  border-radius: 6px;
+  padding:       0.4rem 1rem;
+  cursor:        pointer;
+  font-size:     0.8rem;
+  font-weight:   500;
+  transition:    background 0.15s, border-color 0.15s;
+}
+
+.btn-primary:hover {
+  background:   rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.28);
+}
+
+.btn-danger {
+  background:    rgba(220,60,60,0.12);
+  color:         #f08080;
+  border:        1px solid rgba(220,60,60,0.2);
+  border-radius: 6px;
+  padding:       0.4rem 0.85rem;
+  cursor:        pointer;
+  font-size:     0.8rem;
+  transition:    background 0.15s;
+}
+
+.btn-danger:hover {
+  background: rgba(220,60,60,0.22);
+}
+
+/* ── Confirm dialog ────────────────────────────────────────────────────── */
+
+.confirm-body {
+  font-size: 0.85rem;
+  color:     rgba(255,255,255,0.7);
+  margin:    0.25rem 0 0;
+  line-height: 1.45;
+}
+
+/* ── Star button + descriptor row ──────────────────────────────────────── */
+
+.descriptor-row {
+  display:     flex;
+  align-items: center;
+  gap:         0.35rem;
+  justify-content: center;
+}
+
+.descriptor-row .descriptor { margin: 0; }
+
+.btn-star {
+  background:    none;
+  border:        none;
+  color:         rgba(255,255,255,0.35);
+  cursor:        pointer;
+  padding:       0.15rem;
+  line-height:   1;
+  transition:    color 0.15s;
+}
+
+.btn-star:hover { color: rgba(255,220,80,0.7); }
+
+.btn-star.starred {
+  color: rgba(255,220,80,0.9);
+}
+
+.btn-star.starred svg { fill: currentColor; }
+
+/* ── Favourites dialog ─────────────────────────────────────────────────── */
+
+.app-dialog--wide { max-width: 640px; }
+
+.favourites-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap:                   0.75rem;
+  max-height:            60vh;
+  overflow-y:            auto;
+  padding-right:         0.25rem;
+}
+
+.fav-card {
+  background:    rgba(255,255,255,0.05);
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  overflow:      hidden;
+  display:       flex;
+  flex-direction: column;
+}
+
+.fav-thumb {
+  width:      100%;
+  aspect-ratio: auto;
+  display:    block;
+  background: #111;
+}
+
+.fav-info {
+  padding:  0.4rem 0.5rem;
+  flex:     1;
+}
+
+.fav-descriptor {
+  display:        block;
+  font-size:      0.65rem;
+  line-height:    1.35;
+  color:          rgba(255,255,255,0.7);
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  display:        -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.fav-date {
+  display:   block;
+  font-size: 0.6rem;
+  color:     rgba(255,255,255,0.3);
+  margin-top: 0.15rem;
+}
+
+.fav-actions {
+  display:  flex;
+  gap:      0.25rem;
+  padding:  0.3rem 0.5rem 0.5rem;
+}
+
+.fav-actions button {
+  flex: 1;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.favourites-footer {
+  display:         flex;
+  justify-content: flex-end;
+  margin-top:      0.75rem;
 }

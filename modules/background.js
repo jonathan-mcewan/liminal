@@ -124,60 +124,98 @@ export function drawNoise(ctx, geometry, cardPRNG, noiseZoom, noiseBrightness = 
  * Colours are achromatic so they read as surface texture rather than design.
  *
  * Artifact types (picked by cardPRNG):
- *   0 — Streak band:    a wide filled parallelogram crossing the card at an angle
- *   1 — Line bundle:    3–5 parallel lines of varying width, hard butt caps
- *   2 — Corner wedge:   a filled triangle anchored to one card corner
- *   3 — Arc slice:      a thick partial arc, square caps, spanning ~90–180°
- *   4 — Grid fragment:  a small regular grid of dots clipped to a rectangle
+ *   0 — Streak band:       wide filled parallelogram at a clean angle
+ *   1 — Line bundle:       3–4 uniform parallel lines
+ *   2 — Corner wedge:      filled triangle anchored to one card corner
+ *   3 — Arc slice:         thick partial arc, square caps
+ *   4 — Dot grid:          regular grid of dots clipped to a rectangle
+ *   5 — Concentric rings:  2–4 clean concentric circle strokes
+ *   6 — Cross:             two perpendicular filled rectangles
+ *   7 — Chevron:           open V-shape pointing in a clean direction
+ *   8 — Diamond:           rotated filled square
+ *   9 — Dashes:            row of evenly-spaced short dashes
+ *  10 — Bracket:           thick L-shaped corner bracket
  */
-export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity = 0.2, artifactCount = null, artifactScale = 1) {
+export const ARTIFACT_TYPE_COUNT = 11;
+
+/**
+ * Returns the Set of artifact type indices that the seed would produce.
+ * Runs the real drawArtifacts on a tiny offscreen canvas to guarantee PRNG parity.
+ */
+let _probeCanvas = null;
+export function getArtifactTypesForSeed(prng) {
+  if (!_probeCanvas) {
+    _probeCanvas = document.createElement('canvas');
+    _probeCanvas.width = 4; _probeCanvas.height = 4;
+  }
+  const types = new Set();
+  const geo = { cardLeft: 0, cardTop: 0, cardWidth: 4, cardHeight: 4 };
+  drawArtifacts(_probeCanvas.getContext('2d'), geo, true, prng, 0, null, 1, null, types);
+  return types;
+}
+
+export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity = 0.2, artifactCount = null, artifactScale = 1, artifactTypeLock = null, _collectTypes = null) {
   const { cardLeft, cardTop, cardWidth, cardHeight } = geometry;
   const opacity = artifactOpacity;
   const c = (a) => isDark ? `rgba(255,255,255,${a * opacity})` : `rgba(0,0,0,${a * opacity})`;
-  const sc = (v) => v * artifactScale; // scale size-related dimensions
+  const sc = (v) => v * artifactScale;
+  const TYPE_COUNT = 11;
 
-  const artifactCountFromPRNG = cardPRNG.int(3, 7); // always consume PRNG to preserve sequence
+  // Clean angles: 0°, 15°, 30°, 45°, 60°, 75°, 90° (± mirrored)
+  const CLEAN_ANGLES = [0, 15, 30, 45, 60, 75, 90].map(d => d * Math.PI / 180);
+  const pickAngle = () => {
+    const base = CLEAN_ANGLES[cardPRNG.int(0, CLEAN_ANGLES.length - 1)];
+    return cardPRNG.next() > 0.5 ? base : -base;
+  };
+
+  const artifactCountFromPRNG = cardPRNG.int(3, 7);
   const count = artifactCount !== null ? Math.max(0, artifactCount | 0) : artifactCountFromPRNG;
 
   for (let a = 0; a < count; a++) {
-    const type = cardPRNG.int(0, 4);
+    const typeFromPRNG = cardPRNG.int(0, TYPE_COUNT - 1);
+    const type = artifactTypeLock && artifactTypeLock.length
+      ? artifactTypeLock[typeFromPRNG % artifactTypeLock.length]
+      : typeFromPRNG;
+    if (_collectTypes) _collectTypes.add(type);
     ctx.save();
 
     if (type === 0) {
-      // Wide filled parallelogram — streak band at a shallow angle
-      const angle  = cardPRNG.float(-Math.PI * 0.25, Math.PI * 0.25);
-      const midX   = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
-      const midY   = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
-      const len    = sc(cardWidth * cardPRNG.float(0.9, 1.4));
-      const width  = sc(cardWidth * cardPRNG.float(0.12, 0.28));
-      const alpha  = cardPRNG.float(0.02, 0.05);
-      const ca     = Math.cos(angle), sa = Math.sin(angle);
-      const cp     = Math.cos(angle + Math.PI / 2), sp = Math.sin(angle + Math.PI / 2);
+      // ── Streak band ─────────────────────────────────────────────────
+      const angle = pickAngle();
+      const midX  = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
+      const midY  = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
+      const len   = sc(cardWidth * cardPRNG.float(0.9, 1.4));
+      const w     = sc(cardWidth * cardPRNG.float(0.14, 0.22));
+      const alpha = cardPRNG.float(0.025, 0.04);
+      const ca = Math.cos(angle), sa = Math.sin(angle);
+      const cp = Math.cos(angle + Math.PI / 2), sp = Math.sin(angle + Math.PI / 2);
+      const hl = len * 0.5, hw = w * 0.5;
       ctx.beginPath();
-      ctx.moveTo(midX - ca * len * 0.5 - cp * width * 0.5, midY - sa * len * 0.5 - sp * width * 0.5);
-      ctx.lineTo(midX + ca * len * 0.5 - cp * width * 0.5, midY + sa * len * 0.5 - sp * width * 0.5);
-      ctx.lineTo(midX + ca * len * 0.5 + cp * width * 0.5, midY + sa * len * 0.5 + sp * width * 0.5);
-      ctx.lineTo(midX - ca * len * 0.5 + cp * width * 0.5, midY - sa * len * 0.5 + sp * width * 0.5);
+      ctx.moveTo(midX - ca * hl - cp * hw, midY - sa * hl - sp * hw);
+      ctx.lineTo(midX + ca * hl - cp * hw, midY + sa * hl - sp * hw);
+      ctx.lineTo(midX + ca * hl + cp * hw, midY + sa * hl + sp * hw);
+      ctx.lineTo(midX - ca * hl + cp * hw, midY - sa * hl + sp * hw);
       ctx.closePath();
       ctx.fillStyle = c(alpha);
       ctx.fill();
 
     } else if (type === 1) {
-      // Line bundle — 3–5 parallel lines, hard butt caps, varying widths
-      const lineN  = cardPRNG.int(3, 5);
-      const angle  = cardPRNG.float(0, Math.PI);
-      const midX   = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
-      const midY   = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
-      const len    = sc(cardWidth * cardPRNG.float(0.7, 1.3));
-      const spread = sc(cardWidth * cardPRNG.float(0.12, 0.22));
-      const ca     = Math.cos(angle), sa = Math.sin(angle);
-      const cp     = Math.cos(angle + Math.PI / 2), sp = Math.sin(angle + Math.PI / 2);
-      ctx.lineCap = 'butt';
+      // ── Line bundle ─────────────────────────────────────────────────
+      const lineN = cardPRNG.int(3, 4);
+      const angle = pickAngle();
+      const midX  = cardLeft + cardWidth  * cardPRNG.float(0.15, 0.85);
+      const midY  = cardTop  + cardHeight * cardPRNG.float(0.15, 0.85);
+      const len   = sc(cardWidth * cardPRNG.float(0.7, 1.2));
+      const spread = sc(cardWidth * cardPRNG.float(0.08, 0.18));
+      const ca = Math.cos(angle), sa = Math.sin(angle);
+      const cp = Math.cos(angle + Math.PI / 2), sp = Math.sin(angle + Math.PI / 2);
+      const lw = sc(cardWidth * cardPRNG.float(0.020, 0.032));
+      ctx.lineCap   = 'butt';
+      ctx.lineWidth = lw;
+      const alpha = cardPRNG.float(0.025, 0.045);
+      ctx.strokeStyle = c(alpha);
       for (let i = 0; i < lineN; i++) {
-        const t     = (i / (lineN - 1) - 0.5) * spread;
-        const alpha = cardPRNG.float(0.02, 0.06);
-        ctx.lineWidth   = sc(cardWidth * cardPRNG.float(0.018, 0.042));
-        ctx.strokeStyle = c(alpha);
+        const t = lineN === 1 ? 0 : (i / (lineN - 1) - 0.5) * spread;
         ctx.beginPath();
         ctx.moveTo(midX - ca * len * 0.5 + cp * t, midY - sa * len * 0.5 + sp * t);
         ctx.lineTo(midX + ca * len * 0.5 + cp * t, midY + sa * len * 0.5 + sp * t);
@@ -185,15 +223,19 @@ export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity =
       }
 
     } else if (type === 2) {
-      // Corner wedge — filled triangle from one corner across the card
+      // ── Corner wedge ────────────────────────────────────────────────
       const corner = cardPRNG.int(0, 3);
       const ox = corner % 2 === 0 ? cardLeft : cardLeft + cardWidth;
       const oy = corner < 2       ? cardTop  : cardTop  + cardHeight;
-      const ax = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.55);
-      const ay = cardTop  + cardHeight * cardPRNG.float(0.1, 0.55);
-      const bx = cardLeft + cardWidth  * cardPRNG.float(0.45, 0.9);
-      const by = cardTop  + cardHeight * cardPRNG.float(0.45, 0.9);
-      const alpha = cardPRNG.float(0.02, 0.05);
+      const sx = corner % 2 === 0 ? 1 : -1;
+      const sy = corner < 2       ? 1 : -1;
+      const reach = cardPRNG.float(0.30, 0.50);
+      const width = cardPRNG.float(0.15, 0.35);
+      const ax = ox + sx * sc(cardWidth  * reach);
+      const ay = oy + sy * sc(cardHeight * cardPRNG.float(0.04, 0.14));
+      const bx = ox + sx * sc(cardWidth  * cardPRNG.float(0.04, 0.14));
+      const by = oy + sy * sc(cardHeight * width);
+      const alpha = cardPRNG.float(0.02, 0.035);
       ctx.beginPath();
       ctx.moveTo(ox, oy);
       ctx.lineTo(ax, ay);
@@ -203,30 +245,30 @@ export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity =
       ctx.fill();
 
     } else if (type === 3) {
-      // Arc slice — thick partial arc, square caps
-      const cx     = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
-      const cy     = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
-      const r      = sc(cardWidth * cardPRNG.float(0.30, 0.60));
-      const start  = cardPRNG.float(0, Math.PI * 2);
-      const span   = cardPRNG.float(Math.PI * 0.4, Math.PI * 1.1);
-      const alpha  = cardPRNG.float(0.02, 0.05);
-      ctx.lineWidth   = sc(cardWidth * cardPRNG.float(0.040, 0.090));
+      // ── Arc slice ───────────────────────────────────────────────────
+      const cx    = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
+      const cy    = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
+      const r     = sc(cardWidth * cardPRNG.float(0.25, 0.55));
+      const start = cardPRNG.float(0, Math.PI * 2);
+      const span  = cardPRNG.float(Math.PI * 0.4, Math.PI * 0.8);
+      const alpha = cardPRNG.float(0.025, 0.04);
+      ctx.lineWidth   = sc(cardWidth * cardPRNG.float(0.04, 0.07));
       ctx.lineCap     = 'butt';
       ctx.strokeStyle = c(alpha);
       ctx.beginPath();
       ctx.arc(cx, cy, r, start, start + span);
       ctx.stroke();
 
-    } else {
-      // Grid fragment — evenly spaced dots clipped to a rectangle
-      const rx     = cardLeft + cardWidth  * cardPRNG.float(0.05, 0.6);
-      const ry     = cardTop  + cardHeight * cardPRNG.float(0.05, 0.6);
-      const rw     = sc(cardWidth  * cardPRNG.float(0.30, 0.55));
-      const rh     = sc(cardHeight * cardPRNG.float(0.25, 0.50));
-      const cols   = cardPRNG.int(3, 7);
-      const rows   = cardPRNG.int(3, 6);
-      const dotR   = sc(cardWidth * cardPRNG.float(0.012, 0.026));
-      const alpha  = cardPRNG.float(0.03, 0.07);
+    } else if (type === 4) {
+      // ── Dot grid ────────────────────────────────────────────────────
+      const rx   = cardLeft + cardWidth  * cardPRNG.float(0.08, 0.55);
+      const ry   = cardTop  + cardHeight * cardPRNG.float(0.08, 0.55);
+      const rw   = sc(cardWidth  * cardPRNG.float(0.30, 0.50));
+      const rh   = sc(cardHeight * cardPRNG.float(0.25, 0.45));
+      const cols = cardPRNG.int(3, 6);
+      const rows = cardPRNG.int(3, 5);
+      const dotR = sc(cardWidth * cardPRNG.float(0.014, 0.020));
+      const alpha = cardPRNG.float(0.03, 0.055);
       ctx.beginPath(); ctx.rect(rx, ry, rw, rh); ctx.clip();
       ctx.fillStyle = c(alpha);
       for (let r = 0; r < rows; r++) {
@@ -238,6 +280,118 @@ export function drawArtifacts(ctx, geometry, isDark, cardPRNG, artifactOpacity =
           ctx.fill();
         }
       }
+
+    } else if (type === 5) {
+      // ── Concentric rings ────────────────────────────────────────────
+      const cx      = cardLeft + cardWidth  * cardPRNG.float(0.15, 0.85);
+      const cy      = cardTop  + cardHeight * cardPRNG.float(0.15, 0.85);
+      const ringN   = cardPRNG.int(2, 4);
+      const baseR   = sc(cardWidth * cardPRNG.float(0.06, 0.12));
+      const spacing = sc(cardWidth * cardPRNG.float(0.028, 0.048));
+      const alpha   = cardPRNG.float(0.025, 0.045);
+      ctx.lineWidth  = sc(cardWidth * cardPRNG.float(0.006, 0.015));
+      ctx.strokeStyle = c(alpha);
+      for (let i = 0; i < ringN; i++) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, baseR + spacing * i, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+    } else if (type === 6) {
+      // ── Cross / plus ────────────────────────────────────────────────
+      const cx     = cardLeft + cardWidth  * cardPRNG.float(0.15, 0.85);
+      const cy     = cardTop  + cardHeight * cardPRNG.float(0.15, 0.85);
+      const angle  = pickAngle();
+      const armLen = sc(cardWidth * cardPRNG.float(0.10, 0.20));
+      const armW   = sc(cardWidth * cardPRNG.float(0.028, 0.050));
+      const alpha  = cardPRNG.float(0.02, 0.038);
+      ctx.fillStyle = c(alpha);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.fillRect(-armLen, -armW * 0.5, armLen * 2, armW);
+      ctx.fillRect(-armW * 0.5, -armLen, armW, armLen * 2);
+      ctx.restore();
+
+    } else if (type === 7) {
+      // ── Chevron ─────────────────────────────────────────────────────
+      const cx    = cardLeft + cardWidth  * cardPRNG.float(0.15, 0.85);
+      const cy    = cardTop  + cardHeight * cardPRNG.float(0.15, 0.85);
+      const angle = pickAngle();
+      const armLen = sc(cardWidth * cardPRNG.float(0.12, 0.25));
+      const spread = cardPRNG.float(Math.PI * 0.15, Math.PI * 0.35);
+      const alpha = cardPRNG.float(0.025, 0.045);
+      ctx.lineWidth   = sc(cardWidth * cardPRNG.float(0.025, 0.045));
+      ctx.lineCap     = 'butt';
+      ctx.lineJoin    = 'miter';
+      ctx.strokeStyle = c(alpha);
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(angle - spread) * armLen, cy + Math.sin(angle - spread) * armLen);
+      ctx.lineTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle + spread) * armLen, cy + Math.sin(angle + spread) * armLen);
+      ctx.stroke();
+
+    } else if (type === 8) {
+      // ── Diamond ─────────────────────────────────────────────────────
+      const cx   = cardLeft + cardWidth  * cardPRNG.float(0.15, 0.85);
+      const cy   = cardTop  + cardHeight * cardPRNG.float(0.15, 0.85);
+      const half = sc(cardWidth * cardPRNG.float(0.06, 0.14));
+      const stretch = cardPRNG.float(0.6, 1.4); // elongate vertically or horizontally
+      const alpha = cardPRNG.float(0.02, 0.04);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - half * stretch);
+      ctx.lineTo(cx + half, cy);
+      ctx.lineTo(cx, cy + half * stretch);
+      ctx.lineTo(cx - half, cy);
+      ctx.closePath();
+      ctx.fillStyle = c(alpha);
+      ctx.fill();
+
+    } else if (type === 9) {
+      // ── Dashes ──────────────────────────────────────────────────────
+      const angle  = pickAngle();
+      const midX   = cardLeft + cardWidth  * cardPRNG.float(0.1, 0.9);
+      const midY   = cardTop  + cardHeight * cardPRNG.float(0.1, 0.9);
+      const dashN  = cardPRNG.int(4, 8);
+      const dashLen = sc(cardWidth * cardPRNG.float(0.03, 0.06));
+      const gap    = sc(cardWidth * cardPRNG.float(0.02, 0.04));
+      const totalLen = dashN * dashLen + (dashN - 1) * gap;
+      const alpha  = cardPRNG.float(0.025, 0.045);
+      ctx.lineWidth  = sc(cardWidth * cardPRNG.float(0.012, 0.025));
+      ctx.lineCap    = 'butt';
+      ctx.strokeStyle = c(alpha);
+      const ca = Math.cos(angle), sa = Math.sin(angle);
+      for (let i = 0; i < dashN; i++) {
+        const offset = -totalLen * 0.5 + i * (dashLen + gap);
+        const x0 = midX + ca * offset;
+        const y0 = midY + sa * offset;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x0 + ca * dashLen, y0 + sa * dashLen);
+        ctx.stroke();
+      }
+
+    } else {
+      // ── Bracket (L-shape) ───────────────────────────────────────────
+      const corner = cardPRNG.int(0, 3);
+      const ox = corner % 2 === 0 ? cardLeft + cardWidth * cardPRNG.float(0.05, 0.35)
+                                   : cardLeft + cardWidth * cardPRNG.float(0.65, 0.95);
+      const oy = corner < 2       ? cardTop + cardHeight * cardPRNG.float(0.05, 0.35)
+                                   : cardTop + cardHeight * cardPRNG.float(0.65, 0.95);
+      const sx = corner % 2 === 0 ? 1 : -1;
+      const sy = corner < 2       ? 1 : -1;
+      const armH = sc(cardHeight * cardPRNG.float(0.12, 0.25));
+      const armW = sc(cardWidth  * cardPRNG.float(0.10, 0.20));
+      const alpha = cardPRNG.float(0.025, 0.04);
+      ctx.lineWidth   = sc(cardWidth * cardPRNG.float(0.020, 0.038));
+      ctx.lineCap     = 'butt';
+      ctx.lineJoin    = 'miter';
+      ctx.strokeStyle = c(alpha);
+      ctx.beginPath();
+      ctx.moveTo(ox + sx * armW, oy);
+      ctx.lineTo(ox, oy);
+      ctx.lineTo(ox, oy + sy * armH);
+      ctx.stroke();
     }
 
     ctx.restore();

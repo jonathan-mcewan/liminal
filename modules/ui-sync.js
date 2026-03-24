@@ -1,5 +1,5 @@
 import { makePRNG }                          from "./prng.js";
-import { CARD_SIZES, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, hashString, hueToColorName } from "./constants.js";
+import { CARD_SIZES, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, ARTIFACT_NAMES, hashString, hueToColorName } from "./constants.js";
 import { colorOverrides, seedOverrides, getEffectiveColor, getEffectiveSeeds } from "./state.js";
 
 // ── Seed helper — accepts numbers or text ───────────────────────────────
@@ -68,7 +68,7 @@ export function updatePatternName(dom) {
   } else {
     const seed  = getSeed(dom);
     const seeds = getEffectiveSeeds(seed);
-    const style = makePRNG(seeds.patternSeed).int(0, 15);
+    const style = makePRNG(seeds.patternSeed).int(0, PATTERN_NAMES.length - 1);
     dom.patternNameDisplay.textContent = `[${PATTERN_NAMES[style]}]`;
   }
 }
@@ -140,6 +140,8 @@ export function buildParams(dom) {
     showLanyard:           dom.showLanyardToggle.checked,
     borderRadius:          parseInt(dom.borderRadiusSlider.value, 10) / 100,
     bgBlendMode:           dom.bgBlendMode.value,
+    embossMode:            dom.embossMode || 'none',
+    artifactTypeLock:      dom.artTypeLock && dom.artTypeLock.length ? dom.artTypeLock : null,
   };
 }
 
@@ -178,14 +180,26 @@ export function getCardDescriptor(dom) {
   };
   const blendLabel = BLEND_LABELS[dom.bgBlendMode.value] ?? null;
 
+  // Emboss mode label
+  const embossLabel = dom.embossMode === 'emboss' ? 'Emboss'
+    : dom.embossMode === 'deboss' ? 'Deboss' : null;
+
+  // Artifact type lock label
+  const artTypeLock = dom.artTypeLock;
+  const artTypeLabel = artTypeLock && artTypeLock.length
+    ? artTypeLock.map(i => ARTIFACT_NAMES[i]).join('+') + ' artifacts'
+    : null;
+
   const parts = [
     sizeLabel,
     theme,
     colourName,
     name && name,
     logoName,
+    embossLabel,
     bgName && `${bgName} bg`,
     blendLabel,
+    artTypeLabel,
     seedLabel,
   ].filter(Boolean);
   return parts.join(' · ');

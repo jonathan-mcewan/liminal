@@ -17,7 +17,8 @@ export const PATTERN_NAMES = [
   'Halftone Dots', 'Guilloche', 'Concentric Rings', 'Scanlines',
   'Topographic', 'Moiré', 'Chevron', 'Hexagonal Grid',
   'Radial Burst', 'Diamond Lattice', 'Wave Interference', 'Stipple',
-  'Crosshatch', 'Zigzag', 'Spiral Field', 'Brick Wall',
+  'Crosshatch', 'Zigzag', 'Spiral Field', 'Liquid Gradient',
+  'Milky Way', 'Black Hole', 'Sound Wave',
 ];
 
 export const LOGO_NAMES = [
@@ -28,6 +29,11 @@ export const LOGO_NAMES = [
   'Variable Dot Mask', 'Inlaid Rings',
   'Fractal Tree', 'Voronoi Cells', 'Truchet Tiles', 'Celtic Knot',
   'Cross Hatch', 'Icons', 'ASCII Art', 'Organic Tree',
+];
+
+export const ARTIFACT_NAMES = [
+  'Streak', 'Lines', 'Wedge', 'Arc', 'Dot Grid', 'Rings', 'Cross',
+  'Chevron', 'Diamond', 'Dashes', 'Bracket',
 ];
 
 // ── Theme presets ──────────────────────────────────────────────────────

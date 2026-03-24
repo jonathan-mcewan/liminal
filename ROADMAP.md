@@ -63,7 +63,7 @@ Finer control over every visual layer.
 
 - [ ] **Symbol hue drift override** — shift the logo colour independently from the card hue
 - [ ] **Symbol lightness override** — control logo brightness separately from card lightness
-- [ ] **Artifact type lock** — pin all artifacts to a single type (e.g. all arc slices)
+- [x] **Artifact type lock** — pin all artifacts to a single type (e.g. all arc slices)
 - [x] **Background blend mode** — choose how textures composite (multiply, screen, overlay, etc.)
 - [x] **Pattern rotation** — angle the pattern layer independently
 - [ ] **Custom card dimensions** — free-form width × height input beyond the 3 presets
@@ -78,8 +78,8 @@ One-click starting points and collections.
 - [x] **Curated theme presets** — 20 named presets in a collapsible panel (Corporate, Midnight, Neon, Pastel, Brutalist, etc.)
 - [ ] **Colour harmony modes** — complementary, analogous, and triadic palette generation
 - [ ] **Lucky dip gallery** — grid of random seeds to browse and pick from
-- [ ] **Favourites** — star seeds to a local collection, browse and recall later
-- [ ] **Import / export settings** — JSON blob of all overrides for sharing full configs
+- [x] **Favourites** — star seeds to a local collection, browse and recall later
+- [x] **Import / export settings** — JSON blob of all overrides for sharing full configs
 
 ---
 
@@ -121,7 +121,7 @@ Pushing the generative system further.
 - [ ] **Multi-logo composition** — place 2–3 smaller logos in a layout
 - [ ] **Photo overlay** — import a headshot with circular or rounded mask
 - [ ] **Holographic foil effect** — animated iridescent shimmer on hover
-- [ ] **Emboss / deboss simulation** — inner shadow + highlight for a stamped-in look
+- [x] **Emboss / deboss simulation** — inner shadow + highlight for a stamped-in look
 - [ ] **Generative card back** — procedural back designs beyond the current magnetic stripe
 
 ---

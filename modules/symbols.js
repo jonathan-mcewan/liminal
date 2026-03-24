@@ -495,10 +495,11 @@ function drawDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
   }
 
   const gridN = rng.int(6, 16);
-  const cell  = (radius * 2) / gridN;
+  const extent = radius * 1.35; // expand grid beyond radius for more ghost dots
+  const cell  = (extent * 2) / gridN;
   const dotR  = cell * rng.float(0.22, 0.42);
-  const x0    = x - radius + cell * 0.5;
-  const y0    = y - radius + cell * 0.5;
+  const x0    = x - extent + cell * 0.5;
+  const y0    = y - extent + cell * 0.5;
 
   for (let row = 0; row < gridN; row++) {
     for (let col = 0; col < gridN; col++) {
@@ -511,10 +512,12 @@ function drawDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
         ctx.arc(dx, dy, dotR, 0, Math.PI * 2);
         ctx.fillStyle = symbolColor(0, 0.88);
         ctx.fill();
-      } else if (dist <= radius) {
+      } else {
+        // Ghost dots — fade out with distance
+        const fade = Math.max(0, 1 - (dist - radius) / (extent * 0.5));
         ctx.beginPath();
-        ctx.arc(dx, dy, dotR * 0.38, 0, Math.PI * 2);
-        ctx.fillStyle = symbolColor(0, 0.08);
+        ctx.arc(dx, dy, dotR * 0.35, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.07 * fade);
         ctx.fill();
       }
     }
@@ -544,7 +547,8 @@ function drawVariableDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
   }
 
   const gridN     = rng.int(5, 13);
-  const cell      = (radius * 2) / gridN;
+  const extent    = radius * 1.35;
+  const cell      = (extent * 2) / gridN;
   const sizeSteps = rng.int(2, 7);
   const minDotR   = cell * rng.float(0.20, 0.28);
   const maxDotR   = cell * rng.float(0.34, 0.44);
@@ -556,8 +560,8 @@ function drawVariableDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
     sizes.push(minDotR + (maxDotR - minDotR) * t);
   }
 
-  const x0 = x - radius + cell * 0.5;
-  const y0 = y - radius + cell * 0.5;
+  const x0 = x - extent + cell * 0.5;
+  const y0 = y - extent + cell * 0.5;
 
   for (let row = 0; row < gridN; row++) {
     for (let col = 0; col < gridN; col++) {
@@ -571,10 +575,11 @@ function drawVariableDotMask(ctx, x, y, radius, sw, symbolColor, rng) {
         ctx.arc(dx, dy, dotR, 0, Math.PI * 2);
         ctx.fillStyle = symbolColor(0, 0.88);
         ctx.fill();
-      } else if (dist <= radius) {
+      } else {
+        const fade = Math.max(0, 1 - (dist - radius) / (extent * 0.5));
         ctx.beginPath();
-        ctx.arc(dx, dy, sizes[0] * 0.38, 0, Math.PI * 2);
-        ctx.fillStyle = symbolColor(0, 0.08);
+        ctx.arc(dx, dy, sizes[0] * 0.35, 0, Math.PI * 2);
+        ctx.fillStyle = symbolColor(0, 0.07 * fade);
         ctx.fill();
       }
     }

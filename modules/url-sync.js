@@ -36,6 +36,12 @@ export function applyQueryString(dom) {
   if (q.has("bblend"))   dom.bgBlendMode.value             = q.get("bblend");
   if (q.has("pat_rot")) { dom.patternRotationSlider.value  = q.get("pat_rot");
                            dom.patternRotationDisplay.textContent = dom.patternRotationSlider.value; }
+  if (q.has("emboss"))    dom.embossMode                  = q.get("emboss");
+  if (q.has("art_type")) {
+    const raw = q.get("art_type");
+    dom.artTypeLock = raw === '' ? null : raw.split(',').map(Number).filter(n => n >= 0 && n <= 10);
+    if (dom.artTypeLock && dom.artTypeLock.length === 0) dom.artTypeLock = null;
+  }
 
   // Colour overrides — only in URL if user set them
   if (q.has("dark"))      colorOverrides.isDark          = q.get("dark")     !== "0";
@@ -78,6 +84,8 @@ export function syncURL(dom, push = false) {
     bradius:     dom.borderRadiusSlider.value,
     bblend:      dom.bgBlendMode.value,
     pat_rot:     dom.patternRotationSlider.value,
+    emboss:      dom.embossMode || 'none',
+    art_type:    dom.artTypeLock ? dom.artTypeLock.join(',') : '',
   });
   if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
   if (colorOverrides.cardLightness   !== undefined) q.set("litness",  colorOverrides.cardLightness);

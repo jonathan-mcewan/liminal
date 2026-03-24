@@ -19,6 +19,10 @@ export function makePRNG(seed) {
     int:   (min, max) => (next() * (max - min + 1) | 0) + min,
     /** Random float in [min, max) */
     float: (min, max) =>  next() * (max - min) + min,
+    /** Return a copy of this PRNG at the current position in the sequence */
+    clone() { const c = makePRNG(0); c._setState(state); return c; },
+    /** @internal — used by clone() */
+    _setState(s) { state = s; },
   };
 }
 

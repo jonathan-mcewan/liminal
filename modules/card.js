@@ -10,6 +10,7 @@ import {
 } from './background.js';
 import { drawBackgroundTexture } from './bg-styles.js';
 import { drawPatterns }  from './patterns.js';
+import { PATTERN_NAMES } from './constants.js';
 import { drawSymbol }   from './symbols.js';
 import { drawCardText } from './text.js';
 
@@ -101,6 +102,8 @@ export function generateCard({
   borderRadius       = 0.2,         // 0 = sharp, 0.2 = default, 1 = pill
   bgBlendMode        = 'source-over',
   patternRotation    = 0,           // degrees
+  embossMode         = 'none',      // 'none' | 'emboss' | 'deboss'
+  artifactTypeLock   = null,         // null = auto, [0,3] = only these types
   ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
   // ── Compute card dimensions early so we can size the canvas ───────────
@@ -228,7 +231,7 @@ export function generateCard({
     ctx.restore();
   }
   if (patternType !== -2) {
-    const effectivePatternType = patternType < 0 ? patternPRNG.int(0, 15) : patternType;
+    const effectivePatternType = patternType < 0 ? patternPRNG.int(0, PATTERN_NAMES.length - 1) : patternType;
     if (patternRotation !== 0) {
       ctx.save();
       ctx.translate(centerX, centerY);
@@ -238,11 +241,21 @@ export function generateCard({
     drawPatterns(ctx, geometry, patternPRNG, effectivePatternType, patternOpacity, patternScale, isDark, hue, saturation, cardLightness, patternTwoTone);
     if (patternRotation !== 0) ctx.restore();
   }
-  if (showArtifacts) drawArtifacts(ctx, geometry, isDark, artifactPRNG, artifactOpacity, artifactCount, artifactScale);
+  if (showArtifacts) drawArtifacts(ctx, geometry, isDark, artifactPRNG, artifactOpacity, artifactCount, artifactScale, artifactTypeLock);
 
   // Symbol — drawn with its own save/restore so ctx state leaks don't affect text
   if (symbolStyle >= 0) {
     ctx.save();
+    if (embossMode !== 'none') {
+      const offset = cardWidth * 0.012;
+      const sign = embossMode === 'emboss' ? 1 : -1;
+      // Shadow pass — darker, offset toward light source
+      const shadowColor = (adj, a) => symbolColor(adj - 30, (a ?? 0.9) * 0.2);
+      drawSymbol(ctx, symbolX + offset * sign, symbolY + offset * sign, symbolRadius, symbolStyle, shadowColor, logoPRNG.clone());
+      // Highlight pass — lighter, offset away from light source
+      const highlightColor = (adj, a) => symbolColor(adj + 30, (a ?? 0.9) * 0.13);
+      drawSymbol(ctx, symbolX - offset * sign, symbolY - offset * sign, symbolRadius, symbolStyle, highlightColor, logoPRNG.clone());
+    }
     drawSymbol(ctx, symbolX, symbolY, symbolRadius, symbolStyle, symbolColor, logoPRNG);
     ctx.restore();
   }

@@ -15,10 +15,9 @@ const TAU = Math.PI * 2;
 function drawHalftone(ctx, geo, prng, opacity, scale, toneA, toneB) {
   const { cardWidth: w, cardHeight: h } = geo;
   const spacing = w * 0.028 * scale;
-  const maxR = spacing * 0.48;
+  const maxR = spacing * 0.46;
 
   // Build a smooth tonal field from 2–4 gradient sources
-  // Each source creates a radial falloff; the field is their sum, normalised to 0–1
   const srcCount = prng.int(2, 4);
   const sources = [];
   for (let i = 0; i < srcCount; i++) {
@@ -43,15 +42,20 @@ function drawHalftone(ctx, geo, prng, opacity, scale, toneA, toneB) {
   const angle = prng.float(0.1, 0.6);
   const cos = Math.cos(angle), sin = Math.sin(angle);
 
+  // Two-tone: a second field drives the blend between toneA and toneB
+  const blendSrc = {
+    x: w * prng.float(0.1, 0.9),
+    y: h * prng.float(0.1, 0.9),
+    r: Math.max(w, h) * prng.float(0.5, 1.0),
+  };
+
   ctx.save();
-  let col = 0;
   const diagonal = Math.hypot(w, h);
   const steps = Math.ceil(diagonal / spacing) + 2;
   const ox = w / 2, oy = h / 2;
 
   for (let row = -steps; row <= steps; row++) {
     for (let c = -steps; c <= steps; c++) {
-      // Rotated grid position
       const gx = c * spacing;
       const gy = row * spacing;
       const x = ox + gx * cos - gy * sin;
@@ -62,8 +66,10 @@ function drawHalftone(ctx, geo, prng, opacity, scale, toneA, toneB) {
       const r = maxR * value;
       if (r < 0.4) continue;
 
-      const tone = col++ % 2 === 0 ? toneA : toneB;
-      ctx.fillStyle = tone(opacity);
+      // Blend between tones based on spatial position, not alternation
+      const blend = Math.min(1, Math.hypot(x - blendSrc.x, y - blendSrc.y) / blendSrc.r);
+      const tone = blend < 0.5 ? toneA : toneB;
+      ctx.fillStyle = tone(opacity * (0.5 + 0.5 * value));
       ctx.beginPath();
       ctx.arc(x, y, r, 0, TAU);
       ctx.fill();
@@ -381,23 +387,35 @@ function drawWaveInterference(ctx, geo, prng, opacity, scale, toneA, toneB) {
 
 function drawStipple(ctx, geo, prng, opacity, scale, toneA, toneB) {
   const { cardWidth: w, cardHeight: h } = geo;
-  const dotCount = Math.round(800 * scale * scale);
-  const minR = w * 0.002;
-  const maxR = w * 0.008 * scale;
-  const dx = w * prng.float(0.2, 0.8);
-  const dy = h * prng.float(0.2, 0.8);
-  const maxDist = Math.hypot(w, h) * 0.5;
+  // 2–3 density clusters for organic variation
+  const clusters = [];
+  const clusterN = prng.int(2, 3);
+  for (let i = 0; i < clusterN; i++) {
+    clusters.push({
+      x: w * prng.float(0.15, 0.85),
+      y: h * prng.float(0.15, 0.85),
+      r: Math.hypot(w, h) * prng.float(0.25, 0.50),
+    });
+  }
+
+  const dotCount = Math.round(1200 / (scale * scale));
+  const minR = w * 0.0015;
+  const maxR = w * 0.006 * scale;
 
   ctx.save();
   for (let i = 0; i < dotCount; i++) {
     const x = prng.float(0, w);
     const y = prng.float(0, h);
-    const dist = Math.hypot(x - dx, y - dy) / maxDist;
-    const densityFactor = 1 - Math.min(dist, 1) * 0.7;
-    if (prng.next() > densityFactor) continue;
-    const r = minR + (maxR - minR) * prng.float(0, 1) * densityFactor;
+    // Density: higher near any cluster centre
+    let density = 0.15;
+    for (const cl of clusters) {
+      const d = Math.hypot(x - cl.x, y - cl.y) / cl.r;
+      density = Math.max(density, 1 - Math.min(d, 1));
+    }
+    if (prng.next() > density) continue;
+    const r = minR + (maxR - minR) * prng.float(0.2, 1) * density;
     const tone = prng.next() > 0.5 ? toneA : toneB;
-    ctx.fillStyle = tone(opacity * 0.7);
+    ctx.fillStyle = tone(opacity * (0.3 + density * 0.5));
     ctx.beginPath();
     ctx.arc(x, y, r, 0, TAU);
     ctx.fill();
@@ -506,37 +524,289 @@ function drawSpiralField(ctx, geo, prng, opacity, scale, toneA, toneB) {
   ctx.restore();
 }
 
-function drawBrickWall(ctx, geo, prng, opacity, scale, toneA, toneB) {
+function drawLiquidGradient(ctx, geo, prng, opacity, scale, toneA, toneB) {
   const { cardWidth: w, cardHeight: h } = geo;
-  const brickH = w * 0.03 * scale;
-  const brickW = w * 0.08 * scale;
-  const rows = Math.ceil(h / brickH) + 2;
-  const cols = Math.ceil(w / brickW) + 2;
+
+  // Seed-derived wave field — flowing horizontal lines that undulate via
+  // layered sine waves, with colour smoothly transitioning between toneA/toneB.
+  // Overdraw: extend well beyond card bounds so rotated patterns don't show end caps
+  const diag    = Math.hypot(w, h);
+  const padX    = (diag - w) * 0.5 + w * 0.1;
+  const padY    = (diag - h) * 0.5 + h * 0.1;
+  const drawW   = w + padX * 2;
+  const drawH   = h + padY * 2;
+
+  const lineCount = Math.round(14 / scale) + Math.ceil(padY * 2 / (h / 14));
+  const spacing   = drawH / lineCount;
+  const waveN     = prng.int(2, 4);
+
+  const waves = [];
+  for (let i = 0; i < waveN; i++) {
+    waves.push({
+      freq:  prng.float(0.4, 1.8) / w,
+      amp:   h * prng.float(0.06, 0.18) * scale,
+      phase: prng.float(0, TAU),
+    });
+  }
+  const drift = {
+    freq:  prng.float(0.3, 1.0) / h,
+    amp:   w * prng.float(0.03, 0.10) * scale,
+  };
 
   ctx.save();
-  ctx.lineWidth = w * 0.002;
+  ctx.lineWidth = spacing * prng.float(0.15, 0.30);
+  ctx.lineCap   = 'butt';
 
-  for (let r = -1; r < rows; r++) {
-    const offset = r % 2 === 0 ? 0 : brickW * 0.5;
-    const y = r * brickH;
+  const steps = Math.ceil(drawW / (w * 0.01)) + 1;
+  const dx    = drawW / (steps - 1);
 
-    // Horizontal mortar line — tone A
-    ctx.strokeStyle = toneA(opacity * 0.4);
+  for (let i = 0; i < lineCount; i++) {
+    const t        = lineCount === 1 ? 0.5 : i / (lineCount - 1);
+    const baseY    = -padY + spacing * (i + 0.5);
+    const yDrift   = Math.sin(baseY * drift.freq) * drift.amp;
+
+    const blendA   = opacity * (0.3 + 0.25 * (1 - t));
+    const blendB   = opacity * (0.3 + 0.25 * t);
+    const grad     = ctx.createLinearGradient(-padX, baseY, w + padX, baseY);
+    grad.addColorStop(0,   toneA(blendA));
+    grad.addColorStop(0.5, toneB(blendB));
+    grad.addColorStop(1,   toneA(blendA * 0.8));
+    ctx.strokeStyle = grad;
+
     ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(w, y);
-    ctx.stroke();
-
-    // Vertical mortar lines — tone B
-    ctx.strokeStyle = toneB(opacity * 0.4);
-    for (let c = -1; c < cols; c++) {
-      const x = c * brickW + offset;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x, y + brickH);
-      ctx.stroke();
+    for (let s = 0; s < steps; s++) {
+      const px = -padX + s * dx;
+      let py = baseY;
+      for (const wv of waves) {
+        py += Math.sin(px * wv.freq + wv.phase + t * 2) * wv.amp;
+      }
+      py += yDrift;
+      if (s === 0) ctx.moveTo(px, py);
+      else         ctx.lineTo(px, py);
     }
+    ctx.stroke();
   }
+  ctx.restore();
+}
+
+function drawMilkyWay(ctx, geo, prng, opacity, scale, toneA, toneB) {
+  const { cardWidth: w, cardHeight: h } = geo;
+  const diag = Math.hypot(w, h);
+  const pad  = diag * 0.3;
+
+  // A wide, sweeping band of fine lines that converge in the centre
+  // like a galaxy arm viewed edge-on, with scattered star dots.
+  const bandCY    = h * prng.float(0.3, 0.7);
+  const bandWidth = h * prng.float(0.30, 0.50) * scale;
+  const curve     = h * prng.float(0.05, 0.15);
+  const angle     = prng.float(-0.25, 0.25); // slight tilt
+
+  ctx.save();
+  ctx.translate(w * 0.5, bandCY);
+  ctx.rotate(angle);
+  ctx.translate(-w * 0.5, -bandCY);
+
+  // Dense fine lines within the band
+  const lineN = Math.round(40 / scale);
+  ctx.lineCap = 'butt';
+  for (let i = 0; i < lineN; i++) {
+    const t  = lineN === 1 ? 0.5 : i / (lineN - 1);
+    const yOff = (t - 0.5) * bandWidth;
+    // Lines closer to centre are brighter
+    const intensity = 1 - Math.abs(t - 0.5) * 2;
+    const tone = i % 2 === 0 ? toneA : toneB;
+    ctx.strokeStyle = tone(opacity * (0.1 + 0.4 * intensity * intensity));
+    ctx.lineWidth = w * prng.float(0.001, 0.003);
+
+    const waveFreq  = prng.float(0.5, 2.0) / w;
+    const waveAmp   = bandWidth * prng.float(0.02, 0.08);
+    const wavePhase = prng.float(0, TAU);
+
+    ctx.beginPath();
+    const steps = 80;
+    for (let s = 0; s <= steps; s++) {
+      const px = -pad + (w + pad * 2) * (s / steps);
+      const py = bandCY + yOff
+        + Math.sin(px * waveFreq + wavePhase) * waveAmp
+        + Math.sin(px * 0.003) * curve * (1 - intensity);
+      if (s === 0) ctx.moveTo(px, py);
+      else         ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  // Scattered star dots — denser near the band centre
+  const starN = Math.round(200 * scale);
+  for (let i = 0; i < starN; i++) {
+    const sx = prng.float(-pad, w + pad);
+    // Gaussian-ish distribution centred on the band
+    const spread = prng.float(0, 1);
+    const sy = bandCY + (prng.next() > 0.5 ? 1 : -1) * spread * spread * bandWidth * 0.8;
+    const sr = w * prng.float(0.0008, 0.003);
+    const intensity = Math.max(0, 1 - Math.abs(sy - bandCY) / (bandWidth * 0.5));
+    const tone = prng.next() > 0.5 ? toneA : toneB;
+    ctx.fillStyle = tone(opacity * (0.15 + 0.5 * intensity) * prng.float(0.3, 1));
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, TAU);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawBlackHole(ctx, geo, prng, opacity, scale, toneA, toneB) {
+  const { cardWidth: w, cardHeight: h } = geo;
+
+  // A gravitational distortion pattern — concentric elliptical rings
+  // that warp and compress toward a central void.
+  const cx = w * prng.float(0.3, 0.7);
+  const cy = h * prng.float(0.3, 0.7);
+  const maxR    = Math.hypot(w, h) * 0.6 * scale;
+  const ringN   = Math.round(28 / scale);
+  const squeeze = prng.float(0.4, 0.8); // vertical squash for accretion disk look
+  const tilt    = prng.float(-0.4, 0.4);
+  const voidR   = maxR * prng.float(0.04, 0.10);
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(tilt);
+
+  // Accretion rings — spacing compresses toward centre (logarithmic)
+  for (let i = 0; i < ringN; i++) {
+    const t = (i + 1) / ringN;
+    const r = voidR + (maxR - voidR) * Math.pow(t, 0.6); // compress inner rings
+    const distFromVoid = (r - voidR) / (maxR - voidR);
+
+    // Inner rings are brighter and thinner
+    const intensity = Math.pow(1 - distFromVoid, 0.5);
+    const tone = i % 2 === 0 ? toneA : toneB;
+    ctx.strokeStyle = tone(opacity * (0.08 + 0.45 * intensity));
+    ctx.lineWidth = w * (0.001 + 0.004 * distFromVoid);
+
+    // Each ring is a slightly wobbly ellipse
+    const wobbleAmp   = r * prng.float(0.01, 0.04) * distFromVoid;
+    const wobbleFreq  = prng.int(2, 5);
+    const wobblePhase = prng.float(0, TAU);
+
+    ctx.beginPath();
+    const steps = 64;
+    for (let s = 0; s <= steps; s++) {
+      const theta = (s / steps) * TAU;
+      const wobble = Math.sin(theta * wobbleFreq + wobblePhase) * wobbleAmp;
+      const rr = r + wobble;
+      const px = Math.cos(theta) * rr;
+      const py = Math.sin(theta) * rr * squeeze;
+      if (s === 0) ctx.moveTo(px, py);
+      else         ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Helper: draw an ellipse via scale+arc (SvgContext doesn't support ellipse())
+  function ellipsePath(rx, ry) {
+    ctx.save();
+    ctx.scale(1, ry / rx);
+    ctx.beginPath();
+    ctx.arc(0, 0, rx, 0, TAU);
+    ctx.restore();
+  }
+
+  // Photon sphere — bright glow just outside the event horizon
+  const glowR = voidR * 1.6;
+  const glowGrad = ctx.createRadialGradient(0, 0, voidR * 0.8, 0, 0, glowR * 1.5);
+  glowGrad.addColorStop(0, toneA(0));
+  glowGrad.addColorStop(0.4, toneA(opacity * 0.6));
+  glowGrad.addColorStop(0.6, toneB(opacity * 0.45));
+  glowGrad.addColorStop(1, toneA(0));
+  ctx.fillStyle = glowGrad;
+  ellipsePath(glowR * 1.5, glowR * 1.5 * squeeze);
+  ctx.fill();
+
+  // Event horizon — sharp bright ring at the void boundary
+  const horizonW = w * 0.004;
+  ctx.lineWidth   = horizonW;
+  ctx.strokeStyle = toneA(opacity * 0.7);
+  ellipsePath(voidR, voidR * squeeze);
+  ctx.stroke();
+
+  // Second thinner ring just inside — gives it that double-edge look
+  ctx.lineWidth   = horizonW * 0.4;
+  ctx.strokeStyle = toneB(opacity * 0.5);
+  ellipsePath(voidR * 0.85, voidR * 0.85 * squeeze);
+  ctx.stroke();
+
+  // Inner void — solid dark fill
+  ctx.fillStyle = toneB(opacity * 0.35);
+  ellipsePath(voidR * 0.8, voidR * 0.8 * squeeze);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawSoundWave(ctx, geo, prng, opacity, scale, toneA, toneB) {
+  const { cardWidth: w, cardHeight: h } = geo;
+  const diag = Math.hypot(w, h);
+  const pad  = diag * 0.3;
+
+  // Vertical bars of varying height mirrored across a centre line,
+  // like an audio waveform. Multiple frequency layers create harmonics.
+  const centreY  = h * prng.float(0.35, 0.65);
+  const barCount = Math.round(120 / scale);
+  const barW     = (w + pad * 2) / barCount;
+  const maxAmp   = h * prng.float(0.25, 0.45) * scale;
+
+  // 3–5 harmonic layers with different frequencies
+  const harmonics = [];
+  const harmN = prng.int(3, 5);
+  for (let i = 0; i < harmN; i++) {
+    harmonics.push({
+      freq:  prng.float(1.5, 8.0) / w,
+      amp:   maxAmp * prng.float(0.2, 1.0) / (i + 1), // higher harmonics are quieter
+      phase: prng.float(0, TAU),
+    });
+  }
+  // Envelope: amplitude fades near edges, peaks off-centre
+  const envCentre = prng.float(0.3, 0.7);
+  const envWidth  = prng.float(0.3, 0.6);
+
+  ctx.save();
+
+  for (let i = 0; i < barCount; i++) {
+    const x = -pad + i * barW;
+    const t = (x + pad) / (w + pad * 2); // 0–1 across draw width
+
+    // Envelope — Gaussian-ish
+    const envDist = (t - envCentre) / envWidth;
+    const envelope = Math.exp(-envDist * envDist * 2);
+
+    // Sum harmonics at this x position
+    let amplitude = 0;
+    for (const harm of harmonics) {
+      amplitude += Math.sin(x * harm.freq + harm.phase) * harm.amp;
+    }
+    amplitude *= envelope;
+
+    const barH = Math.abs(amplitude);
+    if (barH < 0.5) continue;
+
+    // Bars get more opaque with height
+    const intensity = Math.min(barH / maxAmp, 1);
+    const tone = i % 3 === 0 ? toneB : toneA;
+    ctx.fillStyle = tone(opacity * (0.15 + 0.4 * intensity));
+
+    // Mirror above and below centre line
+    ctx.fillRect(x, centreY - barH, barW * 0.75, barH * 2);
+  }
+
+  // Thin centre line
+  ctx.strokeStyle = toneA(opacity * 0.15);
+  ctx.lineWidth   = w * 0.001;
+  ctx.beginPath();
+  ctx.moveTo(-pad, centreY);
+  ctx.lineTo(w + pad, centreY);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -558,7 +828,10 @@ const PATTERN_FNS = [
   drawCrosshatch,      // 12
   drawZigzag,          // 13
   drawSpiralField,     // 14
-  drawBrickWall,       // 15
+  drawLiquidGradient,  // 15
+  drawMilkyWay,        // 16
+  drawBlackHole,       // 17
+  drawSoundWave,       // 18
 ];
 
 /**
@@ -585,10 +858,11 @@ export function drawPatterns(ctx, geometry, prng, patternType, opacity, scale, i
 
   // Derive two tones relative to the card body lightness
   // toneA: lighter shift — lifts above the card surface
-  // toneB: darker shift  — recesses into the card surface
-  const shift = isDark ? 12 : -12;
-  const lA = Math.max(0, Math.min(100, cardLightness + shift));
-  const lB = Math.max(0, Math.min(100, cardLightness - shift));
+  // toneB: darker shift  — recesses into the card surface (subtle, stays near card colour)
+  const shiftA = isDark ? 12 : -12;
+  const shiftB = isDark ? -6 : 6;  // gentler: stays close to card body
+  const lA = Math.max(0, Math.min(100, cardLightness + shiftA));
+  const lB = Math.max(0, Math.min(100, cardLightness + shiftB));
   const toneA = (alpha) => hsla(hue, saturation * 0.7, lA, alpha);
   const toneB = twoTone
     ? (alpha) => hsla(hue, saturation * 0.7, lB, alpha)
