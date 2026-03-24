@@ -231,7 +231,8 @@ export function generateCard({
     ctx.restore();
   }
   if (patternType !== -2) {
-    const effectivePatternType = patternType < 0 ? patternPRNG.int(0, PATTERN_NAMES.length - 1) : patternType;
+    const patternTypeFromPRNG = patternPRNG.int(0, PATTERN_NAMES.length - 1); // always consume
+    const effectivePatternType = patternType < 0 ? patternTypeFromPRNG : patternType;
     if (patternRotation !== 0) {
       ctx.save();
       ctx.translate(centerX, centerY);
