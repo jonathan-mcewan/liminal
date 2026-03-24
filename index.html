@@ -339,6 +339,7 @@
             <div class="card-face card-back">
               <canvas id="canvas-back" style="display:none"></canvas>
               <div id="svg-output-back"></div>
+              <div class="holo-sheen" id="holo-sheen"></div>
             </div>
           </div>
         </div>
@@ -973,6 +974,7 @@
         const { frameW, frameH } = getFrameDims(dom);
         const aspect = `${frameW} / ${frameH}`;
 
+        let backResult;
         if (renderMode === 'svg') {
           const p   = buildParams(dom);
           // Front
@@ -981,7 +983,7 @@
           dom.svgOutputEl.innerHTML = svg.toSVG();
           // Back
           const svgBack = new SvgContext(frameW, frameH);
-          generateCardBack({ ...p, ctx: svgBack });
+          backResult = generateCardBack({ ...p, ctx: svgBack });
           dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
         } else {
           // Front
@@ -991,7 +993,20 @@
           const bp = buildParams(dom);
           dom.canvasBackEl.width  = Math.round(frameW);
           dom.canvasBackEl.height = Math.round(frameH);
-          generateCardBack({ ...bp, ctx: backCtx });
+          backResult = generateCardBack({ ...bp, ctx: backCtx });
+        }
+
+        // Position hologram sheen overlay
+        const holoEl = document.getElementById('holo-sheen');
+        if (backResult && backResult.holoBounds) {
+          const b = backResult.holoBounds;
+          holoEl.style.display = 'block';
+          holoEl.style.left    = (b.left   * 100).toFixed(2) + '%';
+          holoEl.style.top     = (b.top    * 100).toFixed(2) + '%';
+          holoEl.style.width   = (b.width  * 100).toFixed(2) + '%';
+          holoEl.style.height  = (b.height * 100).toFixed(2) + '%';
+        } else {
+          holoEl.style.display = 'none';
         }
 
         dom.cardScene.style.setProperty('--card-ar', (frameW / frameH).toFixed(6));

@@ -277,8 +277,46 @@ Keyboard shortcut: `B` to open favourites browser.
 - `isFlipped()` / `setFlipped(bool)` — read/write flip state
 - Tilt: ±12deg, rAF-throttled, disabled on touch-only devices
 - Flip: 0.6s CSS transition, dispatches `card-flip` CustomEvent
-- **`modules/card-back.js`** — Back face renderer (magnetic stripe, hatched pattern, brand mark, barcode)
+- **`modules/card-back.js`** — Back face renderer (magnetic stripe, hatched pattern, brand mark, barcode, easter eggs)
 - DOM structure: `.card-scene > .card-body > .card-face.card-front + .card-face.card-back`
+
+---
+
+## Card Back Easter Eggs
+
+Four seed-driven decorative features on the card back, rendered in `card-back.js`. All driven by `featurePRNG` (seeded `seed ^ 0xEA57E699`) for feature rolls and `backPRNG` (seeded `seed ^ 0xBACCFACE`) for content selection and placement.
+
+### Fine Print (always shown)
+
+Absurd legalese paragraph below the barcode. 100 clauses in the `FINE_PRINT` corpus. `backPRNG` picks 4–6 clauses per card and concatenates them into a word-wrapped paragraph. Renders in a tiny (1.8% cardWidth) font at ~89.5% down the card.
+
+- Font: weight 300, system sans-serif
+- Alpha: 0.28 (dark) / 0.30 (light), desaturated
+- Word-wrapped to card width minus 8% margins, max 6 lines
+
+### Seal of Adequacy (rare, ~12%)
+
+Circular certification stamp in the hatched pattern area, right of center. 20 seal texts in `SEAL_TEXTS`, each with two lines (e.g. "CERTIFIED" / "ADEQUATE"). Includes double ring border, 36 decorative notches, and a 5-pointed star.
+
+- Position: 78% across card width, vertically centered in hatched area
+- Radius: 9% of card width
+- Alpha: 0.22 (dark) / 0.18 (light)
+
+### Hologram (occasional, ~25%)
+
+Small geometric rosette square in a card corner. Concentric circles + 12 radial spokes, with "GENUINE FAKE / HOLOGRAM" text. Corner chosen by `backPRNG` with bias toward bottom corners (avoids magnetic stripe).
+
+- Size: 11% of card width
+- Padding: 4% from card edges
+- Hue shifted ±30° from card hue for subtle shimmer effect
+- Alpha: 0.18 (dark) / 0.14 (light)
+
+### Customer Disservice (occasional, ~20%)
+
+Two lines of unhelpful customer support text, centered between the hatched area and barcode (~71% down). 15 text pairs in `CUSTOMER_DISSERVICE`.
+
+- Font: weight 400, 2.2% cardWidth
+- Alpha: 0.25 (dark) / 0.28 (light), desaturated
 
 ---
 

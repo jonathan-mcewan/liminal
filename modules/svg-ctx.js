@@ -388,6 +388,14 @@ export class SvgContext {
     }
   }
 
+  measureText(text) {
+    if (!this._measureCanvas) {
+      this._measureCanvas = document.createElement('canvas').getContext('2d');
+    }
+    this._measureCanvas.font = this.font;
+    return this._measureCanvas.measureText(text);
+  }
+
   fillText(text, x, y) {
     const { size, weight, family } = parseFont(this.font);
     const baseline = this.textBaseline === 'top' ? 'hanging'

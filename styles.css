@@ -613,6 +613,37 @@ button svg {
   transform: rotateY(180deg);
 }
 
+/* ── Hologram sheen — iridescent flash on tilt ─────────────────────────── */
+.holo-sheen {
+  position:       absolute;
+  pointer-events: none;
+  z-index:        2;
+  display:        none;                 /* shown via JS when hologram present */
+  overflow:       hidden;
+  border-radius:  2px;
+}
+.holo-sheen::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: conic-gradient(
+    from calc(var(--mx, 0.5) * 360deg) at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%),
+    hsla(0,   80%, 70%, 0.25),
+    hsla(60,  80%, 70%, 0.20),
+    hsla(120, 80%, 70%, 0.25),
+    hsla(180, 80%, 70%, 0.20),
+    hsla(240, 80%, 70%, 0.25),
+    hsla(300, 80%, 70%, 0.20),
+    hsla(360, 80%, 70%, 0.25)
+  );
+  mix-blend-mode: screen;
+  opacity:        0;
+  transition:     opacity 0.3s ease;
+}
+.card-body:hover .holo-sheen::before {
+  opacity: 1;
+}
+
 
 /* ── SVG output area — mirrors canvas sizing and background ──────────────── */
 #svg-output,

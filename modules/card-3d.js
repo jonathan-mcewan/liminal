@@ -33,6 +33,10 @@ function tick() {
   const nx = (mx - rect.left) / rect.width  * 2 - 1; // -1..1
   const ny = (my - rect.top)  / rect.height * 2 - 1;
 
+  // Expose normalised mouse position (0–1) for hologram sheen effect
+  bodyEl.style.setProperty('--mx', ((nx + 1) / 2).toFixed(3));
+  bodyEl.style.setProperty('--my', ((ny + 1) / 2).toFixed(3));
+
   const tiltY = (flipped ? -1 : 1) * nx * MAX_TILT;
   const tiltX = -ny * MAX_TILT;
 
@@ -51,6 +55,8 @@ function onMouseMove(e) {
 
 function onMouseLeave() {
   hovering = false;
+  bodyEl.style.setProperty('--mx', '0.5');
+  bodyEl.style.setProperty('--my', '0.5');
   applyTransform(0, 0, EASE_BACK);
 }
 
