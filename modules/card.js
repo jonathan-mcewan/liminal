@@ -136,8 +136,8 @@ export function generateCard({
   const symbolLightness = modeFlipped ? (isDark ? 87 : 15) : symbolLightnessFromSeed;
 
   // ── Symbol style: seed-derived or explicit override ───────────────────────
-  const autoStyle   = stylePRNG.int(0, 23);
-  const symbolStyle = (logoStyle >= 0 && logoStyle <= 23) ? logoStyle : autoStyle;
+  const autoStyle   = stylePRNG.int(0, 24);
+  const symbolStyle = (logoStyle >= 0 && logoStyle <= 24) ? logoStyle : autoStyle;
 
   // ── Logo variation: drawn from logoPRNG (internals only, not style) ───────
   const symbolRadiusFactor = logoPRNG.float(0.169, 0.286); // radius as fraction of card width

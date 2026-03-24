@@ -57,7 +57,7 @@ export function updateLogoName(dom) {
     dom.logoNameDisplay.textContent = '';
   } else {
     const seed  = getSeed(dom);
-    const style = makePRNG(seed ^ 0x9E3779B9).int(0, 23);
+    const style = makePRNG(seed ^ 0x9E3779B9).int(0, 24);
     dom.logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
   }
 }

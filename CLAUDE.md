@@ -194,9 +194,10 @@ Global opacity multiplier: `const opacity = 0.2`.
 | 21 | Cross Hatch |
 | 22 | Icons |
 | 23 | ASCII Art |
+| 24 | Organic Tree |
 
-Style is selected by `stylePRNG.int(0, 23)` in auto mode, or forced via `logoStyle` param (0–23).
-Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 23)` — must match `stylePRNG` seed exactly.
+Style is selected by `stylePRNG.int(0, 24)` in auto mode, or forced via `logoStyle` param (0–24).
+Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 24)` — must match `stylePRNG` seed exactly.
 
 **Dot Mask vs Variable Dot Mask:** Dot Mask (9) uses a single dot size across the grid. Variable Dot Mask (15) seed-derives 2–7 discrete size steps lerped between a min and max radius; each dot randomly picks a step, producing varied dot sizes within the same harmonic blob boundary.
 

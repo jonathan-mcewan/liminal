@@ -43,6 +43,7 @@ export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng) {
     drawCrossHatch,
     drawIcons,
     drawAsciiArt,
+    drawOrganicTree,
   ];
 
   (variants[style] ?? variants[0])(ctx, x, y, radius, strokeWeight, symbolColor, rng);
@@ -871,60 +872,212 @@ function drawRoseCurve(ctx, x, y, radius, sw, symbolColor, rng) {
 // Iterative approach with a stack; branch thickness decays per depth level.
 function drawFractalTree(ctx, cx, cy, radius, sw, symbolColor, rng) {
   const TAU = Math.PI * 2;
-  const initAngle   = rng.float(0, TAU);
-  const spread      = rng.float(0.35, 0.65);
-  const decay       = rng.float(0.55, 0.72);
-  const trunkRatio  = rng.float(0.28, 0.40);
-  const splits      = rng.int(3, 9);
-  // Cap depth so total branches stay reasonable (splits^depth ≤ ~500)
-  const depth       = splits <= 4 ? rng.int(3, 4) : splits <= 6 ? 3 : 2;
-  const hasJitter   = rng.next() > 0.5;
+  const halfSw = sw * 0.5;
 
-  // Pre-generate jitter values for determinism (max branches at depth 5 with 3 splits ≈ 364)
+  // Global tree parameters (shared across all trees)
+  const treeCount   = rng.int(3, 9);
+  const spread      = rng.float(0.55, 0.90);
+  const decay       = rng.float(0.55, 0.72);
+  const trunkRatio  = rng.float(0.18, 0.30);
+  const splits      = rng.int(2, 4);
+  const depth       = splits <= 3 ? rng.int(3, 4) : 3;
+  const hasJitter   = rng.next() > 0.4;
+  const baseAngle   = rng.float(0, TAU);
+  const accentShift = rng.int(8, 18) * (rng.next() > 0.5 ? 1 : -1); // lightness shift for accent
+
+  // Per-tree jitter: angular offset, radial nudge, growth-direction nudge, accent flag
+  const treeMeta = [];
+  for (let i = 0; i < treeCount; i++) {
+    treeMeta.push({
+      angOff:  rng.float(-0.25, 0.25) * (TAU / treeCount),
+      radOff:  rng.float(-0.06, 0.06) * radius,
+      growOff: rng.float(-0.12, 0.12),
+      accent:  rng.next() > 0.6,  // ~40% of trees use accent colour
+    });
+  }
+
+  // Pre-generate branch angle jitter values for determinism
   const jitters = [];
-  for (let i = 0; i < 400; i++) jitters.push(hasJitter ? rng.float(-0.15, 0.15) : 0);
+  for (let i = 0; i < 600; i++) jitters.push(hasJitter ? rng.float(-0.18, 0.18) : 0);
 
   ctx.save();
   ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.clip();
   ctx.lineCap = 'round';
 
-  // BFS stack: [fromX, fromY, angle, length, depthLeft]
-  const stack = [[cx, cy, initAngle, radius * trunkRatio, depth]];
+  const tips = [];   // [x, y, isAccent]
   let ji = 0;
-  const tips = [];
 
-  while (stack.length > 0) {
-    const [fx, fy, angle, len, d] = stack.shift();
-    const tx = fx + Math.cos(angle) * len;
-    const ty = fy + Math.sin(angle) * len;
+  // All trees stem from the center, growing outward
+  for (let t = 0; t < treeCount; t++) {
+    const angle = baseAngle + (t / treeCount) * TAU + treeMeta[t].angOff;
+    const growAngle = angle + treeMeta[t].growOff;
+    const trunkLen  = radius * trunkRatio;
+    const isAccent  = treeMeta[t].accent;
+    const lShift    = isAccent ? accentShift : 0;
 
-    const t = 1 - d / depth; // 0 at root, approaches 1 at tips
-    ctx.lineWidth   = sw * (1.3 - t * 0.8);
-    ctx.strokeStyle = symbolColor(0, 0.85 - t * 0.35);
-    ctx.beginPath();
-    ctx.moveTo(fx, fy);
-    ctx.lineTo(tx, ty);
-    ctx.stroke();
+    // BFS stack: [fromX, fromY, angle, length, depthLeft]
+    const stack = [[cx, cy, growAngle, trunkLen, depth]];
 
-    if (d > 0) {
-      const nextLen = len * decay;
-      for (let s = 0; s < splits; s++) {
-        const frac = splits === 1 ? 0 : (s / (splits - 1)) * 2 - 1; // -1..1
-        const branchAngle = angle + frac * spread + jitters[ji++ % jitters.length];
-        stack.push([tx, ty, branchAngle, nextLen, d - 1]);
+    while (stack.length > 0) {
+      const [fx, fy, a, len, d] = stack.shift();
+      const tx = fx + Math.cos(a) * len;
+      const ty = fy + Math.sin(a) * len;
+
+      const p = 1 - d / depth; // 0 at root, approaches 1 at tips
+      ctx.lineWidth   = halfSw * (1.4 - p * 0.9);
+      ctx.strokeStyle = symbolColor(lShift, 0.80 - p * 0.30);
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+
+      if (d > 0) {
+        const nextLen = len * decay;
+        for (let s = 0; s < splits; s++) {
+          const frac = splits === 1 ? 0 : (s / (splits - 1)) * 2 - 1;
+          const branchAngle = a + frac * spread + jitters[ji++ % jitters.length];
+          stack.push([tx, ty, branchAngle, nextLen, d - 1]);
+        }
+      } else {
+        tips.push([tx, ty, isAccent]);
       }
-    } else {
-      tips.push([tx, ty]);
     }
   }
 
-  // Leaf dots at tips
-  ctx.fillStyle = symbolColor(5, 0.65);
-  for (const [tx, ty] of tips) {
+  // Leaf dots at tips — accent trees get shifted colour
+  for (const [tx, ty, isAccent] of tips) {
+    const lShift = isAccent ? accentShift : 5;
+    ctx.fillStyle = symbolColor(lShift, 0.55);
     ctx.beginPath();
-    ctx.arc(tx, ty, sw * 0.7, 0, TAU);
+    ctx.arc(tx, ty, halfSw * 0.8, 0, TAU);
     ctx.fill();
   }
+
+  // Soft centre dot where all trunks converge
+  ctx.fillStyle = symbolColor(0, 0.18);
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.07, 0, TAU);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// ── Style 24: Organic Tree ───────────────────────────────────────────────────
+// Like Fractal Tree but with curved branches (polyline-approximated for SVG compat),
+// tapered stroke widths, asymmetric splits, and soft gradient-like fade from trunk to tip.
+function drawOrganicTree(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const halfSw = sw * 0.5;
+  const CURVE_SEGS = 6; // polyline segments to approximate each quadratic curve
+
+  const treeCount   = rng.int(3, 8);
+  const baseSpread  = rng.float(0.50, 0.85);
+  const decay       = rng.float(0.52, 0.68);
+  const trunkRatio  = rng.float(0.20, 0.32);
+  const splits      = rng.int(2, 3);
+  const depth       = rng.int(3, 5);
+  const baseAngle   = rng.float(0, TAU);
+  const curviness   = rng.float(0.25, 0.55);
+  const accentShift = rng.int(8, 18) * (rng.next() > 0.5 ? 1 : -1);
+
+  // Per-tree variation
+  const treeMeta = [];
+  for (let i = 0; i < treeCount; i++) {
+    treeMeta.push({
+      angOff:   rng.float(-0.25, 0.25) * (TAU / treeCount),
+      growOff:  rng.float(-0.10, 0.10),
+      accent:   rng.next() > 0.55,
+      lenScale: rng.float(0.85, 1.15),
+      curveDir: rng.next() > 0.5 ? 1 : -1,
+    });
+  }
+
+  // Pre-generate variation values for determinism
+  const curvatures = [];
+  const spreadJit  = [];
+  const tipRadii   = [];
+  for (let i = 0; i < 600; i++) {
+    curvatures.push(rng.float(-1, 1));
+    spreadJit.push(rng.float(-0.15, 0.15));
+    tipRadii.push(rng.float(0.5, 1.2));
+  }
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.clip();
+  ctx.lineCap = 'round';
+
+  const tips = [];   // [x, y, isAccent, tipIndex]
+  let vi = 0;
+  let ti = 0;
+
+  for (let t = 0; t < treeCount; t++) {
+    const angle     = baseAngle + (t / treeCount) * TAU + treeMeta[t].angOff;
+    const growAngle = angle + treeMeta[t].growOff;
+    const trunkLen  = radius * trunkRatio * treeMeta[t].lenScale;
+    const isAccent  = treeMeta[t].accent;
+    const lShift    = isAccent ? accentShift : 0;
+    const cDir      = treeMeta[t].curveDir;
+
+    // BFS stack: [fromX, fromY, angle, length, depthLeft]
+    const stack = [[cx, cy, growAngle, trunkLen, depth]];
+
+    while (stack.length > 0) {
+      const [fx, fy, a, len, d] = stack.shift();
+      const tx = fx + Math.cos(a) * len;
+      const ty = fy + Math.sin(a) * len;
+
+      // Curved branch via polyline (SvgContext-compatible)
+      const curveAmt = curvatures[vi % curvatures.length] * curviness * len * cDir;
+      const perpA = a + Math.PI * 0.5;
+      const cpx = (fx + tx) * 0.5 + Math.cos(perpA) * curveAmt;
+      const cpy = (fy + ty) * 0.5 + Math.sin(perpA) * curveAmt;
+
+      const p = 1 - d / depth;
+      const thickness = halfSw * (1.6 - p * 1.2);
+      ctx.lineWidth   = Math.max(thickness, halfSw * 0.15);
+      ctx.strokeStyle = symbolColor(lShift, 0.75 - p * 0.30);
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      for (let i = 1; i <= CURVE_SEGS; i++) {
+        const t2 = i / CURVE_SEGS;
+        const u  = 1 - t2;
+        // Quadratic Bézier: B(t) = (1-t)²P0 + 2(1-t)tCP + t²P1
+        const bx = u * u * fx + 2 * u * t2 * cpx + t2 * t2 * tx;
+        const by = u * u * fy + 2 * u * t2 * cpy + t2 * t2 * ty;
+        ctx.lineTo(bx, by);
+      }
+      ctx.stroke();
+
+      if (d > 0) {
+        const nextLen = len * decay;
+        for (let s = 0; s < splits; s++) {
+          const frac = splits === 1 ? 0 : (s / (splits - 1)) * 2 - 1;
+          const branchSpread = baseSpread + spreadJit[vi % spreadJit.length];
+          const branchAngle = a + frac * branchSpread;
+          vi++;
+          stack.push([tx, ty, branchAngle, nextLen, d - 1]);
+        }
+      } else {
+        tips.push([tx, ty, isAccent, ti++]);
+      }
+    }
+  }
+
+  // Soft leaf blobs at tips — pre-generated radii for determinism
+  for (const [tx, ty, isAccent, idx] of tips) {
+    const lShift = isAccent ? accentShift : 5;
+    const dotR = halfSw * tipRadii[idx % tipRadii.length];
+    ctx.fillStyle = symbolColor(lShift, 0.40);
+    ctx.beginPath();
+    ctx.arc(tx, ty, dotR, 0, TAU);
+    ctx.fill();
+  }
+
+  // Soft centre dot
+  ctx.fillStyle = symbolColor(0, 0.18);
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.07, 0, TAU);
+  ctx.fill();
 
   ctx.restore();
 }

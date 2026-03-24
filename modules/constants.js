@@ -14,7 +14,7 @@ export const LOGO_NAMES = [
   'Spiral', 'Wave Field', 'Starburst', 'Lissajous', 'Rose Curve',
   'Variable Dot Mask', 'Inlaid Rings',
   'Fractal Tree', 'Voronoi Cells', 'Truchet Tiles', 'Celtic Knot',
-  'Cross Hatch', 'Icons', 'ASCII Art',
+  'Cross Hatch', 'Icons', 'ASCII Art', 'Organic Tree',
 ];
 
 // ── Pure helpers ────────────────────────────────────────────────────────
