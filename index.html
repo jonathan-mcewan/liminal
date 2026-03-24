@@ -252,10 +252,13 @@
           <input id="pattern-opacity" type="range" min="0" max="100" step="1" value="15" />
         </div>
         <div class="field">
-          <div class="field field--row">
-            <label class="toggle-switch"><input id="pattern-two-tone" type="checkbox" checked /><span class="toggle-track"></span></label>
-            <span>Two-Tone</span>
+          <div class="field-hdr">
+            <span>Tone</span>
             <button class="btn-reset" id="pattern-two-tone-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="seg-control">
+            <button id="tone-single" class="mode-btn">Single</button>
+            <button id="tone-two" class="mode-btn active">Two-Tone</button>
           </div>
         </div>
       </div>
@@ -489,7 +492,7 @@
         patternOpacityDisplay:  document.getElementById("pattern-opacity-display"),
         patternScaleSlider:     document.getElementById("pattern-scale"),
         patternScaleDisplay:    document.getElementById("pattern-scale-display"),
-        patternTwoToneToggle:   document.getElementById("pattern-two-tone"),
+        patternTwoToneToggle:   { checked: true },  // virtual — seg-control drives this
         patternTwoToneReset:    document.getElementById("pattern-two-tone-reset"),
         showArtifactsToggle:    document.getElementById("show-artifacts"),
         artifactSeedInput:      document.getElementById("artifact-seed"),
@@ -992,6 +995,7 @@
         patRotReset.classList.toggle('visible', dom.patternRotationSlider.value !== '0');
         patOpacityReset.classList.toggle('visible', dom.patternOpacitySlider.value !== '15');
         patScaleReset.classList.toggle('visible', dom.patternScaleSlider.value !== '100');
+        if (typeof syncToneButtons === 'function') syncToneButtons();
         updateStarButton();
       }
 
@@ -1673,14 +1677,30 @@
         render(true);
       });
 
-      dom.patternTwoToneToggle.addEventListener("change", () => {
-        colorOverrides.patternTwoTone = dom.patternTwoToneToggle.checked;
+      const toneSingleBtn = document.getElementById("tone-single");
+      const toneTwoBtn    = document.getElementById("tone-two");
+      function syncToneButtons() {
+        toneSingleBtn.classList.toggle('active', !dom.patternTwoToneToggle.checked);
+        toneTwoBtn.classList.toggle('active',     dom.patternTwoToneToggle.checked);
+      }
+      toneSingleBtn.addEventListener("click", () => {
+        dom.patternTwoToneToggle.checked = false;
+        colorOverrides.patternTwoTone = false;
+        syncToneButtons();
+        updateResetButtons(dom);
+        render(true);
+      });
+      toneTwoBtn.addEventListener("click", () => {
+        dom.patternTwoToneToggle.checked = true;
+        colorOverrides.patternTwoTone = true;
+        syncToneButtons();
         updateResetButtons(dom);
         render(true);
       });
       dom.patternTwoToneReset.addEventListener("click", () => {
         delete colorOverrides.patternTwoTone;
         updateColorSliders(dom);
+        syncToneButtons();
         updateResetButtons(dom);
         render(true);
       });
