@@ -97,7 +97,8 @@ body {
   align-items:     center;
   justify-content: center;
   padding:         1.5rem;
-  overflow:        hidden;
+  overflow-x:      hidden;
+  overflow-y:      auto;
   background:      #1a1a22;
 }
 
@@ -609,6 +610,10 @@ button svg {
   /* Section headings span both columns */
   .panel-section {
     break-inside: avoid;
+  }
+
+  .panel-section {
+    margin: 0;          /* reset negative margins that cause overlap in grid */
   }
 
   /* Actions section spans full width */
