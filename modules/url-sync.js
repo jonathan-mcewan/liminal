@@ -13,6 +13,7 @@ export function applyQueryString(dom) {
   if (q.has("lstyle"))    dom.logoStyleSelect.value        = q.get("lstyle");
   if (q.has("lscale"))  { dom.logoScaleSlider.value        = q.get("lscale");
                            dom.logoScaleDisplay.textContent = dom.logoScaleSlider.value + '%'; }
+  if (q.has("bgstyle")) { dom.bgStyleSelect.value           = q.get("bgstyle"); }
   if (q.has("zoom"))    { dom.noiseZoomSlider.value        = q.get("zoom");
                            dom.noiseZoomDisplay.textContent = dom.noiseZoomSlider.value; }
   if (q.has("name"))      dom.personNameInput.value        = q.get("name");
@@ -44,6 +45,7 @@ export function applyQueryString(dom) {
   if (q.has("art_seed"))  seedOverrides.artifactSeed = parseInt(q.get("art_seed"), 10);
   if (q.has("pat_seed")) seedOverrides.patternSeed  = parseInt(q.get("pat_seed"), 10);
   if (q.has("pat_2t"))  colorOverrides.patternTwoTone = q.get("pat_2t") !== "0";
+  if (q.has("bblur"))   colorOverrides.bgBlur       = parseInt(q.get("bblur"), 10) / 1000;
 }
 
 // ── State → URL ─────────────────────────────────────────────────────────
@@ -54,6 +56,7 @@ export function syncURL(dom, push = false) {
   const q = new URLSearchParams({
     seed:        dom.seedInput.value,
     csize:       dom.cardSize,
+    bgstyle:     dom.bgStyleSelect.value,
     lstyle:      dom.logoStyleSelect.value,
     lscale:      dom.logoScaleSlider.value,
     zoom:        dom.noiseZoomSlider.value,
@@ -78,6 +81,7 @@ export function syncURL(dom, push = false) {
   if (seedOverrides.artifactSeed     !== undefined) q.set("art_seed", seedOverrides.artifactSeed);
   if (seedOverrides.patternSeed      !== undefined) q.set("pat_seed", seedOverrides.patternSeed);
   if (colorOverrides.patternTwoTone  !== undefined) q.set("pat_2t",   colorOverrides.patternTwoTone ? "1" : "0");
+  if (colorOverrides.bgBlur          !== undefined) q.set("bblur",    Math.round(colorOverrides.bgBlur * 1000));
   const url = "?" + q.toString();
   if (push) history.pushState(null, "", url);
   else      history.replaceState(null, "", url);

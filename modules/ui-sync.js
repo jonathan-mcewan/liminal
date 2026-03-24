@@ -1,5 +1,5 @@
 import { makePRNG }                          from "./prng.js";
-import { CARD_SIZES, LOGO_NAMES, PATTERN_NAMES, hashString, hueToColorName } from "./constants.js";
+import { CARD_SIZES, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, hashString, hueToColorName } from "./constants.js";
 import { colorOverrides, seedOverrides, getEffectiveColor, getEffectiveSeeds } from "./state.js";
 
 // ── Seed helper — accepts numbers or text ───────────────────────────────
@@ -32,6 +32,8 @@ export function updateColorSliders(dom) {
   dom.noiseContrastSlider.value        = Math.round(c.noiseContrast * 100);
   dom.noiseContrastDisplay.textContent = Math.round(c.noiseContrast * 100);
   dom.patternTwoToneToggle.checked    = c.patternTwoTone;
+  dom.bgBlurSlider.value              = Math.round(c.bgBlur * 1000);
+  dom.bgBlurDisplay.textContent       = dom.bgBlurSlider.value;
 }
 
 export function updateSeedInputs(dom) {
@@ -53,6 +55,7 @@ export function updateResetButtons(dom) {
   dom.artifactSeedReset.classList.toggle('visible',      seedOverrides.artifactSeed     !== undefined);
   dom.patternSeedReset.classList.toggle('visible',       seedOverrides.patternSeed      !== undefined);
   dom.patternTwoToneReset.classList.toggle('visible',   colorOverrides.patternTwoTone  !== undefined);
+  dom.bgBlurReset.classList.toggle('visible',           colorOverrides.bgBlur          !== undefined);
 }
 
 export function updatePatternName(dom) {
@@ -66,6 +69,19 @@ export function updatePatternName(dom) {
     const seeds = getEffectiveSeeds(seed);
     const style = makePRNG(seeds.patternSeed).int(0, 15);
     dom.patternNameDisplay.textContent = `[${PATTERN_NAMES[style]}]`;
+  }
+}
+
+export function updateBgName(dom) {
+  const override = parseInt(dom.bgStyleSelect.value, 10);
+  if (override === -2) {
+    dom.bgNameDisplay.textContent = '[None]';
+  } else if (override >= 0) {
+    dom.bgNameDisplay.textContent = '';
+  } else {
+    const seed  = getSeed(dom);
+    const style = makePRNG(seed ^ 0xBACE0000).int(0, 15);
+    dom.bgNameDisplay.textContent = `[${BG_NAMES[style]}]`;
   }
 }
 
@@ -102,9 +118,11 @@ export function buildParams(dom) {
     isDarkOverride:        colorOverrides.isDark          !== undefined ? colorOverrides.isDark          : null,
     cardLightnessOverride: colorOverrides.cardLightness   !== undefined ? colorOverrides.cardLightness   : null,
     saturationOverride:    colorOverrides.saturation      !== undefined ? colorOverrides.saturation      : null,
+    bgStyle:               parseInt(dom.bgStyleSelect.value, 10),
     noiseZoom:             parseInt(dom.noiseZoomSlider.value, 10) | 0,
     noiseBrightness:       color.noiseBrightness,
     noiseContrast:         color.noiseContrast,
+    bgBlur:                color.bgBlur,
     personName:            dom.personNameInput.value.trim(),
     jobTitle:              dom.jobTitleInput.value.trim(),
     artifactSeed:          seeds.artifactSeed,

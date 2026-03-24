@@ -3,12 +3,12 @@ import { hsla, roundedRectPath } from './utils.js';
 import {
   drawCardBodyGradient,
   drawVignette,
-  drawNoise,
   drawArtifacts,
   drawTopGloss,
   drawLanyardHole,
   drawCardEdge,
 } from './background.js';
+import { drawBackgroundTexture } from './bg-styles.js';
 import { drawPatterns }  from './patterns.js';
 import { drawSymbol }   from './symbols.js';
 import { drawCardText } from './text.js';
@@ -40,8 +40,9 @@ export function deriveColorParams(seed) {
   // without an explicit lightness override, so the slider shows a sensible value.
   const altCardLightness = isDark ? colorPRNG.int(72, 86) : colorPRNG.int(11, 22);
   const patternTwoTone   = colorPRNG.next() > 0.35; // ~65% chance of two-tone
+  const bgBlur           = colorPRNG.float(0.02, 0.06); // fraction of card max dim
 
-  return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast, patternTwoTone };
+  return { isDark, cardLightness, altCardLightness, hue, saturation, noiseBrightness, noiseContrast, patternTwoTone, bgBlur };
 }
 
 /**
@@ -79,9 +80,11 @@ export function generateCard({
   isDarkOverride        = null,
   cardLightnessOverride = null,
   saturationOverride    = null,
+  bgStyle               = -1,    // -1 = auto, 0–9 = specific style
   noiseZoom             = 4,
   noiseBrightness    = 0.06,
   noiseContrast      = 0.05,
+  bgBlur             = 0.033,
   personName         = '',
   jobTitle           = '',
   artifactSeed       = 0,
@@ -199,7 +202,24 @@ export function generateCard({
 
   drawCardBodyGradient(ctx, geometry, isDark, cardColor);
   drawVignette(ctx, geometry, isDark);
-  drawNoise(ctx, geometry, cardPRNG, noiseZoom, noiseBrightness, noiseContrast);
+
+  // ── Background texture ────────────────────────────────────────────────
+  // Always consume cardPRNG for the blob-noise grid (style 0) to preserve
+  // the downstream sequence, even when a different bg style is active.
+  const bgPRNG = makePRNG(seed ^ 0xBACE0000);
+  const autoBgStyle = bgPRNG.int(0, 15);
+  const effectiveBgStyle = bgStyle >= 0 ? bgStyle : autoBgStyle;
+  // Consume cardPRNG exactly as the old drawNoise did — preserve sequence
+  for (let row = 0; row < noiseZoom; row++) {
+    for (let col = 0; col < noiseZoom; col++) {
+      cardPRNG.float(0, 1); // cx jitter
+      cardPRNG.float(0, 1); // cy jitter
+      cardPRNG.next();       // brightness
+    }
+  }
+  if (bgStyle !== -2) {
+    drawBackgroundTexture(ctx, geometry, bgPRNG, effectiveBgStyle, noiseBrightness, noiseContrast, noiseZoom, bgBlur);
+  }
   if (patternType !== -2) {
     const effectivePatternType = patternType < 0 ? patternPRNG.int(0, 15) : patternType;
     drawPatterns(ctx, geometry, patternPRNG, effectivePatternType, patternOpacity, patternScale, isDark, hue, saturation, cardLightness, patternTwoTone);

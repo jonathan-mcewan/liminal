@@ -4,7 +4,7 @@ import { deriveColorParams } from "./card.js";
 // ── Override state ──────────────────────────────────────────────────────
 // Only keys that the user has explicitly set are present.
 // Absent key → use seed-derived default.
-export const colorOverrides = {};  // isDark | cardLightness | hue | saturation | noiseBrightness | noiseContrast | patternTwoTone
+export const colorOverrides = {};  // isDark | cardLightness | hue | saturation | noiseBrightness | noiseContrast | patternTwoTone | bgBlur
 export const seedOverrides  = {};  // logoNonce | artifactSeed | patternSeed
 
 export function clearAllOverrides() {
@@ -15,6 +15,7 @@ export function clearAllOverrides() {
   delete colorOverrides.noiseBrightness;
   delete colorOverrides.noiseContrast;
   delete colorOverrides.patternTwoTone;
+  delete colorOverrides.bgBlur;
   delete seedOverrides.logoNonce;
   delete seedOverrides.artifactSeed;
   delete seedOverrides.patternSeed;
@@ -49,6 +50,7 @@ export function getEffectiveColor(seed) {
     noiseBrightness: colorOverrides.noiseBrightness ?? derived.noiseBrightness,
     noiseContrast:      colorOverrides.noiseContrast   ?? derived.noiseContrast,
     patternTwoTone:    colorOverrides.patternTwoTone  ?? derived.patternTwoTone,
+    bgBlur:            colorOverrides.bgBlur          ?? derived.bgBlur,
   };
 }
 

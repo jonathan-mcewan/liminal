@@ -76,6 +76,7 @@ export class SvgContext {
     // No-op properties — kept so drawing code can set them without errors
     this.globalCompositeOperation = 'source-over';
     this.globalAlpha   = 1;
+    this.imageSmoothingEnabled = true;
     this.filter        = 'none';
     this.shadowColor   = 'transparent';
     this.shadowBlur    = 0;
@@ -400,13 +401,14 @@ export class SvgContext {
   /**
    * Embeds an HTMLCanvasElement as a base64 <image> in the SVG.
    * Honours ctx.filter = 'blur(Npx)' by generating an SVG feGaussianBlur filter.
-   * Only the (image, dx, dy) overload is needed by the drawing pipeline.
+   * Supports both (image, dx, dy) and (image, dx, dy, dw, dh) overloads.
    */
-  drawImage(image, dx, dy) {
+  drawImage(image, dx, dy, dw, dh) {
     if (!(image instanceof HTMLCanvasElement)) return;
     const dataUrl = image.toDataURL('image/png');
-    const w = image.width;
-    const h = image.height;
+    // If dw/dh provided, scale to destination size; otherwise use source dimensions
+    const w = dw ?? image.width;
+    const h = dh ?? image.height;
 
     let filterAttr = '';
     const blurMatch = this.filter && this.filter.match(/blur\(([\d.]+)px\)/);
@@ -422,8 +424,9 @@ export class SvgContext {
       filterAttr = ` filter="url(#${fid})"`;
     }
 
+    const renderAttr = this.imageSmoothingEnabled ? '' : ' image-rendering="pixelated"';
     this._body.push(
-      `<image href="${dataUrl}" x="${f(dx)}" y="${f(dy)}" width="${f(w)}" height="${f(h)}"${filterAttr}/>`,
+      `<image href="${dataUrl}" x="${f(dx)}" y="${f(dy)}" width="${f(w)}" height="${f(h)}"${filterAttr}${renderAttr}/>`,
     );
   }
 

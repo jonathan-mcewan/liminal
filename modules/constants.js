@@ -7,6 +7,12 @@ export const CARD_SIZES = {
   moo:    { aspect: 84 / 55,   scale: 1 },           // MOO business card (84 × 55 mm)
 };
 
+export const BG_NAMES = [
+  'Noise', 'Solid', 'Linear Gradient', 'Radial Glow', 'Film Grain',
+  'Cloudy', 'Brushed', 'Speckle', 'Mesh Gradient', 'Dappled',
+  'Plasma', 'Ripple', 'Weave', 'Marble', 'Topographic', 'Caustics',
+];
+
 export const PATTERN_NAMES = [
   'Halftone Dots', 'Guilloche', 'Concentric Rings', 'Scanlines',
   'Topographic', 'Moiré', 'Chevron', 'Hexagonal Grid',
