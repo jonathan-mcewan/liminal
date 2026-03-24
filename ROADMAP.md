@@ -27,7 +27,7 @@ Giving each card a distinctive mark.
 - Logo seed (nonce) for independent variation without changing the card
 - Logo scale control (25–200%)
 - Auto / None / manual logo selection via visual grid picker
-- 5 artifact types (streak, line bundle, corner wedge, arc slice, grid fragment)
+- 11 artifact types (streak, line bundle, corner wedge, arc slice, dot grid, rings, cross, chevron, diamond, dashes, bracket)
 - Artifact seed, count, scale, and opacity controls
 - Name and job title text fields
 
@@ -39,7 +39,7 @@ Backgrounds and patterns that stack to create depth.
 
 - 16 background texture styles (noise, marble, caustics, plasma, topographic, and more)
 - Background zoom, brightness, contrast, and blur controls
-- 16 pattern overlay styles (halftone, guilloche, moiré, chevron, and more)
+- 19 pattern overlay styles (halftone, guilloche, moiré, chevron, spiral field, liquid gradient, milky way, and more)
 - Pattern seed, scale, opacity, and two-tone toggle
 - Visual grid pickers for both backgrounds and patterns
 
@@ -57,40 +57,41 @@ Making the card feel like a real object.
 
 ---
 
-## Phase 4 — Customisation Depth
+## Phase 4 — Customisation Depth ✅
 
 Finer control over every visual layer.
 
+- [x] **Artifact type lock** — multi-select grid to pin artifacts to chosen types
+- [x] **Background blend mode** — choose how textures composite (multiply, screen, overlay, etc.)
+- [x] **Pattern rotation** — angle the pattern layer independently (0–360°)
+- [x] **Card border radius control** — adjust corner rounding from sharp to pill
+- [x] **Emboss / deboss** — stamped-in/raised look for the logo
 - [ ] **Symbol hue drift override** — shift the logo colour independently from the card hue
 - [ ] **Symbol lightness override** — control logo brightness separately from card lightness
-- [x] **Artifact type lock** — pin all artifacts to a single type (e.g. all arc slices)
-- [x] **Background blend mode** — choose how textures composite (multiply, screen, overlay, etc.)
-- [x] **Pattern rotation** — angle the pattern layer independently
 - [ ] **Custom card dimensions** — free-form width × height input beyond the 3 presets
-- [x] **Card border radius control** — adjust corner rounding from sharp to pill
 
 ---
 
-## Phase 5 — Templates & Theming
+## Phase 5 — Templates & Theming 🔶
 
 One-click starting points and collections.
 
 - [x] **Curated theme presets** — 20 named presets in a collapsible panel (Corporate, Midnight, Neon, Pastel, Brutalist, etc.)
-- [ ] **Colour harmony modes** — complementary, analogous, and triadic palette generation
-- [ ] **Lucky dip gallery** — grid of random seeds to browse and pick from
 - [x] **Favourites** — star seeds to a local collection, browse and recall later
 - [x] **Import / export settings** — JSON blob of all overrides for sharing full configs
+- [ ] **Colour harmony modes** — complementary, analogous, and triadic palette generation
+- [ ] **Lucky dip gallery** — grid of random seeds to browse and pick from
 
 ---
 
-## Phase 6 — Export & Sharing
+## Phase 6 — Export & Sharing 🔶
 
 Getting cards out into the world.
 
-- [ ] **Batch export** — generate and download N cards as a ZIP
 - [x] **High-DPI PNG** — 1×, 2×, 3× resolution selector for print-quality raster export
-- [ ] **PDF export** — single or multi-card PDF with crop marks for print
 - [x] **Copy as image** — clipboard copy (PNG) for quick paste into docs or chat (keyboard shortcut: I)
+- [ ] **Batch export** — generate and download N cards as a ZIP
+- [ ] **PDF export** — single or multi-card PDF with crop marks for print
 - [ ] **QR code on back** — encode the card URL into a QR code on the back face
 - [ ] **OG image meta tag** — dynamic preview image when sharing card URLs on social
 
@@ -121,7 +122,6 @@ Pushing the generative system further.
 - [ ] **Multi-logo composition** — place 2–3 smaller logos in a layout
 - [ ] **Photo overlay** — import a headshot with circular or rounded mask
 - [ ] **Holographic foil effect** — animated iridescent shimmer on hover
-- [x] **Emboss / deboss simulation** — inner shadow + highlight for a stamped-in look
 - [ ] **Generative card back** — procedural back designs beyond the current magnetic stripe
 
 ---
@@ -200,26 +200,19 @@ The inevitable final form, in three acts.
 - [ ] **Sponsored card styles** — brands pay to have their aesthetic as a template
 - [ ] **"Recommended for you"** cards in the gallery (ads)
 - [ ] **Email list "shared with partners"**
-- [ ] **Telemetry on slider movements** — we need to know how you feel about saturation
+- [ ] **Analytics data** packaged as "industry insights" sold to design tool companies
 - [ ] **Cookie banner** that's 40% of the viewport on mobile
-- [ ] **Remove keyboard shortcuts** — re-sell them as a browser extension
 
 ---
 
-## Phase 13 — The Corpse
+## The Corpse (Post-Enshittification)
 
-Post-enshittification.
-
-- [ ] Open-source competitor appears (it's your Phase 0 code, which was never minified)
-- [ ] Core users migrate — "Remember when Liminal was just a simple card generator?"
-- [ ] Hacker News post: "Liminal: A Cautionary Tale" (2,847 points)
-- [ ] Pivot to "Enterprise Identity Platform" — new landing page with stock photos of people pointing at whiteboards
-- [ ] Acqui-hired by Canva for the team — product shut down 11 months later
-- [ ] Someone forks the original on GitHub — it gets more stars than the original ever had
-- [ ] **Blockchain-verified card authenticity** for a card that doesn't exist
-- [ ] **NFT export** — mint your procedural rectangle on-chain (gas fees extra)
-- [ ] **Interstitial ads** between the front and back face flip animation
-- [ ] **"Upgrade to Pro" modal** every time you press Export
+- Open-source competitor appears (it's your Phase 0 code, which was never minified)
+- Core users migrate. "Remember when Liminal was just a simple card generator?"
+- Hacker News post: "Liminal: A Cautionary Tale" (2,847 points)
+- Pivot to "Enterprise Identity Platform." New landing page with stock photos of people pointing at whiteboards
+- Acqui-hired by Canva for the team. Product shut down 11 months later
+- Someone forks the original on GitHub. It gets more stars than the original ever had
 
 ---
 
@@ -229,12 +222,14 @@ The line between Phase 10 and Phase 12. Hold this line.
 
 - **Client-side gating** for cosmetic features (logo packs, palettes, fonts) — assets simply not shipped to free tier
 - **Server-side gating** for export features (hi-res, bulk, API) — generation happens server-side for paid tiers
-- **URL sharing stays free and ungated** — never break the core sharing/preview loop, only gate export and customization depth
-- **Free tier must always feel complete** — not a crippled demo; the free card should look good; paid adds variety and workflow features
+- **URL sharing stays free and ungated** — never break the core sharing/preview loop, only gate export and customisation depth
+- **Free tier must always feel complete** — not a crippled demo. The free card should look good; paid adds variety and workflow features
 
-### Strategic notes
+---
 
-- The sweet spot is Phase 10 with restraint — premium packs + bulk export + hi-res is real revenue without platform complexity
+## Strategic Notes
+
+- The sweet spot is Phase 10 with restraint. Premium packs + bulk export + hi-res is real revenue without platform complexity
 - The moment you add accounts and a backend, maintenance burden 10×'s and enshittification pressure becomes gravitational
 - B2B (teams/events) is where the real money is — individual creator pricing is a race to the bottom
-- Keep the core loop (seed → card → share URL) free and fast forever — that's the moat
+- Keep the core loop (seed → card → share URL) free and fast forever. That's the moat
