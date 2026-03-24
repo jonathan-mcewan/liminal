@@ -265,9 +265,9 @@
 
       <div class="panel-section">
         <h2><i data-lucide="sparkles"></i>Artifacts</h2>
-        <div class="field field--row">
-          <label class="toggle-switch"><input id="show-artifacts" type="checkbox" /><span class="toggle-track"></span></label>
-          <span>Artifacts</span>
+        <div class="field">
+          <span>Type</span>
+          <div id="art-type-grid" class="logo-grid"></div>
         </div>
         <div class="field">
           <div class="field-hdr">
@@ -278,10 +278,6 @@
             <input id="artifact-seed" type="number" value="0" min="0" max="999999" />
             <button id="btn-next-artifact">Next</button>
           </div>
-        </div>
-        <div class="field">
-          <span>Type</span>
-          <div id="art-type-grid" class="logo-grid"></div>
         </div>
         <div class="field">
           <div class="field-hdr">
@@ -494,7 +490,7 @@
         patternScaleDisplay:    document.getElementById("pattern-scale-display"),
         patternTwoToneToggle:   { checked: true },  // virtual — seg-control drives this
         patternTwoToneReset:    document.getElementById("pattern-two-tone-reset"),
-        showArtifactsToggle:    document.getElementById("show-artifacts"),
+        showArtifactsToggle:    { checked: false },  // virtual — None/Auto in grid drives this
         artifactSeedInput:      document.getElementById("artifact-seed"),
         artifactSeedReset:      document.getElementById("artifact-seed-reset"),
         artCountSlider:         document.getElementById("art-count"),
@@ -811,14 +807,29 @@
 
         const grid = dom.artTypeGrid;
         grid.innerHTML = '';
+        const show = dom.showArtifactsToggle.checked;
+
+        // "None" cell — disables artifacts
+        const noneCell = document.createElement('button');
+        noneCell.className = 'logo-cell' + (!show ? ' active' : '');
+        noneCell.title = 'No Artifacts';
+        noneCell.dataset.style = 'none';
+        noneCell.innerHTML = '<i data-lucide="ban"></i>';
+        noneCell.addEventListener('click', () => {
+          dom.showArtifactsToggle.checked = false;
+          syncArtTypeGrid();
+          render(true);
+        });
+        grid.appendChild(noneCell);
 
         // "Auto" cell — active when no types are manually locked
         const autoCell = document.createElement('button');
-        autoCell.className = 'logo-cell' + (!dom.artTypeLock ? ' active' : '');
+        autoCell.className = 'logo-cell' + (show && !dom.artTypeLock ? ' active' : '');
         autoCell.title = 'Auto (seed picks types)';
         autoCell.dataset.style = 'auto';
         autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
         autoCell.addEventListener('click', () => {
+          dom.showArtifactsToggle.checked = true;
           dom.artTypeLock = null;
           syncArtTypeGrid();
           render(true);
@@ -859,17 +870,21 @@
       }
 
       function syncArtTypeGrid() {
+        const show = dom.showArtifactsToggle.checked;
         const active = getActiveArtTypes(dom);
         dom.artTypeGrid.querySelectorAll('.logo-cell').forEach(c => {
-          if (c.dataset.style === 'auto') {
-            c.classList.toggle('active', !dom.artTypeLock);
+          if (c.dataset.style === 'none') {
+            c.classList.toggle('active', !show);
+          } else if (c.dataset.style === 'auto') {
+            c.classList.toggle('active', show && !dom.artTypeLock);
           } else {
-            c.classList.toggle('active', active.has(parseInt(c.dataset.style, 10)));
+            c.classList.toggle('active', show && active.has(parseInt(c.dataset.style, 10)));
           }
         });
       }
 
       function toggleArtType(i) {
+        dom.showArtifactsToggle.checked = true; // selecting a type enables artifacts
         if (!dom.artTypeLock) {
           // Switching from auto — start with the seed's types, then toggle
           const seedTypes = getSeedArtTypes(dom);
@@ -1705,7 +1720,7 @@
         render(true);
       });
 
-      dom.showArtifactsToggle.addEventListener("change",  () => render(true));
+      // showArtifactsToggle is virtual — driven by None/Auto in artifact type grid
       dom.showLanyardToggle.addEventListener("change",    () => render(true));
       dom.personNameInput.addEventListener("input", render);
       dom.jobTitleInput.addEventListener("input",   render);

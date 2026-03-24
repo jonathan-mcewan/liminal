@@ -283,6 +283,28 @@ Example: `Dark · Blue · Alex Reeves · Celtic Knot · Marble bg · Multiply ·
 
 ---
 
+## Sidebar Control Order
+
+Controls per panel, in DOM order. When adding new controls, maintain this order.
+
+**Actions:** Card size (ID/Square/MOO) · Render mode (Canvas/SVG) · Render / Reset / Shuffle · Export + DPI · Copy Image / Copy Link · Export JSON / Import JSON · Favourites
+
+**Identity:** Name · Job Title
+
+**Card:** Seed · Lanyard Hole (toggle) · Corners (slider, default 20%)
+
+**Colour:** Presets (collapsible) · Colour swatches · Hue (slider) · Saturation (slider) · Theme (Light/Dark seg) · Lightness (slider)
+
+**Background:** Style (grid: None/Auto/0–15) · Zoom (slider, default 4) · Brightness (slider) · Contrast (slider) · Blur (slider) · Blend Mode (select, default Normal)
+
+**Logo:** Style (grid: None/Auto/0–24) · Seed (number + Next) · Scale (slider, default 100%) · Effect (None/Emboss/Deboss seg)
+
+**Patterns:** Type (grid: None/Auto/0–18) · Seed (number + Next) · Scale (slider, default 100%) · Rotation (slider, default 0°) · Opacity (slider, default 15) · Tone (Single/Two-Tone seg)
+
+**Artifacts:** Type (grid: None/Auto/0–10, multi-select) · Seed (number + Next) · Count (slider, default 0=auto) · Scale (slider, default 100%) · Opacity (slider, default 20)
+
+---
+
 ## Keyboard Shortcuts
 
 All shortcuts are disabled when an `<input>`, `<select>`, or `<textarea>` is focused.
