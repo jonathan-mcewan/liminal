@@ -129,7 +129,10 @@
           <div id="bg-style-grid" class="logo-grid"></div>
         </div>
         <div class="field">
-          <span>Zoom <span id="noise-zoom-display">4</span></span>
+          <div class="field-hdr">
+            <span>Zoom <span id="noise-zoom-display">4</span></span>
+            <button class="btn-reset" id="noise-zoom-reset" title="Reset to default">↺</button>
+          </div>
           <input id="noise-zoom" type="range" min="2" max="16" step="1" value="4" />
         </div>
         <div class="field">
@@ -154,7 +157,10 @@
           <input id="bg-blur" type="range" min="0" max="100" step="1" value="33" />
         </div>
         <div class="field">
-          <span>Blend Mode</span>
+          <div class="field-hdr">
+            <span>Blend Mode</span>
+            <button class="btn-reset" id="bg-blend-reset" title="Reset to default">↺</button>
+          </div>
           <select id="bg-blend-mode">
             <option value="source-over" selected>Normal</option>
             <option value="multiply">Multiply</option>
@@ -196,7 +202,10 @@
           <input id="logo-scale" type="range" min="25" max="200" step="5" value="100" />
         </div>
         <div class="field">
-          <span>Effect</span>
+          <div class="field-hdr">
+            <span>Effect</span>
+            <button class="btn-reset" id="emboss-reset" title="Reset to default">↺</button>
+          </div>
           <div class="seg-control">
             <button id="emboss-none" class="mode-btn active">None</button>
             <button id="emboss-emboss" class="mode-btn">Emboss</button>
@@ -222,15 +231,24 @@
           </div>
         </div>
         <div class="field">
-          <span>Scale <span id="pattern-scale-display">100%</span></span>
+          <div class="field-hdr">
+            <span>Scale <span id="pattern-scale-display">100%</span></span>
+            <button class="btn-reset" id="pattern-scale-reset" title="Reset to default">↺</button>
+          </div>
           <input id="pattern-scale" type="range" min="25" max="200" step="5" value="100" />
         </div>
         <div class="field">
-          <span>Rotation <span id="pattern-rotation-display">0</span>&deg;</span>
+          <div class="field-hdr">
+            <span>Rotation <span id="pattern-rotation-display">0</span>&deg;</span>
+            <button class="btn-reset" id="pattern-rotation-reset" title="Reset to default">↺</button>
+          </div>
           <input id="pattern-rotation" type="range" min="0" max="360" step="1" value="0" />
         </div>
         <div class="field">
-          <span>Opacity <span id="pattern-opacity-display">15</span></span>
+          <div class="field-hdr">
+            <span>Opacity <span id="pattern-opacity-display">15</span></span>
+            <button class="btn-reset" id="pattern-opacity-reset" title="Reset to default">↺</button>
+          </div>
           <input id="pattern-opacity" type="range" min="0" max="100" step="1" value="15" />
         </div>
         <div class="field">
@@ -967,6 +985,13 @@
         updateDescriptor(dom);
         updateColourSwatches();
         updateArtResetButtons();
+        // Non-override control reset button visibility
+        noiseZoomReset.classList.toggle('visible', dom.noiseZoomSlider.value !== '4');
+        bgBlendReset.classList.toggle('visible', dom.bgBlendMode.value !== 'source-over');
+        if (typeof updateEmbossReset === 'function') updateEmbossReset();
+        patRotReset.classList.toggle('visible', dom.patternRotationSlider.value !== '0');
+        patOpacityReset.classList.toggle('visible', dom.patternOpacitySlider.value !== '15');
+        patScaleReset.classList.toggle('visible', dom.patternScaleSlider.value !== '100');
         updateStarButton();
       }
 
@@ -1052,9 +1077,17 @@
       });
 
       // Background
+      const noiseZoomReset = document.getElementById("noise-zoom-reset");
       dom.noiseZoomSlider.addEventListener("input", () => {
         dom.noiseZoomDisplay.textContent = dom.noiseZoomSlider.value;
+        noiseZoomReset.classList.toggle('visible', dom.noiseZoomSlider.value !== '4');
         render();
+      });
+      noiseZoomReset.addEventListener("click", () => {
+        dom.noiseZoomSlider.value = 4;
+        dom.noiseZoomDisplay.textContent = '4';
+        noiseZoomReset.classList.remove('visible');
+        render(true);
       });
 
       dom.noiseBrightnessSlider.addEventListener("input", () => {
@@ -1204,6 +1237,7 @@
       function setEmbossMode(mode) {
         dom.embossMode = mode;
         for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === mode);
+        if (typeof updateEmbossReset === 'function') updateEmbossReset();
         render(true);
       }
       embossBtns.none.addEventListener("click", () => setEmbossMode('none'));
@@ -1561,22 +1595,65 @@
       });
 
       // Background blend mode
-      dom.bgBlendMode.addEventListener("change", () => render(true));
+      const bgBlendReset = document.getElementById("bg-blend-reset");
+      dom.bgBlendMode.addEventListener("change", () => {
+        bgBlendReset.classList.toggle('visible', dom.bgBlendMode.value !== 'source-over');
+        render(true);
+      });
+      bgBlendReset.addEventListener("click", () => {
+        dom.bgBlendMode.value = 'source-over';
+        bgBlendReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Emboss reset
+      const embossReset = document.getElementById("emboss-reset");
+      function updateEmbossReset() {
+        embossReset.classList.toggle('visible', dom.embossMode !== 'none');
+      }
+      embossReset.addEventListener("click", () => {
+        setEmbossMode('none');
+      });
 
       // Pattern rotation
+      const patRotReset = document.getElementById("pattern-rotation-reset");
       dom.patternRotationSlider.addEventListener("input", () => {
         dom.patternRotationDisplay.textContent = dom.patternRotationSlider.value;
+        patRotReset.classList.toggle('visible', dom.patternRotationSlider.value !== '0');
         render();
+      });
+      patRotReset.addEventListener("click", () => {
+        dom.patternRotationSlider.value = 0;
+        dom.patternRotationDisplay.textContent = '0';
+        patRotReset.classList.remove('visible');
+        render(true);
       });
 
       // Pattern controls
+      const patOpacityReset = document.getElementById("pattern-opacity-reset");
       dom.patternOpacitySlider.addEventListener("input", () => {
         dom.patternOpacityDisplay.textContent = dom.patternOpacitySlider.value;
+        patOpacityReset.classList.toggle('visible', dom.patternOpacitySlider.value !== '15');
         render();
       });
+      patOpacityReset.addEventListener("click", () => {
+        dom.patternOpacitySlider.value = 15;
+        dom.patternOpacityDisplay.textContent = '15';
+        patOpacityReset.classList.remove('visible');
+        render(true);
+      });
+
+      const patScaleReset = document.getElementById("pattern-scale-reset");
       dom.patternScaleSlider.addEventListener("input", () => {
         dom.patternScaleDisplay.textContent = dom.patternScaleSlider.value + '%';
+        patScaleReset.classList.toggle('visible', dom.patternScaleSlider.value !== '100');
         render();
+      });
+      patScaleReset.addEventListener("click", () => {
+        dom.patternScaleSlider.value = 100;
+        dom.patternScaleDisplay.textContent = '100%';
+        patScaleReset.classList.remove('visible');
+        render(true);
       });
       document.getElementById("btn-next-pattern").addEventListener("click", () => {
         seedOverrides.patternSeed  = (parseInt(dom.patternSeedInput.value, 10) | 0) + 1;
