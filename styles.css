@@ -42,8 +42,8 @@ body {
 
 /* ── Left control panel ──────────────────────────────────────────────────── */
 .panel {
-  width:          260px;
-  min-width:      260px;
+  width:          312px;
+  min-width:      312px;
   height:         100vh;
   display:        flex;
   flex-direction: column;
@@ -185,6 +185,49 @@ select:focus {
 
 select option {
   background: oklch(0.15 0 0);
+}
+
+/* ── Logo style grid ───────────────────────────────────────────────────── */
+.logo-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   0.375rem;
+}
+
+.logo-cell {
+  position:       relative;
+  width:          100%;
+  height:         0;
+  padding-bottom: 100%;       /* forces 1:1 ratio */
+  border-radius:  var(--radius);
+  border:         1px solid var(--border);
+  background:     transparent;
+  cursor:         pointer;
+  transition:     border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  color:          var(--muted-foreground);
+  font-family:    var(--font-mono);
+  font-size:      0.5625rem;
+  font-weight:    500;
+  overflow:       hidden;
+}
+
+.logo-cell canvas {
+  position:       absolute;
+  inset:          2px;
+  width:          calc(100% - 4px);
+  height:         calc(100% - 4px);
+  pointer-events: none;
+}
+
+.logo-cell:hover {
+  border-color: var(--ring);
+  background:   oklch(1 0 0 / 6%);
+}
+
+.logo-cell.active {
+  border-color: var(--ring);
+  box-shadow:   0 0 0 2px oklch(0.556 0 0 / 25%);
+  background:   oklch(1 0 0 / 8%);
 }
 
 /* ── Range — minimal, matches shadcn aesthetic ───────────────────────────── */

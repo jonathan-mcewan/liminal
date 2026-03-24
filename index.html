@@ -99,34 +99,7 @@
         <h2><i data-lucide="shapes"></i>Logo</h2>
         <div class="field">
           <span>Style <span id="logo-name-display"></span></span>
-          <select id="logo-style">
-            <option value="-1">Auto</option>
-            <option value="0">Venn</option>
-            <option value="1">Segmented Ring</option>
-            <option value="2">Radial Spokes</option>
-            <option value="3">Layered Arcs</option>
-            <option value="4">Orbital</option>
-            <option value="5">Parallel Lines</option>
-            <option value="6">Polygon Nodes</option>
-            <option value="7">Polygon Free Nodes</option>
-            <option value="8">Dot Matrix</option>
-            <option value="9">Dot Mask</option>
-            <option value="10">Spiral</option>
-            <option value="11">Wave Field</option>
-            <option value="12">Starburst</option>
-            <option value="13">Lissajous</option>
-            <option value="14">Rose Curve</option>
-            <option value="15">Variable Dot Mask</option>
-            <option value="16">Inlaid Rings</option>
-            <option value="17">Fractal Tree</option>
-            <option value="18">Voronoi Cells</option>
-            <option value="19">Truchet Tiles</option>
-            <option value="20">Celtic Knot</option>
-            <option value="21">Cross Hatch</option>
-            <option value="22">Icons</option>
-            <option value="23">ASCII Art</option>
-            <option value="24">Organic Tree</option>
-          </select>
+          <div id="logo-style-grid" class="logo-grid"></div>
         </div>
         <div class="field">
           <div class="field-hdr">
@@ -258,7 +231,10 @@
     <script type="module">
       import { generateCard }  from "./modules/card.js";
       import { SvgContext }    from "./modules/svg-ctx.js";
-      import { artCountLabel } from "./modules/constants.js";
+      import { artCountLabel, LOGO_NAMES } from "./modules/constants.js";
+      import { drawSymbol }   from "./modules/symbols.js";
+      import { makePRNG }     from "./modules/prng.js";
+      import { hsla }         from "./modules/utils.js";
       import { colorOverrides, seedOverrides, clearAllOverrides } from "./modules/state.js";
       import { getSeed, updateColorSliders, updateSeedInputs, updateResetButtons,
                updateLogoName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
@@ -292,7 +268,8 @@
         noiseContrastReset:     document.getElementById("noise-contrast-reset"),
         personNameInput:        document.getElementById("person-name"),
         jobTitleInput:          document.getElementById("job-title"),
-        logoStyleSelect:        document.getElementById("logo-style"),
+        logoStyleGrid:          document.getElementById("logo-style-grid"),
+        logoStyleSelect:        { value: '-1' },  // virtual select — grid sets this
         logoNameDisplay:        document.getElementById("logo-name-display"),
         logoScaleSlider:        document.getElementById("logo-scale"),
         logoScaleDisplay:       document.getElementById("logo-scale-display"),
@@ -353,7 +330,76 @@
         render();
       }
 
+      // ── Logo style grid ─────────────────────────────────────────────────
+      const THUMB_SIZE = 48;
+      const LOGO_COUNT = LOGO_NAMES.length;  // 25 (0-24)
+      let _lastGridKey = null;
+
+      function buildLogoGrid(force = false) {
+        const seed = getSeed(dom);
+        const seeds = getEffectiveSeeds(seed);
+        const nonce = seeds.logoNonce;
+        const key = `${seed}:${nonce}`;
+        if (!force && key === _lastGridKey) return;
+        _lastGridKey = key;
+
+        const grid = dom.logoStyleGrid;
+        grid.innerHTML = '';
+
+        // "Auto" cell
+        const autoCell = document.createElement('button');
+        autoCell.className = 'logo-cell' + (dom.logoStyleSelect.value === '-1' ? ' active' : '');
+        autoCell.title = 'Auto';
+        autoCell.dataset.style = '-1';
+        autoCell.textContent = 'Auto';
+        autoCell.addEventListener('click', () => selectLogoStyle('-1'));
+        grid.appendChild(autoCell);
+
+        // One cell per style
+        for (let i = 0; i < LOGO_COUNT; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'logo-cell' + (dom.logoStyleSelect.value === String(i) ? ' active' : '');
+          cell.title = LOGO_NAMES[i];
+          cell.dataset.style = String(i);
+
+          const cvs = document.createElement('canvas');
+          cvs.width  = THUMB_SIZE * 2;  // 2x for sharpness
+          cvs.height = THUMB_SIZE * 2;
+          const tctx = cvs.getContext('2d');
+
+          // Draw on a dark circle background
+          const cx = THUMB_SIZE, cy = THUMB_SIZE, r = THUMB_SIZE * 0.82;
+          tctx.fillStyle = 'rgba(255,255,255,0.06)';
+          tctx.beginPath();
+          tctx.arc(cx, cy, r, 0, Math.PI * 2);
+          tctx.fill();
+
+          // symbolColor helper for thumbnails — neutral grey
+          const thumbColor = (lAdj = 0, a = 0.9) =>
+            hsla(0, 0, 72 + lAdj, a);
+
+          // Match the card's logoPRNG state: same seed, consume symbolRadiusFactor
+          const rng = makePRNG(nonce);
+          rng.float(0.169, 0.286);  // skip symbolRadiusFactor (consumed in card.js before drawSymbol)
+          drawSymbol(tctx, cx, cy, r * 0.85, i, thumbColor, rng);
+
+          cell.appendChild(cvs);
+          cell.addEventListener('click', () => selectLogoStyle(String(i)));
+          grid.appendChild(cell);
+        }
+      }
+
+      function selectLogoStyle(val, doRender = true) {
+        dom.logoStyleSelect.value = val;
+        // Update active state
+        dom.logoStyleGrid.querySelectorAll('.logo-cell').forEach(c =>
+          c.classList.toggle('active', c.dataset.style === val)
+        );
+        if (doRender) render(true);
+      }
+
       function render(push = false) {
+        buildLogoGrid();
         const { frameW, frameH } = getFrameDims(dom);
         const aspect = `${frameW} / ${frameH}`;
 
@@ -393,6 +439,7 @@
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);
+        buildLogoGrid(true);
         render();
       });
 
@@ -564,7 +611,7 @@
       document.getElementById("btn-reset-all").addEventListener("click", () => {
         clearAllOverrides();
         setCardSize('id');
-        dom.logoStyleSelect.value         = '-1';
+        selectLogoStyle('-1', false);
         dom.logoScaleSlider.value         = 100;
         dom.logoScaleDisplay.textContent  = '100%';
         dom.noiseZoomSlider.value         = 4;
@@ -628,7 +675,6 @@
       dom.btnSizeId.addEventListener("click",     () => setCardSize('id'));
       dom.btnSizeSquare.addEventListener("click", () => setCardSize('square'));
       dom.btnSizeMoo.addEventListener("click",    () => setCardSize('moo'));
-      dom.logoStyleSelect.addEventListener("change",      () => render(true));
       dom.showArtifactsToggle.addEventListener("change",  () => render(true));
       dom.showLanyardToggle.addEventListener("change",    () => render(true));
       dom.personNameInput.addEventListener("input", render);
@@ -745,6 +791,7 @@
       updateSeedInputs(dom);
       updateResetButtons(dom);
       initCard3D(dom.cardScene, dom.cardBody);
+      buildLogoGrid();
       render();
     </script>
 
