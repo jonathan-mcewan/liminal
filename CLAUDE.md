@@ -5,16 +5,25 @@
 Vanilla ES modules, Canvas 2D + SVG, no build step. Served via local HTTP (ES modules need a server).
 
 **Module layout:**
-- `modules/prng.js`       — mulberry32 PRNG + seed mixer
-- `modules/card.js`       — orchestrator; four PRNGs; exports `generateCard` + `deriveColorParams`
-- `modules/background.js` — noise blobs, artifacts, gloss, edge
-- `modules/symbols.js`    — 16 logo variants (0–15)
-- `modules/text.js`       — name + job title layout
-- `modules/utils.js`      — `hsla()`, `roundedRectPath()`
-- `modules/svg-ctx.js`    — `SvgContext` — Canvas 2D API shim that emits SVG markup (supports `mix-blend-mode`)
-- `modules/constants.js`  — `CARD_SIZES`, `LOGO_NAMES`, `ARTIFACT_NAMES`, `THEME_PRESETS`, helpers
+- `modules/prng.js`        — mulberry32 PRNG + seed mixer
+- `modules/card.js`        — orchestrator; four PRNGs; exports `generateCard` + `deriveColorParams`
+- `modules/background.js`  — noise blobs, artifacts, gloss, edge
+- `modules/bg-styles.js`   — 16 background texture renderers (noise, marble, caustics, etc.)
+- `modules/patterns.js`    — 19 pattern overlay renderers (halftone, guilloche, moiré, etc.)
+- `modules/symbols.js`     — 25 logo variants (0–24)
+- `modules/text.js`        — name + job title layout
+- `modules/utils.js`       — `hsla()`, `roundedRectPath()`
+- `modules/svg-ctx.js`     — `SvgContext` — Canvas 2D API shim that emits SVG markup (supports `mix-blend-mode`)
+- `modules/svg-path.js`    — SVG path utilities
+- `modules/constants.js`   — `CARD_SIZES`, `LOGO_NAMES`, `ARTIFACT_NAMES`, `THEME_PRESETS`, helpers
 - `modules/settings-io.js` — `gatherSettings` / `applySettings` for JSON import/export
-- `modules/favourites.js` — localStorage CRUD for favourited card configs
+- `modules/favourites.js`  — localStorage CRUD for favourited card configs
+- `modules/state.js`       — shared state management
+- `modules/url-sync.js`    — `syncURL` / `applyQueryString` for URL persistence
+- `modules/ui-sync.js`     — `getCardDescriptor`, slider/reset-button sync
+- `modules/card-3d.js`     — tilt-on-hover + click-to-flip controller
+- `modules/card-back.js`   — back face renderer (magnetic stripe, hatched pattern, barcode)
+- `modules/icon-paths.js`  — Phosphor Duotone icon SVG paths for the Icons logo style
 
 ---
 
@@ -339,3 +348,16 @@ Curated colour presets in a collapsible `<details>` section within the Colour pa
 Applying a preset populates `colorOverrides` for the specified keys. No URL param for the preset name — the individual overrides are persisted via the existing override URL system. Reset All clears all overrides, undoing any preset.
 
 **Colour previews:** A row of swatches below the Colour panel header shows the active palette: card base, card highlight, card shadow, symbol/text colour, and noise tint. Updates on every render.
+
+---
+
+## AI Protections
+
+Content is protected from AI training crawlers at multiple layers:
+
+- **`robots.txt`** — Blocks known AI crawlers (GPTBot, ClaudeBot, CCBot, Google-Extended, Bytespider, Meta-ExternalAgent, PerplexityBot, etc.) while allowing regular search engines (Googlebot, Bingbot, DuckDuckBot)
+- **`ai.txt`** — Spawning.ai specification opt-out for AI training, scraping, and indexing
+- **`<meta name="robots" content="noai, noimageai">`** — Page-level signal in `index.html`
+- **`LICENSE`** — Permissive for human use; explicitly prohibits use as training data, fine-tuning data, evaluation data, or input for any ML/AI system without written permission
+
+When adding new public-facing pages, include the `noai, noimageai` meta tag.
