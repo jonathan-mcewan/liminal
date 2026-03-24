@@ -64,29 +64,36 @@ export function applyQueryString(dom) {
 // push=false → replaceState (continuous: slider drag, text typing)
 
 export function syncURL(dom, push = false) {
-  const q = new URLSearchParams({
-    seed:        dom.seedInput.value,
-    csize:       dom.cardSize,
-    bgstyle:     dom.bgStyleSelect.value,
-    lstyle:      dom.logoStyleSelect.value,
-    lscale:      dom.logoScaleSlider.value,
-    zoom:        dom.noiseZoomSlider.value,
-    name:        dom.personNameInput.value.trim(),
-    title:       dom.jobTitleInput.value.trim(),
-    art_show:    dom.showArtifactsToggle.checked ? "1" : "0",
-    art_count:   dom.artCountSlider.value,
-    art_opacity: dom.artOpacitySlider.value,
-    art_scale:   dom.artScaleSlider.value,
-    pat_type:    dom.patternTypeSelect.value,
-    pat_opacity: dom.patternOpacitySlider.value,
-    pat_scale:   dom.patternScaleSlider.value,
-    lanyard:     dom.showLanyardToggle.checked   ? "1" : "0",
-    bradius:     dom.borderRadiusSlider.value,
-    bblend:      dom.bgBlendMode.value,
-    pat_rot:     dom.patternRotationSlider.value,
-    emboss:      dom.embossMode || 'none',
-    art_type:    dom.artTypeLock ? dom.artTypeLock.join(',') : '',
-  });
+  // Always include seed and identity
+  const q = new URLSearchParams({ seed: dom.seedInput.value });
+  const name  = dom.personNameInput.value.trim();
+  const title = dom.jobTitleInput.value.trim();
+  if (name)  q.set("name",  name);
+  if (title) q.set("title", title);
+
+  // Only include params that differ from their defaults
+  const set = (key, val, def) => { if (String(val) !== String(def)) q.set(key, val); };
+
+  set("csize",       dom.cardSize,                                        "id");
+  set("bgstyle",     dom.bgStyleSelect.value,                             "-1");
+  set("lstyle",      dom.logoStyleSelect.value,                           "-1");
+  set("lscale",      dom.logoScaleSlider.value,                           "100");
+  set("zoom",        dom.noiseZoomSlider.value,                           "4");
+  set("art_show",    dom.showArtifactsToggle.checked ? "1" : "0",         "0");
+  set("art_count",   dom.artCountSlider.value,                            "0");
+  set("art_opacity", dom.artOpacitySlider.value,                          "20");
+  set("art_scale",   dom.artScaleSlider.value,                            "100");
+  set("pat_type",    dom.patternTypeSelect.value,                         "-1");
+  set("pat_opacity", dom.patternOpacitySlider.value,                      "15");
+  set("pat_scale",   dom.patternScaleSlider.value,                        "100");
+  set("lanyard",     dom.showLanyardToggle.checked ? "1" : "0",           "0");
+  set("bradius",     dom.borderRadiusSlider.value,                        "20");
+  set("bblend",      dom.bgBlendMode.value,                               "source-over");
+  set("pat_rot",     dom.patternRotationSlider.value,                     "0");
+  set("emboss",      dom.embossMode || "none",                            "none");
+  if (dom.artTypeLock) q.set("art_type", dom.artTypeLock.join(","));
+
+  // Colour overrides — only if user has set them
   if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
   if (colorOverrides.cardLightness   !== undefined) q.set("litness",  colorOverrides.cardLightness);
   if (colorOverrides.hue             !== undefined) q.set("hue",      colorOverrides.hue);
