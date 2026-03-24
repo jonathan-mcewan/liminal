@@ -126,17 +126,115 @@ Pushing the generative system further.
 
 ---
 
-## Phase 9 — Enshitification
+## Phase 9 — Soft Monetization (No backend required)
 
-The inevitable final form.
+Build audience, establish value, introduce the concept of paying.
+
+- [ ] **Analytics** — privacy-respecting usage data (Plausible or Umami)
+- [ ] **Gallery** — public "share your card" page — social proof, SEO, virality
+- [ ] **Watermark on free PNG export** — small "made with liminal" mark; SVG stays clean
+- [ ] **Tip jar** — Ko-fi / Buy Me a Coffee link
+- [ ] **Email capture** — "Get notified about new logo styles" — the list is the asset
+
+*Revenue: ~$0–50/month. But you have emails and traffic data.*
+
+---
+
+## Phase 10 — Real Monetization (Requires auth + backend)
+
+Create things worth paying for without degrading the free tier.
+
+Infrastructure needed: auth (magic link or OAuth), small backend (Cloudflare Workers), Stripe.
+
+- [ ] **Premium logo/pattern packs** — free tier keeps ~10 logo styles; new packs (Geometric, Organic, Minimal, Retro) $3–5 each or bundle
+- [ ] **Custom colour palettes** — curated preset packs ($2/pack)
+- [ ] **Hi-res PNG export** — free = 1×, paid = 2×/4×
+- [ ] **Bulk export** — generate a whole team's cards from a CSV ($9.99 one-time)
+- [ ] **Custom fonts** — free = 2 fonts, paid unlocks 8+
+- [ ] **API access** — headless card generation for devs ($19/mo)
+
+*Revenue: $200–2k/month if marketed.*
+
+---
+
+## Phase 11 — Platform / B2B Growth
+
+Exponential growth via network effects and B2B.
+
+- [ ] **Teams / Orgs** — upload company logo, lock brand colours, generate cards for all employees ($49/mo per org)
+- [ ] **Event badges** — conference organizers generate attendee badges from registration lists (per-event pricing)
+- [ ] **Embed widget** — `<liminal-card>` web component for blogs/portfolios; free drives traffic, premium styles need paid embed license
+- [ ] **Template marketplace** — designers sell custom card templates; 30% platform cut
+- [ ] **Integrations** — Slack bot (`/card @alice`), Figma plugin, Notion embed
+- [ ] **"Powered by Liminal"** on every free embed — viral loop
+
+*Revenue: $5–50k/month. Enterprise customers who can't easily leave.*
+
+---
+
+## Phase 12 — The Enshittification
+
+The inevitable final form, in three acts.
+
+### Act 1 — Degrade the free tier
+
+- [ ] **Rate-limit free exports** — 3/day, counter resets at midnight UTC (not your midnight, never your midnight)
+- [ ] **Watermark growth** — 40% larger, now says "LIMINAL FREE" in Impact font
+- [ ] **SVG export moved to paid tier** — "due to server costs" (there is no server)
+- [ ] **Gallery ranking** — free users shown below paid users
+- [ ] **Fake loading spinner** — 3-second "generating..." on free tier (the card rendered instantly — the spinner is a lie)
+
+### Act 2 — Squeeze paying customers
+
+- [ ] **Price increase** — "to continue investing in the platform." $12/mo → $19/mo
+- [ ] **Premium tier** to unlock the colour slider past 180°
+- [ ] **Logo Style of the Month** — one premium style rotates into free monthly, creating FOMO
+- [ ] **Sunset one-time purchases** — bulk export now requires Teams plan ($49/mo)
+- [ ] **API rate limits halved** — need more? Enterprise tier: "Contact Sales"
+- [ ] **AI-powered seed suggestions** that are always worse than random — requires Pro plan
+- [ ] **Subscription model** for the shuffle button (3 free shuffles/day)
+
+### Act 3 — Sell the users
 
 - [ ] **Mandatory account creation** to view your own card
-- [ ] **AI-powered seed suggestions** that are always worse than random
-- [ ] **Premium tier** to unlock the colour slider past 180°
+- [ ] **Sponsored card styles** — brands pay to have their aesthetic as a template
+- [ ] **"Recommended for you"** cards in the gallery (ads)
+- [ ] **Email list "shared with partners"**
+- [ ] **Telemetry on slider movements** — we need to know how you feel about saturation
+- [ ] **Cookie banner** that's 40% of the viewport on mobile
+- [ ] **Remove keyboard shortcuts** — re-sell them as a browser extension
+
+---
+
+## Phase 13 — The Corpse
+
+Post-enshittification.
+
+- [ ] Open-source competitor appears (it's your Phase 0 code, which was never minified)
+- [ ] Core users migrate — "Remember when Liminal was just a simple card generator?"
+- [ ] Hacker News post: "Liminal: A Cautionary Tale" (2,847 points)
+- [ ] Pivot to "Enterprise Identity Platform" — new landing page with stock photos of people pointing at whiteboards
+- [ ] Acqui-hired by Canva for the team — product shut down 11 months later
+- [ ] Someone forks the original on GitHub — it gets more stars than the original ever had
 - [ ] **Blockchain-verified card authenticity** for a card that doesn't exist
 - [ ] **NFT export** — mint your procedural rectangle on-chain (gas fees extra)
-- [ ] **Subscription model** for the shuffle button (3 free shuffles/day)
 - [ ] **Interstitial ads** between the front and back face flip animation
 - [ ] **"Upgrade to Pro" modal** every time you press Export
-- [ ] **Telemetry on slider movements** — we need to know how you feel about saturation
-- [ ] **Remove keyboard shortcuts** — re-sell them as a browser extension
+
+---
+
+## Feature Gating Strategy
+
+The line between Phase 10 and Phase 12. Hold this line.
+
+- **Client-side gating** for cosmetic features (logo packs, palettes, fonts) — assets simply not shipped to free tier
+- **Server-side gating** for export features (hi-res, bulk, API) — generation happens server-side for paid tiers
+- **URL sharing stays free and ungated** — never break the core sharing/preview loop, only gate export and customization depth
+- **Free tier must always feel complete** — not a crippled demo; the free card should look good; paid adds variety and workflow features
+
+### Strategic notes
+
+- The sweet spot is Phase 10 with restraint — premium packs + bulk export + hi-res is real revenue without platform complexity
+- The moment you add accounts and a backend, maintenance burden 10×'s and enshittification pressure becomes gravitational
+- B2B (teams/events) is where the real money is — individual creator pricing is a race to the bottom
+- Keep the core loop (seed → card → share URL) free and fast forever — that's the moat
