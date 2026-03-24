@@ -624,7 +624,7 @@ button svg {
   }
 
   /* Actions section spans full width */
-  .panel-section:last-child {
+  .panel-section:first-child {
     grid-column: 1 / -1;
   }
 
