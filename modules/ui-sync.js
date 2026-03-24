@@ -57,14 +57,14 @@ export function updateLogoName(dom) {
     dom.logoNameDisplay.textContent = '';
   } else {
     const seed  = getSeed(dom);
-    const style = makePRNG(seed ^ 0x9E3779B9).int(0, 16);
+    const style = makePRNG(seed ^ 0x9E3779B9).int(0, 23);
     dom.logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
   }
 }
 
 // ── Build params for generateCard ───────────────────────────────────────
 
-export function buildParams(dom, transparent = false) {
+export function buildParams(dom) {
   const seed  = getSeed(dom);
   const color = getEffectiveColor(seed);
   const seeds = getEffectiveSeeds(seed);
@@ -92,9 +92,7 @@ export function buildParams(dom, transparent = false) {
     artifactCount:         parseInt(dom.artCountSlider.value, 10) === 0 ? null : parseInt(dom.artCountSlider.value, 10),
     artifactScale:         parseInt(dom.artScaleSlider.value, 10) / 100,
     showArtifacts:         dom.showArtifactsToggle.checked,
-    showShadow:            dom.showShadowToggle.checked,
     showLanyard:           dom.showLanyardToggle.checked,
-    transparent,
   };
 }
 
@@ -125,10 +123,9 @@ export function updateDescriptor(dom) {
 export function getFrameDims(dom) {
   const sizePreset = CARD_SIZES[dom.cardSize] || CARD_SIZES.id;
   const sz = 1024, pad = 0.08;
-  const paddingPx = sz * pad;
-  const available = sz - 2 * paddingPx;
+  const refDim = sz * (1 - 2 * pad);
   let cw, ch;
-  if (sizePreset.aspect <= 1) { ch = available * sizePreset.scale; cw = ch * sizePreset.aspect; }
-  else                        { cw = available * sizePreset.scale; ch = cw / sizePreset.aspect; }
-  return { frameW: cw + 2 * paddingPx, frameH: ch + 2 * paddingPx };
+  if (sizePreset.aspect <= 1) { ch = refDim * sizePreset.scale; cw = ch * sizePreset.aspect; }
+  else                        { cw = refDim * sizePreset.scale; ch = cw / sizePreset.aspect; }
+  return { frameW: cw, frameH: ch };
 }

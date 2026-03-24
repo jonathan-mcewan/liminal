@@ -13,7 +13,6 @@
 import { makePRNG }             from './prng.js';
 import { hsla, roundedRectPath } from './utils.js';
 import {
-  drawCardShadow,
   drawCardBodyGradient,
   drawCardEdge,
 } from './background.js';
@@ -32,25 +31,20 @@ export function generateCardBack({
   isDarkOverride        = null,
   cardLightnessOverride = null,
   saturationOverride    = null,
-  showShadow  = true,
-  transparent = false,
   ctx: ctxOverride = null,
 } = {}) {
 
-  // ── Geometry (mirrors generateCard) ────────────────────────────────────
-  const paddingPx = size * padding;
-  const available = size - 2 * paddingPx;
+  // ── Geometry (mirrors generateCard — card-bounds only, no padding) ─────
+  const refDim = size * (1 - 2 * padding);
   let cardWidth, cardHeight;
-  if (cardAspect <= 1) { cardHeight = available * cardScale; cardWidth  = cardHeight * cardAspect; }
-  else                 { cardWidth  = available * cardScale; cardHeight = cardWidth / cardAspect; }
-  const frameW       = cardWidth  + 2 * paddingPx;
-  const frameH       = cardHeight + 2 * paddingPx;
-  const centerX      = frameW / 2;
-  const centerY      = frameH / 2;
-  const cardLeft     = paddingPx;
-  const cardTop      = paddingPx;
+  if (cardAspect <= 1) { cardHeight = refDim * cardScale; cardWidth  = cardHeight * cardAspect; }
+  else                 { cardWidth  = refDim * cardScale; cardHeight = cardWidth / cardAspect; }
+  const centerX      = cardWidth / 2;
+  const centerY      = cardHeight / 2;
+  const cardLeft     = 0;
+  const cardTop      = 0;
   const cornerRadius = cardWidth * 0.1;
-  const geometry = { frameW, frameH, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY };
+  const geometry = { frameW: cardWidth, frameH: cardHeight, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY };
 
   // ── Resolve colours (mirrors generateCard PRNG sequence) ───────────────
   const cardPRNG = makePRNG(seed);
@@ -72,21 +66,12 @@ export function generateCardBack({
 
   // ── Ctx setup ──────────────────────────────────────────────────────────
   const ctx = ctxOverride;
-  if (ctx.cropTo) ctx.cropTo(0, 0, frameW, frameH);
+  if (ctx.cropTo) ctx.cropTo(0, 0, cardWidth, cardHeight);
 
   const cardColor = (lightnessAdj = 0, alpha = 1) =>
     hsla(hue, saturation, cardLightness + lightnessAdj, alpha);
 
   const backPRNG = makePRNG(seed ^ 0xBACCFACE);
-
-  // ── Canvas background ──────────────────────────────────────────────────
-  if (!transparent) {
-    ctx.fillStyle = '#1a1a22';
-    ctx.fillRect(0, 0, frameW, frameH);
-  }
-
-  // ── Card shadow ────────────────────────────────────────────────────────
-  if (showShadow) drawCardShadow(ctx, geometry, cardColor);
 
   // ── Clip to card boundary ──────────────────────────────────────────────
   ctx.save();

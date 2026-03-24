@@ -283,7 +283,8 @@ export class SvgContext {
 
   fillText(text, x, y) {
     const { size, weight, family } = parseFont(this.font);
-    const baseline = this.textBaseline === 'top' ? 'hanging' : 'auto';
+    const baseline = this.textBaseline === 'top' ? 'hanging'
+                   : this.textBaseline === 'middle' ? 'central' : 'auto';
     const anchor   = this.textAlign === 'center' ? 'middle'
                    : this.textAlign === 'right'  ? 'end' : 'start';
     this._body.push(

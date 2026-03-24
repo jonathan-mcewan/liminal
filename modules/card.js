@@ -1,8 +1,6 @@
 import { makePRNG }             from './prng.js';
 import { hsla, roundedRectPath } from './utils.js';
 import {
-  drawCanvasBackground,
-  drawCardShadow,
   drawCardBodyGradient,
   drawVignette,
   drawNoise,
@@ -65,8 +63,6 @@ export function deriveColorParams(seed) {
  * @param {string}  options.jobTitle           - Job title printed beneath the name
  * @param {number}  options.artifactSeed       - Mixed with seed to seed the artifact PRNG
  * @param {boolean} options.showArtifacts      - Whether to draw background artifacts
- * @param {boolean} options.showShadow         - Whether to draw the card drop shadow
- * @param {boolean} options.transparent        - Skip canvas background fill (for PNG export)
  */
 export function generateCard({
   size               = 1024,
@@ -91,27 +87,22 @@ export function generateCard({
   artifactCount      = null,
   artifactScale      = 1,
   showArtifacts      = true,
-  showShadow         = true,
   showLanyard        = false,
-  transparent        = false,
   ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
-  // ── Compute frame dimensions early so we can size the canvas ──────────
-  const _paddingPx = size * padding;
-  const _available = size - 2 * _paddingPx;
+  // ── Compute card dimensions early so we can size the canvas ───────────
+  const _refDim = size * (1 - 2 * padding);  // available reference dimension
   let _cw, _ch;
-  if (cardAspect <= 1) { _ch = _available * cardScale; _cw = _ch * cardAspect; }
-  else                 { _cw = _available * cardScale; _ch = _cw / cardAspect; }
-  const _frameW = _cw + 2 * _paddingPx;
-  const _frameH = _ch + 2 * _paddingPx;
+  if (cardAspect <= 1) { _ch = _refDim * cardScale; _cw = _ch * cardAspect; }
+  else                 { _cw = _refDim * cardScale; _ch = _cw / cardAspect; }
 
   let ctx;
   if (ctxOverride) {
     ctx = ctxOverride;
   } else {
     const canvas = document.getElementById('canvas');
-    canvas.width  = Math.round(_frameW);
-    canvas.height = Math.round(_frameH);
+    canvas.width  = Math.round(_cw);
+    canvas.height = Math.round(_ch);
     ctx = canvas.getContext('2d');
   }
 
@@ -145,46 +136,36 @@ export function generateCard({
   const symbolLightness = modeFlipped ? (isDark ? 87 : 15) : symbolLightnessFromSeed;
 
   // ── Symbol style: seed-derived or explicit override ───────────────────────
-  const autoStyle   = stylePRNG.int(0, 16);
-  const symbolStyle = (logoStyle >= 0 && logoStyle <= 16) ? logoStyle : autoStyle;
+  const autoStyle   = stylePRNG.int(0, 23);
+  const symbolStyle = (logoStyle >= 0 && logoStyle <= 23) ? logoStyle : autoStyle;
 
   // ── Logo variation: drawn from logoPRNG (internals only, not style) ───────
   const symbolRadiusFactor = logoPRNG.float(0.169, 0.286); // radius as fraction of card width
 
   // ── Card geometry (pure math, no PRNG) ───────────────────────────────────
-  const paddingPx  = size * padding;
-  const available  = size - 2 * paddingPx;          // reference dimension for card fitting
+  const refDim   = size * (1 - 2 * padding);       // reference dimension for card fitting
   let cardWidth, cardHeight;
   if (cardAspect <= 1) {
-    // Portrait or square: height fills the available space (scaled)
-    cardHeight = available * cardScale;
+    cardHeight = refDim * cardScale;
     cardWidth  = cardHeight * cardAspect;
   } else {
-    // Landscape: width fills the available space (scaled)
-    cardWidth  = available * cardScale;
+    cardWidth  = refDim * cardScale;
     cardHeight = cardWidth / cardAspect;
   }
 
-  // Frame tightly around the card with equal padding on all sides
-  const frameW       = cardWidth  + 2 * paddingPx;
-  const frameH       = cardHeight + 2 * paddingPx;
-  const centerX      = frameW / 2;
-  const centerY      = frameH / 2;
-  const cardLeft     = paddingPx;
-  const cardTop      = paddingPx;
+  // Canvas/SVG is exactly the card bounds — no padding
+  const centerX      = cardWidth / 2;
+  const centerY      = cardHeight / 2;
+  const cardLeft     = 0;
+  const cardTop      = 0;
   const cornerRadius = cardWidth * 0.1;
 
-  // Short side — used for proportional sizing (font, symbol radius, etc.)
-  // so elements stay visually consistent across portrait, square, and landscape cards.
   const shortSide = Math.min(cardWidth, cardHeight);
   const landscape = cardAspect > 1;
 
-  // Bundled into one object for easy passing to drawing modules
-  const geometry = { frameW, frameH, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY, shortSide, landscape };
+  const geometry = { frameW: cardWidth, frameH: cardHeight, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius, centerX, centerY, shortSide, landscape };
 
-  // If the ctx supports it (SvgContext), set the viewBox to the full frame
-  // so the SVG output matches the canvas framing (card + padding).
-  if (ctx.cropTo) ctx.cropTo(0, 0, frameW, frameH);
+  if (ctx.cropTo) ctx.cropTo(0, 0, cardWidth, cardHeight);
 
   // ── Colour helpers ────────────────────────────────────────────────────────
   // cardColor   — base hue, used for the card body gradient and shadow
@@ -203,14 +184,7 @@ export function generateCard({
 
   // ── Drawing ───────────────────────────────────────────────────────────────
 
-  if (!transparent) {
-    drawCanvasBackground(ctx, frameW, frameH);
-  }
-
-  // Shadow must go before the card clip (so it can bleed outside the card shape)
-  if (showShadow) drawCardShadow(ctx, geometry, cardColor);
-
-  // Clip everything that follows to the card boundary
+  // Clip everything to the card boundary (canvas is now card-sized)
   ctx.save();
   roundedRectPath(ctx, cardLeft, cardTop, cardWidth, cardHeight, cornerRadius);
   ctx.clip();

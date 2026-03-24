@@ -7,7 +7,7 @@ Vanilla ES modules, Canvas 2D + SVG, no build step. Served via local HTTP (ES mo
 **Module layout:**
 - `modules/prng.js`       — mulberry32 PRNG + seed mixer
 - `modules/card.js`       — orchestrator; four PRNGs; exports `generateCard` + `deriveColorParams`
-- `modules/background.js` — canvas bg, shadow, noise blobs, artifacts, gloss, edge
+- `modules/background.js` — noise blobs, artifacts, gloss, edge
 - `modules/symbols.js`    — 16 logo variants (0–15)
 - `modules/text.js`       — name + job title layout
 - `modules/utils.js`      — `hsla()`, `roundedRectPath()`
@@ -24,7 +24,7 @@ Two render modes: **Canvas** (raster) and **SVG** (vector). SVG is the default.
 - SVG mode creates a `SvgContext` from `svg-ctx.js`, passes it as `ctx` to `generateCard`, then sets `svgOutputEl.innerHTML`
 - Canvas mode uses the standard `<canvas>` element's 2D context
 
-**SVG limitations (POC):** No shadow, no `globalCompositeOperation` (lanyard hole punch-through absent), filter only honoured in `drawImage` (blur).
+**SVG limitations (POC):** No `globalCompositeOperation` (lanyard hole punch-through absent), filter only honoured in `drawImage` (blur).
 
 ---
 
@@ -83,7 +83,7 @@ function getEffectiveColor() {
 - URL only includes overridden colour params (not seed-derived defaults)
 
 **URL param strategy:**
-- Standard params always in URL: `seed`, `lstyle`, `zoom`, `name`, `title`, `artifacts`, `shadow`
+- Standard params always in URL: `seed`, `lstyle`, `zoom`, `name`, `title`, `artifacts`
 - Colour overrides only if set: `hue`, `sat`, `nbright`, `ncontrast`
 - Seed overrides only if set: `nonce`, `aseed`
 
@@ -186,9 +186,17 @@ Global opacity multiplier: `const opacity = 0.2`.
 | 13 | Lissajous |
 | 14 | Rose Curve |
 | 15 | Variable Dot Mask |
+| 16 | Inlaid Rings |
+| 17 | Fractal Tree |
+| 18 | Voronoi Cells |
+| 19 | Truchet Tiles |
+| 20 | Celtic Knot |
+| 21 | Cross Hatch |
+| 22 | Icons |
+| 23 | ASCII Art |
 
-Style is selected by `stylePRNG.int(0, 15)` in auto mode, or forced via `logoStyle` param (0–15).
-Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 15)` — must match `stylePRNG` seed exactly.
+Style is selected by `stylePRNG.int(0, 23)` in auto mode, or forced via `logoStyle` param (0–23).
+Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 23)` — must match `stylePRNG` seed exactly.
 
 **Dot Mask vs Variable Dot Mask:** Dot Mask (9) uses a single dot size across the grid. Variable Dot Mask (15) seed-derives 2–7 discrete size steps lerped between a min and max radius; each dot randomly picks a step, producing varied dot sizes within the same harmonic blob boundary.
 
@@ -199,6 +207,42 @@ Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 15)` — mu
 ## Export
 
 - **SVG mode (default):** Export renders a fresh `SvgContext`, serializes via `toSVG()`, downloads as `.svg` Blob.
-- **Canvas mode:** Export re-renders with `transparent: true` (skips `drawCanvasBackground`), downloads as `.png` via `canvas.toDataURL()`, then re-renders normally.
-- `showShadow: false` skips `drawCardShadow` for a shadow-free export (or preview).
+- **Canvas mode:** Downloads `.png` directly from the current canvas via `canvas.toDataURL()`.
+- Drop shadow is CSS-only (on `.card-body`), not part of the exported card.
 - The export button label dynamically updates to "Export SVG" or "Export PNG" based on the active render mode.
+
+---
+
+## 3D Card Interaction
+
+- **`modules/card-3d.js`** — Tilt-on-hover + click-to-flip controller
+- `initCard3D(sceneEl, bodyEl)` — attach events to `.card-scene` / `.card-body`
+- `isFlipped()` / `setFlipped(bool)` — read/write flip state
+- Tilt: ±12deg, rAF-throttled, disabled on touch-only devices
+- Flip: 0.6s CSS transition, dispatches `card-flip` CustomEvent
+- **`modules/card-back.js`** — Back face renderer (magnetic stripe, hatched pattern, brand mark, barcode)
+- DOM structure: `.card-scene > .card-body > .card-face.card-front + .card-face.card-back`
+
+---
+
+## Keyboard Shortcuts
+
+All shortcuts are disabled when an `<input>`, `<select>`, or `<textarea>` is focused.
+
+| Key | Action |
+|-----|--------|
+| Space | Shuffle (random seed) |
+| E | Export |
+| R | Re-render |
+| C | Copy link |
+| Backspace | Reset all |
+| F | Flip card |
+| ← / → | Seed ±1 |
+| ↑ / ↓ | Seed ±10 |
+| 1 / 2 / 3 | Card size: ID / Square / MOO |
+| S | SVG mode |
+| V | Canvas mode |
+| D | Toggle dark/light |
+| ? | Toggle hotkey legend |
+
+Hotkey legend: collapsible panel at `position: fixed; top-right`, toggled by `?` button or key.

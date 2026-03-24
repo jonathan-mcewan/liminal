@@ -113,7 +113,8 @@ export function drawNoise(ctx, geometry, cardPRNG, noiseZoom, noiseBrightness = 
   }
 
   ctx.save();
-  ctx.filter = 'blur(28px)';
+  const blurPx = Math.round(Math.max(cardWidth, cardHeight) * 0.033);
+  ctx.filter = `blur(${blurPx}px)`;
   ctx.drawImage(offCanvas, cardLeft, cardTop);
   ctx.restore();
 }

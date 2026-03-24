@@ -36,6 +36,13 @@ export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng) {
     drawRoseCurve,
     drawVariableDotMask,
     drawInlaidRings,
+    drawFractalTree,
+    drawVoronoiCells,
+    drawTruchetTiles,
+    drawCelticKnot,
+    drawCrossHatch,
+    drawIcons,
+    drawAsciiArt,
   ];
 
   (variants[style] ?? variants[0])(ctx, x, y, radius, strokeWeight, symbolColor, rng);
@@ -857,5 +864,613 @@ function drawRoseCurve(ctx, x, y, radius, sw, symbolColor, rng) {
 
   ctx.beginPath(); ctx.arc(x, y, radius * 0.07, 0, Math.PI * 2);
   ctx.fillStyle = symbolColor(6, 1); ctx.fill();
+}
+
+// ── Style 17: Fractal Tree ────────────────────────────────────────────────────
+// Recursive branching structure growing outward from the centre.
+// Iterative approach with a stack; branch thickness decays per depth level.
+function drawFractalTree(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const initAngle   = rng.float(0, TAU);
+  const spread      = rng.float(0.35, 0.65);
+  const decay       = rng.float(0.55, 0.72);
+  const trunkRatio  = rng.float(0.28, 0.40);
+  const splits      = rng.int(3, 9);
+  // Cap depth so total branches stay reasonable (splits^depth ≤ ~500)
+  const depth       = splits <= 4 ? rng.int(3, 4) : splits <= 6 ? 3 : 2;
+  const hasJitter   = rng.next() > 0.5;
+
+  // Pre-generate jitter values for determinism (max branches at depth 5 with 3 splits ≈ 364)
+  const jitters = [];
+  for (let i = 0; i < 400; i++) jitters.push(hasJitter ? rng.float(-0.15, 0.15) : 0);
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.clip();
+  ctx.lineCap = 'round';
+
+  // BFS stack: [fromX, fromY, angle, length, depthLeft]
+  const stack = [[cx, cy, initAngle, radius * trunkRatio, depth]];
+  let ji = 0;
+  const tips = [];
+
+  while (stack.length > 0) {
+    const [fx, fy, angle, len, d] = stack.shift();
+    const tx = fx + Math.cos(angle) * len;
+    const ty = fy + Math.sin(angle) * len;
+
+    const t = 1 - d / depth; // 0 at root, approaches 1 at tips
+    ctx.lineWidth   = sw * (1.3 - t * 0.8);
+    ctx.strokeStyle = symbolColor(0, 0.85 - t * 0.35);
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+
+    if (d > 0) {
+      const nextLen = len * decay;
+      for (let s = 0; s < splits; s++) {
+        const frac = splits === 1 ? 0 : (s / (splits - 1)) * 2 - 1; // -1..1
+        const branchAngle = angle + frac * spread + jitters[ji++ % jitters.length];
+        stack.push([tx, ty, branchAngle, nextLen, d - 1]);
+      }
+    } else {
+      tips.push([tx, ty]);
+    }
+  }
+
+  // Leaf dots at tips
+  ctx.fillStyle = symbolColor(5, 0.65);
+  for (const [tx, ty] of tips) {
+    ctx.beginPath();
+    ctx.arc(tx, ty, sw * 0.7, 0, TAU);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+// ── Style 18: Voronoi Cells ──────────────────────────────────────────────────
+// Random seed points with perpendicular bisector edges clipped to the bounding circle.
+function drawVoronoiCells(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const n = rng.int(6, 12);
+  const showDots = rng.next() > 0.45;
+  const edgeAlpha = rng.float(0.40, 0.65);
+
+  // Generate points in polar coords (always inside circle)
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = rng.float(0, TAU);
+    const r = rng.float(0.12, 0.82) * radius;
+    pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+  }
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.clip();
+
+  ctx.lineWidth   = sw * 0.6;
+  ctx.strokeStyle = symbolColor(0, edgeAlpha);
+  ctx.lineCap     = 'butt';
+
+  // For each pair within threshold, draw perpendicular bisector
+  const threshold = radius * 1.4;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > threshold) continue;
+
+      // Midpoint and perpendicular direction
+      const mx = (pts[i].x + pts[j].x) / 2;
+      const my = (pts[i].y + pts[j].y) / 2;
+      const px = -dy / dist;
+      const py =  dx / dist;
+      const ext = radius * 1.2;
+
+      ctx.beginPath();
+      ctx.moveTo(mx - px * ext, my - py * ext);
+      ctx.lineTo(mx + px * ext, my + py * ext);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+
+  // Seed point dots
+  if (showDots) {
+    ctx.fillStyle = symbolColor(5, 0.75);
+    for (const p of pts) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, sw * 1.1, 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  // Outer ring
+  ctx.lineWidth   = sw * 0.5;
+  ctx.strokeStyle = symbolColor(0, 0.35);
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.stroke();
+}
+
+// ── Style 19: Truchet Tiles ──────────────────────────────────────────────────
+// Grid of quarter-circle arcs in random orientations, creating maze-like curves.
+function drawTruchetTiles(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const PI  = Math.PI;
+  const gridN     = rng.int(3, 7);
+  const lineAlpha = rng.float(0.55, 0.85);
+  const showGrid  = rng.next() > 0.6;
+
+  const cellSize = (radius * 2) / gridN;
+  const gridLeft = cx - radius;
+  const gridTop  = cy - radius;
+
+  // Pre-consume orientations for determinism
+  const orientations = [];
+  for (let i = 0; i < gridN * gridN; i++) orientations.push(rng.next() > 0.5 ? 0 : 1);
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.clip();
+
+  ctx.lineWidth = sw * 0.8;
+  ctx.lineCap   = 'butt';
+
+  // Optional faint grid
+  if (showGrid) {
+    ctx.strokeStyle = symbolColor(0, 0.10);
+    ctx.lineWidth   = sw * 0.25;
+    for (let i = 0; i <= gridN; i++) {
+      ctx.beginPath();
+      ctx.moveTo(gridLeft + i * cellSize, gridTop);
+      ctx.lineTo(gridLeft + i * cellSize, gridTop + gridN * cellSize);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(gridLeft, gridTop + i * cellSize);
+      ctx.lineTo(gridLeft + gridN * cellSize, gridTop + i * cellSize);
+      ctx.stroke();
+    }
+    ctx.lineWidth = sw * 0.8;
+  }
+
+  ctx.strokeStyle = symbolColor(0, lineAlpha);
+  const half = cellSize / 2;
+
+  for (let row = 0; row < gridN; row++) {
+    for (let col = 0; col < gridN; col++) {
+      const lx = gridLeft + col * cellSize;
+      const ty = gridTop  + row * cellSize;
+      const orient = orientations[row * gridN + col];
+
+      if (orient === 0) {
+        // Arcs at top-left and bottom-right corners
+        ctx.beginPath(); ctx.arc(lx, ty, half, 0, PI * 0.5); ctx.stroke();
+        ctx.beginPath(); ctx.arc(lx + cellSize, ty + cellSize, half, PI, PI * 1.5); ctx.stroke();
+      } else {
+        // Arcs at top-right and bottom-left corners
+        ctx.beginPath(); ctx.arc(lx + cellSize, ty, half, PI * 0.5, PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(lx, ty + cellSize, half, PI * 1.5, TAU); ctx.stroke();
+      }
+    }
+  }
+
+  ctx.restore();
+
+  // Outer ring
+  ctx.lineWidth   = sw * 0.6;
+  ctx.strokeStyle = symbolColor(0, 0.45);
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.stroke();
+}
+
+// ── Style 20: Celtic Knot ────────────────────────────────────────────────────
+// Parametric knot curve with over-under weaving at crossings.
+// Uses a trefoil-like parameterization; crossings drawn as segment gaps.
+function drawCelticKnot(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const lobes     = rng.int(2, 4);
+  const rotOff    = rng.float(0, TAU);
+  const scale     = rng.float(0.60, 0.82) * radius;
+  const hasInner  = rng.next() > 0.55;
+  const innerAmp  = rng.float(0.35, 0.55);
+
+  // Parametric knot: x = sin(t) + A*sin(lobes*t), y = cos(t) - A*cos(lobes*t)
+  // A controls lobe amplitude
+  const A = 2 / lobes;
+  const steps = 360;
+  const dt = TAU / steps;
+
+  // Sample curve points
+  function curvePoint(t) {
+    const raw_x = Math.sin(t) + A * Math.sin(lobes * t);
+    const raw_y = Math.cos(t) - A * Math.cos(lobes * t);
+    // Rotate
+    const cos_r = Math.cos(rotOff), sin_r = Math.sin(rotOff);
+    const rx = raw_x * cos_r - raw_y * sin_r;
+    const ry = raw_x * sin_r + raw_y * cos_r;
+    // Normalize to fit within radius
+    const normFactor = 1 / (1 + A);
+    return {
+      x: cx + rx * scale * normFactor,
+      y: cy + ry * scale * normFactor,
+    };
+  }
+
+  const points = [];
+  for (let i = 0; i <= steps; i++) points.push(curvePoint(i * dt));
+
+  // Find approximate crossing points (where curve self-intersects)
+  // Crossings occur at regular intervals for trefoil-like knots
+  const crossings = [];
+  const crossStep = steps / (lobes * 2);
+  for (let k = 0; k < lobes * 2; k++) {
+    crossings.push(Math.round(k * crossStep) % steps);
+  }
+
+  // Determine which segments are "under" a crossing (alternating)
+  const isNearCrossing = (idx, crossIdx) => {
+    const d = Math.abs(idx - crossIdx);
+    const d2 = steps - d;
+    return Math.min(d, d2) < steps * 0.03;
+  };
+
+  // Draw the curve in two passes: under first, then over
+  ctx.lineCap = 'round';
+
+  for (let pass = 0; pass < 2; pass++) {
+    ctx.lineWidth   = pass === 0 ? sw * 1.4 : sw * 1.0;
+    ctx.strokeStyle = pass === 0
+      ? symbolColor(0, 0.35)
+      : symbolColor(0, 0.82);
+
+    ctx.beginPath();
+    let drawing = false;
+
+    for (let i = 0; i < steps; i++) {
+      let nearAnyCrossing = false;
+      for (let c = 0; c < crossings.length; c++) {
+        if (isNearCrossing(i, crossings[c])) {
+          // Alternating: even crossings → under at pass 0, over at pass 1
+          const isUnder = (c % 2 === 0) === (pass === 0);
+          if (isUnder) { nearAnyCrossing = true; break; }
+        }
+      }
+
+      if (nearAnyCrossing) {
+        if (drawing) ctx.stroke();
+        drawing = false;
+      } else {
+        if (!drawing) {
+          ctx.beginPath();
+          ctx.moveTo(points[i].x, points[i].y);
+          drawing = true;
+        } else {
+          ctx.lineTo(points[i].x, points[i].y);
+        }
+      }
+    }
+    if (drawing) ctx.stroke();
+  }
+
+  // Optional inner knot
+  if (hasInner) {
+    ctx.lineWidth   = sw * 0.45;
+    ctx.strokeStyle = symbolColor(-5, 0.22);
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const t = i * dt;
+      const raw_x = Math.sin(t * 2) * innerAmp;
+      const raw_y = Math.cos(t * 2) * innerAmp;
+      const cos_r = Math.cos(rotOff), sin_r = Math.sin(rotOff);
+      const px = cx + (raw_x * cos_r - raw_y * sin_r) * scale;
+      const py = cy + (raw_x * sin_r + raw_y * cos_r) * scale;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  // Centre dot
+  ctx.beginPath(); ctx.arc(cx, cy, radius * 0.06, 0, TAU);
+  ctx.fillStyle = symbolColor(6, 1); ctx.fill();
+}
+
+// ── Style 21: Cross Hatch ────────────────────────────────────────────────────
+// Multiple sets of parallel lines at different angles with directional shading.
+function drawCrossHatch(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const PI  = Math.PI;
+  const setCount = rng.int(2, 4);
+  const gradDir  = rng.float(0, PI);
+  const minAlpha = rng.float(0.10, 0.25);
+  const maxAlpha = rng.float(0.55, 0.80);
+
+  // Pre-consume per-set params
+  const sets = [];
+  for (let s = 0; s < setCount; s++) {
+    sets.push({
+      angle:      rng.float(0, PI),
+      lineCount:  rng.int(8, 18),
+      weight:     rng.float(0.5, 1.0),
+    });
+  }
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.clip();
+  ctx.lineCap = 'butt';
+
+  // Gradient direction vectors
+  const gx = Math.cos(gradDir);
+  const gy = Math.sin(gradDir);
+
+  for (const { angle, lineCount, weight } of sets) {
+    const perp = { x:  Math.cos(angle), y:  Math.sin(angle) };
+    const dir  = { x: -Math.sin(angle), y:  Math.cos(angle) };
+    const spacing = (radius * 2) / lineCount;
+
+    ctx.lineWidth = sw * weight;
+
+    for (let i = 0; i < lineCount; i++) {
+      const t = -radius + spacing * (i + 0.5);
+      const lineX = perp.x * t;
+      const lineY = perp.y * t;
+
+      // Alpha based on position along gradient axis
+      const gradPos = (lineX * gx + lineY * gy) / radius; // -1..1
+      const alpha = minAlpha + (maxAlpha - minAlpha) * (gradPos * 0.5 + 0.5);
+
+      ctx.strokeStyle = symbolColor(0, alpha);
+      ctx.beginPath();
+      ctx.moveTo(cx + lineX - dir.x * radius * 1.5, cy + lineY - dir.y * radius * 1.5);
+      ctx.lineTo(cx + lineX + dir.x * radius * 1.5, cy + lineY + dir.y * radius * 1.5);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+
+  // Outer ring
+  ctx.lineWidth   = sw * 0.5;
+  ctx.strokeStyle = symbolColor(0, 0.40);
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.stroke();
+}
+
+// ── Style 22: Icons ──────────────────────────────────────────────────────────
+// Curated set of simple icon shapes drawn with lines and arcs.
+// Each icon is defined in unit coordinates (-1..1), then rotated and scaled.
+function drawIcons(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const iconIdx   = rng.int(0, 9);
+  const rotAngle  = rng.float(0, TAU);
+  rng.next(); // consume for PRNG sequence stability
+  const scale     = rng.float(0.55, 0.78) * radius;
+  const filled    = rng.next() > 0.5;
+
+  function rp(ux, uy) {
+    const c = Math.cos(rotAngle), s = Math.sin(rotAngle);
+    return [cx + (ux * c - uy * s) * scale, cy + (ux * s + uy * c) * scale];
+  }
+
+  // Each icon is a function that traces a path (doesn't stroke/fill)
+  const icons = [
+    // 0: Shield
+    () => {
+      ctx.beginPath();
+      const [ax, ay] = rp(0, -0.9);
+      const [bx, by] = rp(0.7, -0.4);
+      const [dx, dy] = rp(0, 0.9);
+      const [ex, ey] = rp(-0.7, -0.4);
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.lineTo(...rp(0.7, 0.1));
+      ctx.lineTo(dx, dy);
+      ctx.lineTo(...rp(-0.7, 0.1));
+      ctx.lineTo(ex, ey);
+      ctx.closePath();
+    },
+    // 1: Star (5-pointed)
+    () => {
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const a = (i * Math.PI / 5) - Math.PI / 2;
+        const r = i % 2 === 0 ? 0.9 : 0.4;
+        const [px, py] = rp(Math.cos(a) * r, Math.sin(a) * r);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    },
+    // 2: Hexagon
+    () => {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI / 3) - Math.PI / 6;
+        const [px, py] = rp(Math.cos(a) * 0.85, Math.sin(a) * 0.85);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    },
+    // 3: Eye
+    () => {
+      ctx.beginPath();
+      // Upper lid
+      const pts = 20;
+      for (let i = 0; i <= pts; i++) {
+        const t = i / pts;
+        const ux = -0.9 + t * 1.8;
+        const uy = -0.4 * Math.sin(t * Math.PI);
+        const [px, py] = rp(ux, uy);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      // Lower lid
+      for (let i = pts; i >= 0; i--) {
+        const t = i / pts;
+        const ux = -0.9 + t * 1.8;
+        const uy = 0.4 * Math.sin(t * Math.PI);
+        const [px, py] = rp(ux, uy);
+        ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    },
+    // 4: Diamond
+    () => {
+      ctx.beginPath();
+      const [tx, ty] = rp(0, -0.9);
+      const [rx, ry] = rp(0.6, 0);
+      const [bx, by] = rp(0, 0.9);
+      const [lx, ly] = rp(-0.6, 0);
+      ctx.moveTo(tx, ty); ctx.lineTo(rx, ry);
+      ctx.lineTo(bx, by); ctx.lineTo(lx, ly);
+      ctx.closePath();
+    },
+    // 5: Heart
+    () => {
+      ctx.beginPath();
+      const [bx, by] = rp(0, 0.85);
+      ctx.moveTo(bx, by);
+      const steps = 30;
+      for (let i = 0; i <= steps; i++) {
+        const t = (i / steps) * Math.PI;
+        const ux = 0.45 * Math.sin(t) * -1;
+        const uy = -0.3 + 0.55 * -Math.cos(t);
+        const [px, py] = rp(ux - 0.45, uy);
+        ctx.lineTo(px, py);
+      }
+      for (let i = 0; i <= steps; i++) {
+        const t = (i / steps) * Math.PI;
+        const ux = 0.45 * Math.sin(t);
+        const uy = -0.3 + 0.55 * -Math.cos(t);
+        const [px, py] = rp(ux + 0.45, uy);
+        ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    },
+    // 6: Lightning bolt
+    () => {
+      ctx.beginPath();
+      const shape = [[0.1, -0.9], [0.4, -0.9], [-0.05, -0.1], [0.35, -0.1], [-0.2, 0.9], [0.05, 0.15], [-0.35, 0.15]];
+      for (let i = 0; i < shape.length; i++) {
+        const [px, py] = rp(shape[i][0], shape[i][1]);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    },
+    // 7: Globe (circle + lat/long lines)
+    () => {
+      // Outer circle
+      ctx.beginPath(); ctx.arc(cx, cy, scale * 0.85, 0, TAU);
+      // Elliptical meridians approximated with lines
+      const steps = 24;
+      for (let m = 0; m < 3; m++) {
+        const squeeze = 0.3 + m * 0.3;
+        ctx.moveTo(...rp(0, -0.85));
+        for (let i = 1; i <= steps; i++) {
+          const a = (i / steps) * TAU;
+          const [px, py] = rp(Math.sin(a) * squeeze * 0.85, -Math.cos(a) * 0.85);
+          ctx.lineTo(px, py);
+        }
+      }
+      // Latitude lines
+      for (let l = -1; l <= 1; l++) {
+        const ly = l * 0.35;
+        const w = Math.sqrt(1 - (ly / 0.85) * (ly / 0.85)) * 0.85;
+        ctx.moveTo(...rp(-w, ly));
+        ctx.lineTo(...rp(w, ly));
+      }
+    },
+    // 8: Key
+    () => {
+      ctx.beginPath();
+      // Bow (circle part)
+      const [kx, ky] = rp(0, -0.45);
+      ctx.arc(kx, ky, scale * 0.35, 0, TAU);
+      // Shaft
+      ctx.moveTo(...rp(0, -0.1));
+      ctx.lineTo(...rp(0, 0.85));
+      // Teeth
+      ctx.moveTo(...rp(0, 0.5)); ctx.lineTo(...rp(0.25, 0.5));
+      ctx.moveTo(...rp(0, 0.7)); ctx.lineTo(...rp(0.2, 0.7));
+    },
+    // 9: Crown
+    () => {
+      ctx.beginPath();
+      const pts = [[-0.7, 0.3], [-0.7, -0.1], [-0.35, 0.15], [0, -0.5], [0.35, 0.15], [0.7, -0.1], [0.7, 0.3]];
+      for (let i = 0; i < pts.length; i++) {
+        const [px, py] = rp(pts[i][0], pts[i][1]);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    },
+  ];
+
+  icons[iconIdx]();
+
+  if (filled) {
+    ctx.fillStyle = symbolColor(0, 0.15);
+    ctx.fill();
+  }
+  ctx.lineWidth   = filled ? sw * 0.8 : sw * 1.0;
+  ctx.strokeStyle = symbolColor(0, 0.82);
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  ctx.stroke();
+
+}
+
+// ── Style 23: ASCII Art ──────────────────────────────────────────────────────
+// Grid of monospace text characters within the bounding circle.
+function drawAsciiArt(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const charsets = [
+    '0123456789',
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    '0123456789ABCDEF',
+    '*+#@.:-=~<>[]',
+  ];
+  const charsetIdx = rng.int(0, charsets.length - 1);
+  const chars      = charsets[charsetIdx];
+  const cols       = rng.int(8, 16);
+  const density    = rng.float(0.45, 0.85);
+  const baseAlpha  = rng.float(0.35, 0.80);
+
+  const diameter = radius * 2;
+  const cellW    = diameter / cols;
+  const fontSize = cellW * 0.85;
+  const cellH    = fontSize * 1.1;
+  const rows     = Math.ceil(diameter / cellH);
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, radius * 0.95, 0, TAU); ctx.clip();
+
+  ctx.font         = `500 ${fontSize}px monospace`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+
+  const startX = cx - (cols * cellW) / 2 + cellW / 2;
+  const startY = cy - (rows * cellH) / 2 + cellH / 2;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const px = startX + col * cellW;
+      const py = startY + row * cellH;
+
+      // Skip if outside circle
+      const dx = px - cx, dy = py - cy;
+      if (dx * dx + dy * dy > radius * radius * 0.88) continue;
+
+      // Density check
+      if (rng.next() > density) continue;
+
+      const charIdx = rng.int(0, chars.length - 1);
+      const alpha = baseAlpha + rng.float(-0.12, 0.12);
+      ctx.fillStyle = symbolColor(0, Math.max(0.1, Math.min(1, alpha)));
+      ctx.fillText(chars[charIdx], px, py);
+    }
+  }
+
+  ctx.restore();
+
+  // Faint outer ring
+  ctx.lineWidth   = sw * 0.4;
+  ctx.strokeStyle = symbolColor(0, 0.20);
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.stroke();
 }
 

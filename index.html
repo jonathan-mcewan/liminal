@@ -36,10 +36,6 @@
           <input id="show-lanyard" type="checkbox" />
           <span>Lanyard Hole</span>
         </div>
-        <div class="field field--row">
-          <input id="show-shadow" type="checkbox" checked />
-          <span>Drop Shadow</span>
-        </div>
       </div>
 
       <div class="panel-section">
@@ -122,6 +118,13 @@
             <option value="14">Rose Curve</option>
             <option value="15">Variable Dot Mask</option>
             <option value="16">Inlaid Rings</option>
+            <option value="17">Fractal Tree</option>
+            <option value="18">Voronoi Cells</option>
+            <option value="19">Truchet Tiles</option>
+            <option value="20">Celtic Knot</option>
+            <option value="21">Cross Hatch</option>
+            <option value="22">Icons</option>
+            <option value="23">ASCII Art</option>
           </select>
         </div>
         <div class="field">
@@ -232,6 +235,25 @@
       </div>
     </main>
 
+    <!-- ── Hotkey legend ──────────────────────────────────────────────────── -->
+    <div class="hotkey-legend" id="hotkey-legend">
+      <button class="hotkey-toggle" id="hotkey-toggle" title="Keyboard shortcuts">?</button>
+      <div class="hotkey-panel" id="hotkey-panel">
+        <div class="hotkey-row"><kbd>Space</kbd><span>Shuffle</span></div>
+        <div class="hotkey-row"><kbd>E</kbd><span>Export</span></div>
+        <div class="hotkey-row"><kbd>R</kbd><span>Render</span></div>
+        <div class="hotkey-row"><kbd>C</kbd><span>Copy link</span></div>
+        <div class="hotkey-row"><kbd>&#9003;</kbd><span>Reset all</span></div>
+        <div class="hotkey-row"><kbd>F</kbd><span>Flip card</span></div>
+        <div class="hotkey-row"><kbd>&larr; &rarr;</kbd><span>Seed &plusmn;1</span></div>
+        <div class="hotkey-row"><kbd>&uarr; &darr;</kbd><span>Seed &plusmn;10</span></div>
+        <div class="hotkey-row"><kbd>1 2 3</kbd><span>ID / Sq / MOO</span></div>
+        <div class="hotkey-row"><kbd>S</kbd><span>SVG mode</span></div>
+        <div class="hotkey-row"><kbd>V</kbd><span>Canvas mode</span></div>
+        <div class="hotkey-row"><kbd>D</kbd><span>Toggle theme</span></div>
+      </div>
+    </div>
+
     <script type="module">
       import { generateCard }  from "./modules/card.js";
       import { SvgContext }    from "./modules/svg-ctx.js";
@@ -241,7 +263,7 @@
                updateLogoName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
       import { applyQueryString, syncURL } from "./modules/url-sync.js";
       import { getEffectiveColor, getEffectiveSeeds } from "./modules/state.js";
-      import { initCard3D }    from "./modules/card-3d.js";
+      import { initCard3D, isFlipped, setFlipped } from "./modules/card-3d.js";
       import { generateCardBack } from "./modules/card-back.js";
 
       // ── DOM cache ─────────────────────────────────────────────────────────
@@ -288,7 +310,6 @@
         artOpacityDisplay:      document.getElementById("art-opacity-display"),
         artScaleSlider:         document.getElementById("art-scale"),
         artScaleDisplay:        document.getElementById("art-scale-display"),
-        showShadowToggle:       document.getElementById("show-shadow"),
         showLanyardToggle:      document.getElementById("show-lanyard"),
         cardDescriptor:         document.getElementById("card-descriptor"),
         canvasEl:               document.getElementById("canvas"),
@@ -336,7 +357,7 @@
         const aspect = `${frameW} / ${frameH}`;
 
         if (renderMode === 'svg') {
-          const p   = buildParams(dom, true);
+          const p   = buildParams(dom);
           // Front
           const svg = new SvgContext(frameW, frameH);
           generateCard({ ...p, ctx: svg });
@@ -548,7 +569,6 @@
         dom.noiseZoomSlider.value         = 4;
         dom.noiseZoomDisplay.textContent  = '4';
         dom.showArtifactsToggle.checked   = true;
-        dom.showShadowToggle.checked      = true;
         dom.showLanyardToggle.checked     = false;
         dom.artCountSlider.value          = 5;
         dom.artCountDisplay.textContent   = artCountLabel(5);
@@ -576,7 +596,7 @@
         const s = getEffectiveSeeds(seed);
         const link = document.createElement("a");
         if (renderMode === 'svg') {
-          const p   = buildParams(dom, true);
+          const p   = buildParams(dom);
           const { frameW, frameH } = getFrameDims(dom);
           const svg = new SvgContext(frameW, frameH);
           generateCard({ ...p, ctx: svg });
@@ -587,11 +607,10 @@
           link.click();
           URL.revokeObjectURL(url);
         } else {
-          generateCard(buildParams(dom, true));
+          generateCard(buildParams(dom));  // ensure canvas has fresh content
           link.download = `card-s${dom.seedInput.value}-h${c.hue}-l${s.logoNonce}.png`;
           link.href     = dom.canvasEl.toDataURL("image/png");
           link.click();
-          render();
         }
       });
 
@@ -610,10 +629,109 @@
       dom.btnSizeMoo.addEventListener("click",    () => setCardSize('moo'));
       dom.logoStyleSelect.addEventListener("change",      () => render(true));
       dom.showArtifactsToggle.addEventListener("change",  () => render(true));
-      dom.showShadowToggle.addEventListener("change",     () => render(true));
       dom.showLanyardToggle.addEventListener("change",    () => render(true));
       dom.personNameInput.addEventListener("input", render);
       dom.jobTitleInput.addEventListener("input",   render);
+
+      // ── Keyboard shortcuts ────────────────────────────────────────────────
+      const hotkeyPanel  = document.getElementById('hotkey-panel');
+      const hotkeyToggle = document.getElementById('hotkey-toggle');
+
+      hotkeyToggle.addEventListener('click', () => {
+        hotkeyPanel.classList.toggle('open');
+      });
+
+      document.addEventListener('keydown', (e) => {
+        // Skip when typing in an input/select/textarea
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+        switch (e.key) {
+          case ' ':
+            e.preventDefault();
+            dom.seedInput.value = (Math.random() * 99999) | 0;
+            clearAllOverrides();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'e':
+            document.getElementById('btn-export').click();
+            break;
+          case 'r':
+            render(true);
+            break;
+          case 'c':
+            document.getElementById('btn-copy-link').click();
+            break;
+          case 'Backspace':
+            e.preventDefault();
+            document.getElementById('btn-reset-all').click();
+            break;
+          case 'f':
+            setFlipped(!isFlipped());
+            break;
+          case 'ArrowLeft':
+            e.preventDefault();
+            dom.seedInput.value = Math.max(0, getSeed(dom) - 1);
+            clearAllOverrides();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'ArrowRight':
+            e.preventDefault();
+            dom.seedInput.value = getSeed(dom) + 1;
+            clearAllOverrides();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            dom.seedInput.value = getSeed(dom) + 10;
+            clearAllOverrides();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'ArrowDown':
+            e.preventDefault();
+            dom.seedInput.value = Math.max(0, getSeed(dom) - 10);
+            clearAllOverrides();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case '1':
+            setCardSize('id');
+            break;
+          case '2':
+            setCardSize('square');
+            break;
+          case '3':
+            setCardSize('moo');
+            break;
+          case 's':
+            setRenderMode('svg');
+            break;
+          case 'v':
+            setRenderMode('canvas');
+            break;
+          case 'd':
+            setTheme(colorOverrides.isDark !== undefined ? !colorOverrides.isDark
+              : !(getEffectiveColor(getSeed(dom)).isDark));
+            break;
+          case '?':
+            hotkeyPanel.classList.toggle('open');
+            break;
+        }
+      });
 
       // ── Init ──────────────────────────────────────────────────────────────
       dom.artCountDisplay.textContent   = artCountLabel(dom.artCountSlider.value);

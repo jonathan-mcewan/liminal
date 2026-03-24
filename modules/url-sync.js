@@ -24,7 +24,6 @@ export function applyQueryString(dom) {
                               dom.artOpacityDisplay.textContent = dom.artOpacitySlider.value; }
   if (q.has("art_scale"))  { dom.artScaleSlider.value    = q.get("art_scale");
                               dom.artScaleDisplay.textContent = dom.artScaleSlider.value + '%'; }
-  if (q.has("shadow"))    dom.showShadowToggle.checked     = q.get("shadow")    !== "0";
   if (q.has("lanyard"))   dom.showLanyardToggle.checked    = q.get("lanyard")   !== "0";
 
   // Colour overrides — only in URL if user set them
@@ -57,7 +56,6 @@ export function syncURL(dom, push = false) {
     art_count:   dom.artCountSlider.value,
     art_opacity: dom.artOpacitySlider.value,
     art_scale:   dom.artScaleSlider.value,
-    shadow:      dom.showShadowToggle.checked   ? "1" : "0",
     lanyard:     dom.showLanyardToggle.checked   ? "1" : "0",
   });
   if (colorOverrides.isDark          !== undefined) q.set("dark",     colorOverrides.isDark ? "1" : "0");
