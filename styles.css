@@ -467,13 +467,13 @@ button svg {
 
 /* ── 3D card scene ──────────────────────────────────────────────────────── */
 .card-scene {
-  --card-ar:    0.63;          /* overridden by JS; fallback ≈ ID-card ratio */
   perspective:  1200px;
-  /* Width is the smaller of 84% (breathing room) or the width that,
-     given the card's aspect-ratio, keeps the height ≤ available space. */
-  width:        min(84%, calc((100vh - 16rem) * var(--card-ar)));
-  max-height:   calc(100vh - 16rem);  /* safety net */
-  /* aspect-ratio set dynamically by render() */
+  width:        84%;
+  flex:         1 1 0;         /* take remaining height in canvas-wrap */
+  min-height:   0;             /* allow shrink below content size */
+  display:      flex;
+  align-items:  center;
+  justify-content: center;
   cursor:       pointer;
   position:     relative;
   filter:       drop-shadow(0 12px 32px rgba(0,0,0,0.55));
@@ -483,8 +483,7 @@ button svg {
 
 .card-body {
   position:        relative;
-  width:           100%;
-  height:          100%;
+  /* width & height set by ResizeObserver to fit card-scene while keeping aspect ratio */
   transform-style: preserve-3d;
 }
 
@@ -550,6 +549,7 @@ button svg {
   gap:            0.75rem;
   max-width:      min(540px, 100%);
   width:          100%;
+  height:         100%;         /* fill .main so flex children can distribute height */
 }
 
 .brand {
@@ -635,14 +635,22 @@ button svg {
   }
 
   .card-scene {
+    flex:        0 0 auto;
     width:       100%;
-    max-height:  none;
     padding:     1rem;
+  }
+
+  /* On mobile the page scrolls — use CSS aspect-ratio instead of JS sizing */
+  .card-body {
+    width:        100% !important;
+    height:       auto !important;
+    aspect-ratio: var(--card-ar, 0.63);
   }
 
   .canvas-wrap {
     max-width: none;
     width:     calc(100vw - 2rem);
+    height:    auto;
   }
 
   .card-actions {
