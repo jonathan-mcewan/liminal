@@ -628,13 +628,26 @@ button svg {
   }
 
   .card-scene {
-    max-height: none;
-    width:      84%;
+    max-height:  none;
+    width:       100%;
+    padding:     1rem;
+    box-sizing:  border-box;
   }
 
   .canvas-wrap {
     max-width: none;
     width:     calc(100vw - 2rem);
+  }
+
+  .card-actions {
+    flex-wrap: wrap;
+  }
+
+  .card-actions button {
+    flex:      1 1 auto;
+    min-width: 0;
+    padding:   0 0.5rem;
+    font-size: 0.6rem;
   }
 
   .hotkey-legend { display: none; }
