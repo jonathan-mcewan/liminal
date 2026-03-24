@@ -193,6 +193,28 @@
         </div>
       </div>
 
+      <div class="panel-section">
+        <h2><i data-lucide="monitor"></i>Actions</h2>
+        <div class="render-mode-toggle">
+          <button id="btn-size-id"     class="mode-btn active">ID Card</button>
+          <button id="btn-size-square" class="mode-btn">Square</button>
+          <button id="btn-size-moo"    class="mode-btn">MOO</button>
+        </div>
+        <div class="render-mode-toggle">
+          <button id="btn-mode-canvas" class="mode-btn">Canvas</button>
+          <button id="btn-mode-svg"    class="mode-btn active">SVG</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-render"><i data-lucide="refresh-cw"></i>Render</button>
+          <button id="btn-reset-all" class="btn-action-reset" title="Reset all overrides (keep name, title, seed)"><i data-lucide="rotate-ccw"></i></button>
+          <button id="btn-rand"><i data-lucide="shuffle"></i>Shuffle</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-export"><i data-lucide="download"></i>Export SVG</button>
+          <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
+        </div>
+      </div>
+
     </aside>
 
     <!-- ── Canvas area ────────────────────────────────────────────────────── -->
@@ -233,22 +255,6 @@
           </div>
         </div>
         <p class="descriptor" id="card-descriptor"></p>
-        <div class="card-actions">
-          <button id="btn-render"><i data-lucide="refresh-cw"></i>Render</button>
-          <button id="btn-reset-all" class="btn-action-reset" title="Reset all overrides (keep name, title, seed)"><i data-lucide="rotate-ccw"></i></button>
-          <button id="btn-rand"><i data-lucide="shuffle"></i>Shuffle</button>
-          <button id="btn-export"><i data-lucide="download"></i>Export SVG</button>
-          <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
-        </div>
-        <div class="render-mode-toggle">
-          <button id="btn-size-id"     class="mode-btn active">ID Card</button>
-          <button id="btn-size-square" class="mode-btn">Square</button>
-          <button id="btn-size-moo"    class="mode-btn">MOO</button>
-        </div>
-        <div class="render-mode-toggle">
-          <button id="btn-mode-canvas" class="mode-btn">Canvas</button>
-          <button id="btn-mode-svg"    class="mode-btn active">SVG</button>
-        </div>
       </div>
     </main>
 
