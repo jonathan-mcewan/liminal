@@ -100,6 +100,7 @@ body {
   overflow-x:      hidden;
   overflow-y:      auto;
   background:      #1a1a22;
+  position:        relative;
 }
 
 canvas {
@@ -751,8 +752,9 @@ button svg {
   gap:            0.5rem;
   opacity:        0.55;
   user-select:    none;
-  align-self:     flex-start;
-  flex-shrink:    0;
+  position:       absolute;
+  top:            1.5rem;
+  left:           1.5rem;
 }
 
 .brand-icon {
@@ -862,7 +864,8 @@ button svg {
   .brand { display: none; }
   .brand-mobile {
     display:         flex;
-    justify-content: center;
+    position:        static;
+    justify-content: left;
     padding:         0 0 0.25rem;
     opacity:         0.55;
   }
@@ -917,8 +920,8 @@ button svg {
 /* ── Hotkey legend ──────────────────────────────────────────────────────── */
 .hotkey-legend {
   position: fixed;
-  top:      1rem;
-  right:    1rem;
+  top:      1.5rem;
+  right:    1.5rem;
   z-index:  100;
   display:  flex;
   flex-direction: column;
@@ -1385,7 +1388,8 @@ button svg {
 }
 
 .hotkey-fav svg,
-#hotkey-favs-browser svg {
+#hotkey-favs-browser svg,
+#hotkey-toggle svg {
   width:  0.85rem;
   height: 0.85rem;
 }
