@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <clipPath id="stripe-clip">
+      <circle cx="600" cy="315" r="260"/>
+    </clipPath>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="1200" height="630" fill="#0d0d14"/>
+
+  <!-- Subtle diagonal stripe motif (echoes favicon) -->
+  <g clip-path="url(#stripe-clip)" stroke="rgba(255,255,255,0.07)" stroke-width="2.4" stroke-linecap="butt">
+    <line x1="280" y1="100" x2="620" y2="440"/>
+    <line x1="310" y1="100" x2="650" y2="440"/>
+    <line x1="340" y1="100" x2="680" y2="440"/>
+    <line x1="370" y1="100" x2="710" y2="440"/>
+    <line x1="400" y1="100" x2="740" y2="440"/>
+    <line x1="430" y1="100" x2="770" y2="440"/>
+    <line x1="460" y1="100" x2="800" y2="440"/>
+    <line x1="490" y1="100" x2="830" y2="440"/>
+    <line x1="520" y1="100" x2="860" y2="440"/>
+    <line x1="550" y1="100" x2="890" y2="440"/>
+    <line x1="580" y1="100" x2="920" y2="440"/>
+  </g>
+
+  <!-- Outer ring (echoes favicon) -->
+  <circle cx="600" cy="315" r="260" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.4"/>
+
+  <!-- Brand name -->
+  <text x="600" y="295" text-anchor="middle" dominant-baseline="central"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        font-size="72" font-weight="600" letter-spacing="0.3em" fill="rgba(255,255,255,0.88)">
+    LIMINAL
+  </text>
+
+  <!-- Tagline -->
+  <text x="600" y="360" text-anchor="middle" dominant-baseline="central"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        font-size="22" font-weight="300" letter-spacing="0.12em" fill="rgba(255,255,255,0.38)">
+    One seed, one unique card
+  </text>
+</svg>

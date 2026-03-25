@@ -4,9 +4,82 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>LIMINAL</title>
+    <title>LIMINAL — Procedural Card Generator</title>
+
+    <!-- SEO -->
+    <meta name="description" content="A procedural identity card generator. One seed, one unique card. Colour, pattern, logo, texture — every parameter lives in the space between randomness and intention." />
+    <meta name="author" content="LIMINAL Team" />
+    <meta name="application-name" content="LIMINAL" />
+    <meta name="theme-color" content="#0d0d14" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="LIMINAL — Procedural Card Generator" />
+    <meta property="og:description" content="One seed, one unique card. A procedural identity card generator where colour, pattern, logo, and texture all derive from a single number." />
+    <meta property="og:site_name" content="LIMINAL" />
+    <meta property="og:image" content="og-image.svg" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="LIMINAL — diagonal stripes through a dark field, one seed one unique card" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LIMINAL — Procedural Card Generator" />
+    <meta name="twitter:description" content="One seed, one unique card. A procedural identity card generator where colour, pattern, logo, and texture all derive from a single number." />
+    <meta name="twitter:image" content="og-image.svg" />
+
+    <!-- Favicon & touch icons -->
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="favicon.svg" />
+    <meta name="apple-mobile-web-app-title" content="LIMINAL" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- AI training opt-out -->
     <meta name="robots" content="noai, noimageai" />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "LIMINAL",
+      "description": "A procedural identity card generator. One seed, one unique card.",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires a modern browser with ES module and Canvas 2D support",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "LIMINAL Team"
+      }
+    }
+    </script>
+
+    <!-- Resolve absolute URLs for canonical + OG from current location -->
+    <link rel="canonical" href="" />
+    <script>
+    (function () {
+      var base = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
+      document.querySelector('link[rel="canonical"]').href = base;
+      var ogUrl = document.createElement('meta');
+      ogUrl.setAttribute('property', 'og:url');
+      ogUrl.content = base;
+      document.head.appendChild(ogUrl);
+      ['og:image', 'twitter:image'].forEach(function (attr) {
+        var isOg = attr.startsWith('og:');
+        var sel = isOg ? 'meta[property="' + attr + '"]' : 'meta[name="' + attr + '"]';
+        var el = document.querySelector(sel);
+        if (el) el.content = base + 'og-image.svg';
+      });
+    })();
+    </script>
+
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   </head>
