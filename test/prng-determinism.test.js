@@ -52,10 +52,11 @@ describe('makePRNG determinism', () => {
   });
 
   it('same seed always produces the same sequence', () => {
-    const a = Array.from({ length: 10 }, () => makePRNG(99999).next());
-    const b = Array.from({ length: 10 }, () => makePRNG(99999).next());
-    // Each call starts fresh, so element 0 from seed 99999 is always the same
-    assert.strictEqual(a[0], b[0]);
+    const rngA = makePRNG(99999);
+    const a = Array.from({ length: 10 }, () => rngA.next());
+    const rngB = makePRNG(99999);
+    const b = Array.from({ length: 10 }, () => rngB.next());
+    assert.deepStrictEqual(a, b);
   });
 });
 

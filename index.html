@@ -998,14 +998,28 @@
             generateCardBack({ ...p, ctx: svgBack });
             dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
           } else {
-            // Front
-            generateCard(buildParams(dom));
+            // Front - use offscreen canvas to preserve previous card on error
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width  = Math.round(frameW);
+            offCanvas.height = Math.round(frameH);
+            const offCtx = offCanvas.getContext('2d');
+            const p = buildParams(dom);
+            generateCard({ ...p, ctx: offCtx });
+            // Only commit to visible canvas after successful render
+            const canvas = dom.canvasEl;
+            canvas.width  = offCanvas.width;
+            canvas.height = offCanvas.height;
+            canvas.getContext('2d').drawImage(offCanvas, 0, 0);
             // Back
-            const backCtx = dom.canvasBackEl.getContext('2d');
+            const backOffCanvas = document.createElement('canvas');
+            backOffCanvas.width  = Math.round(frameW);
+            backOffCanvas.height = Math.round(frameH);
+            const backOffCtx = backOffCanvas.getContext('2d');
             const bp = buildParams(dom);
-            dom.canvasBackEl.width  = Math.round(frameW);
-            dom.canvasBackEl.height = Math.round(frameH);
-            generateCardBack({ ...bp, ctx: backCtx });
+            generateCardBack({ ...bp, ctx: backOffCtx });
+            dom.canvasBackEl.width  = backOffCanvas.width;
+            dom.canvasBackEl.height = backOffCanvas.height;
+            dom.canvasBackEl.getContext('2d').drawImage(backOffCanvas, 0, 0);
           }
         } catch (err) {
           console.error('Render failed:', err);
