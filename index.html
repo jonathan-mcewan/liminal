@@ -965,6 +965,19 @@
         }
       }
 
+      function showRenderError(msg) {
+        let el = document.querySelector('.render-error-toast');
+        if (el) el.remove();
+        el = document.createElement('div');
+        el.className = 'render-error-toast';
+        el.textContent = msg;
+        el.style.cssText = 'position:fixed;top:1rem;left:50%;transform:translateX(-50%);' +
+          'background:#1a1a1a;color:#f08080;padding:0.5rem 1rem;border-radius:0.5rem;' +
+          'font-size:0.8rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+      }
+
       function render(push = false) {
         buildLogoGrid();
         buildPatternGrid();
@@ -973,25 +986,31 @@
         const { frameW, frameH } = getFrameDims(dom);
         const aspect = `${frameW} / ${frameH}`;
 
-        if (renderMode === 'svg') {
-          const p   = buildParams(dom);
-          // Front
-          const svg = new SvgContext(frameW, frameH);
-          generateCard({ ...p, ctx: svg });
-          dom.svgOutputEl.innerHTML = svg.toSVG();
-          // Back
-          const svgBack = new SvgContext(frameW, frameH);
-          generateCardBack({ ...p, ctx: svgBack });
-          dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
-        } else {
-          // Front
-          generateCard(buildParams(dom));
-          // Back
-          const backCtx = dom.canvasBackEl.getContext('2d');
-          const bp = buildParams(dom);
-          dom.canvasBackEl.width  = Math.round(frameW);
-          dom.canvasBackEl.height = Math.round(frameH);
-          generateCardBack({ ...bp, ctx: backCtx });
+        try {
+          if (renderMode === 'svg') {
+            const p   = buildParams(dom);
+            // Front
+            const svg = new SvgContext(frameW, frameH);
+            generateCard({ ...p, ctx: svg });
+            dom.svgOutputEl.innerHTML = svg.toSVG();
+            // Back
+            const svgBack = new SvgContext(frameW, frameH);
+            generateCardBack({ ...p, ctx: svgBack });
+            dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
+          } else {
+            // Front
+            generateCard(buildParams(dom));
+            // Back
+            const backCtx = dom.canvasBackEl.getContext('2d');
+            const bp = buildParams(dom);
+            dom.canvasBackEl.width  = Math.round(frameW);
+            dom.canvasBackEl.height = Math.round(frameH);
+            generateCardBack({ ...bp, ctx: backCtx });
+          }
+        } catch (err) {
+          console.error('Render failed:', err);
+          showRenderError('Card render failed: ' + err.message);
+          return;
         }
 
         dom.cardScene.style.setProperty('--card-ar', (frameW / frameH).toFixed(6));
@@ -1399,9 +1418,22 @@
       const importTextarea = document.getElementById("import-textarea");
       const importFileInput = document.getElementById("import-file");
 
+      // ── Focus restore helper ─────────────────────────────────────────────
+      // Save the element that opened a dialog so focus returns there on close.
+      const dialogOpeners = new WeakMap();
+      function openDialog(dialog, beforeOpen) {
+        dialogOpeners.set(dialog, document.activeElement);
+        if (beforeOpen) beforeOpen();
+        dialog.showModal();
+      }
+      function restoreFocus(dialog) {
+        const opener = dialogOpeners.get(dialog);
+        if (opener && opener.focus) opener.focus();
+        dialogOpeners.delete(dialog);
+      }
+
       document.getElementById("btn-import-json").addEventListener("click", () => {
-        importTextarea.value = '';
-        importDialog.showModal();
+        openDialog(importDialog, () => { importTextarea.value = ''; });
       });
 
       document.getElementById("import-file-btn").addEventListener("click", () => importFileInput.click());
@@ -1417,6 +1449,7 @@
 
       document.getElementById("import-dialog-cancel").addEventListener("click", () => importDialog.close());
       document.getElementById("import-dialog-cancel-x").addEventListener("click", () => importDialog.close());
+      importDialog.addEventListener("close", () => restoreFocus(importDialog));
 
       // Styled error toast inside a dialog (replaces native alert)
       function showImportError(msg) {
@@ -1553,11 +1586,11 @@
       }
 
       document.getElementById("btn-favourites").addEventListener("click", () => {
-        renderFavouritesGrid();
-        favDialog.showModal();
+        openDialog(favDialog, renderFavouritesGrid);
       });
 
       document.getElementById("favourites-close").addEventListener("click", () => favDialog.close());
+      favDialog.addEventListener("close", () => restoreFocus(favDialog));
 
       // ── Styled confirm dialog (replaces native confirm()) ────────────────
       const confirmDialog = document.getElementById("confirm-dialog");
@@ -1571,14 +1604,14 @@
         confirmBody.textContent  = body;
         confirmOk.textContent    = okLabel;
         confirmOk.className      = okClass;
-        confirmDialog.showModal();
+        openDialog(confirmDialog);
         return new Promise(resolve => { confirmResolve = resolve; });
       }
 
       confirmOk.addEventListener("click", () => { confirmDialog.close(); confirmResolve?.(true);  confirmResolve = null; });
       document.getElementById("confirm-cancel").addEventListener("click", () => { confirmDialog.close(); confirmResolve?.(false); confirmResolve = null; });
       document.getElementById("confirm-close").addEventListener("click",  () => { confirmDialog.close(); confirmResolve?.(false); confirmResolve = null; });
-      confirmDialog.addEventListener("close", () => { if (confirmResolve) { confirmResolve(false); confirmResolve = null; } });
+      confirmDialog.addEventListener("close", () => { if (confirmResolve) { confirmResolve(false); confirmResolve = null; } restoreFocus(confirmDialog); });
 
       document.getElementById("favourites-clear-all").addEventListener("click", async () => {
         const ok = await showConfirm({
