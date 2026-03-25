@@ -7,7 +7,7 @@ import { deriveColorParams } from "./card.js";
 export const colorOverrides = {};  // isDark | cardLightness | hue | saturation | noiseBrightness | noiseContrast | patternTwoTone | bgBlur
 export const seedOverrides  = {};  // logoNonce | artifactSeed | patternSeed
 
-export function clearAllOverrides() {
+export function clearColorOverrides() {
   delete colorOverrides.isDark;
   delete colorOverrides.cardLightness;
   delete colorOverrides.hue;
@@ -16,6 +16,10 @@ export function clearAllOverrides() {
   delete colorOverrides.noiseContrast;
   delete colorOverrides.patternTwoTone;
   delete colorOverrides.bgBlur;
+}
+
+export function clearAllOverrides() {
+  clearColorOverrides();
   delete seedOverrides.logoNonce;
   delete seedOverrides.artifactSeed;
   delete seedOverrides.patternSeed;

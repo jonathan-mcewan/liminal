@@ -94,7 +94,8 @@ export function updateLogoName(dom) {
     dom.logoNameDisplay.textContent = '';
   } else {
     const seed  = getSeed(dom);
-    const style = makePRNG(seed ^ 0x9E3779B9).int(0, 24);
+    const seeds = getEffectiveSeeds(seed);
+    const style = makePRNG(seeds.logoNonce).int(0, 24);
     dom.logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
   }
 }
@@ -155,6 +156,7 @@ export function buildParams(dom) {
 export function getCardDescriptor(dom) {
   const seed     = getSeed(dom);
   const color    = getEffectiveColor(seed);
+  const seeds    = getEffectiveSeeds(seed);
   const raw      = dom.seedInput.value.trim();
   const isText   = String(seed) !== raw;
   const seedLabel = isText ? `${raw} (#${seed})` : `#${seed}`;
@@ -168,7 +170,7 @@ export function getCardDescriptor(dom) {
   const logoVal = parseInt(dom.logoStyleSelect.value, 10);
   const logoName = logoVal === -2 ? null
     : logoVal >= 0 ? LOGO_NAMES[logoVal]
-    : LOGO_NAMES[makePRNG(seed ^ 0x9E3779B9).int(0, 24)];
+    : LOGO_NAMES[makePRNG(seeds.logoNonce).int(0, 24)];
 
   // Background style name
   const bgVal = parseInt(dom.bgStyleSelect.value, 10);

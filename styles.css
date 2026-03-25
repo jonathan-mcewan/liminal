@@ -615,6 +615,16 @@ button svg {
   opacity: 1;
 }
 
+.btn-action-danger {
+  color:        #f08080;
+  border-color: rgba(220,60,60,0.25);
+}
+.btn-action-danger:hover {
+  background:   rgba(220,60,60,0.14);
+  border-color: rgba(220,60,60,0.35);
+  color:        #f09090;
+}
+
 /* ── 3D card scene ──────────────────────────────────────────────────────── */
 .card-scene {
   perspective:  1200px;
@@ -760,6 +770,10 @@ button svg {
   line-height:    1;
 }
 
+.brand-mobile {
+  display: none;
+}
+
 .descriptor {
   font-size:      0.6rem;
   letter-spacing: 0.07em;
@@ -823,12 +837,14 @@ button svg {
     display:     flex;
     align-items: center;
     justify-content: center;
+    overflow:    hidden;
   }
 
-  /* On mobile: height from flex parent, width from aspect-ratio */
+  /* On mobile: fit card within scene, letterboxed */
   .card-body {
     width:        auto !important;
     height:       100% !important;
+    max-width:    100%;
     aspect-ratio: var(--card-ar, 0.63);
   }
 
@@ -844,6 +860,12 @@ button svg {
   }
 
   .brand { display: none; }
+  .brand-mobile {
+    display:         flex;
+    justify-content: center;
+    padding:         0 0 0.25rem;
+    opacity:         0.55;
+  }
 
   .descriptor-row {
     display:     flex;
@@ -859,6 +881,7 @@ button svg {
   }
 
   .hotkey-legend { display: none; }
+  .hotkey-pro    { display: none; }
 }
 
 /* ── Scroll-to-top button ────────────────────────────────────────────────── */
@@ -901,6 +924,35 @@ button svg {
   flex-direction: column;
   align-items:    flex-end;
   gap:            0.4rem;
+}
+
+.hotkey-buttons {
+  display: flex;
+  gap:     0.4rem;
+  align-items: center;
+}
+
+.hotkey-pro {
+  background: linear-gradient(135deg, rgba(255,180,50,0.25), rgba(255,120,200,0.20));
+  border-color: rgba(255,180,50,0.45);
+  color: #ffd666;
+  animation: pro-glow 2.5s ease-in-out infinite;
+}
+
+.hotkey-pro svg {
+  width:  0.85rem;
+  height: 0.85rem;
+}
+
+.hotkey-pro:hover {
+  background: linear-gradient(135deg, rgba(255,180,50,0.40), rgba(255,120,200,0.35));
+  border-color: rgba(255,180,50,0.65);
+  color: #ffe88a;
+}
+
+@keyframes pro-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(255,214,102,0.15); }
+  50%      { box-shadow: 0 0 10px rgba(255,214,102,0.35), 0 0 20px rgba(255,120,200,0.15); }
 }
 
 .hotkey-toggle {
@@ -1017,6 +1069,9 @@ button svg {
   line-height:   1;
   border-radius: 4px;
   transition:    color 0.15s, background 0.15s;
+  width:         auto;
+  margin-left:   auto;
+  flex-shrink:   0;
 }
 
 .btn-dialog-close:hover {
@@ -1120,6 +1175,177 @@ button svg {
   background: rgba(220,60,60,0.22);
 }
 
+/* ── Pro upsell button & dialog ────────────────────────────────────────── */
+
+.btn-enshittify {
+  background: linear-gradient(135deg, rgba(255,180,50,0.18), rgba(255,120,200,0.14));
+  border-color: rgba(255,180,50,0.35);
+  color: #ffd666;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.btn-enshittify:hover {
+  background: linear-gradient(135deg, rgba(255,180,50,0.30), rgba(255,120,200,0.24));
+  border-color: rgba(255,180,50,0.50);
+  color: #ffe088;
+}
+
+.pro-dialog {
+  max-width: 520px;
+}
+
+.pro-title {
+  background: linear-gradient(90deg, #ffd666, #ff8ec6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.pro-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1rem 0 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 1rem;
+}
+
+.pro-price {
+  font-size: 2.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffd666, #ff8ec6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.pro-price-period {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.pro-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1a1a22;
+  background: linear-gradient(135deg, #ffd666, #ffb833);
+  padding: 0.2rem 0.75rem;
+  border-radius: 20px;
+}
+
+.pro-price-old {
+  font-size: 1.3rem;
+  font-weight: 400;
+  opacity: 0.4;
+  text-decoration: line-through;
+  -webkit-text-fill-color: rgba(255,255,255,0.4);
+  margin-right: 0.3rem;
+}
+
+.pro-tagline {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+  font-style: italic;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pro-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.pro-features li {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.58);
+  line-height: 1.45;
+}
+
+.pro-features strong {
+  color: #e8e8e8;
+}
+
+.pro-check {
+  color: #ffd666;
+  margin-right: 0.5rem;
+  font-weight: 700;
+}
+
+.pro-testimonial {
+  border-left: 2px solid rgba(255,214,102,0.25);
+  padding: 0.6rem 0.8rem;
+  margin: 0.5rem 0 0.2rem;
+  background: rgba(255,214,102,0.04);
+  border-radius: 0 6px 6px 0;
+}
+
+.pro-testimonial p {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: rgba(255,255,255,0.55);
+  margin: 0 0 0.25rem;
+  line-height: 1.4;
+}
+
+.pro-testimonial span {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.3);
+}
+
+.pro-actions {
+  justify-content: center;
+}
+
+.btn-pro-subscribe {
+  background: linear-gradient(135deg, #ffd666, #ff8ec6);
+  color: #1a1a22;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 2.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  width: auto;
+}
+
+.btn-pro-subscribe:hover {
+  opacity: 0.88;
+  transform: scale(1.02);
+  background: linear-gradient(135deg, #ffd666, #ff8ec6);
+  color: #1a1a22;
+  border: none;
+}
+
+.btn-pro-subscribe:disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+
+.pro-fine-print {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.25);
+  line-height: 1.45;
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
 /* ── Confirm dialog ────────────────────────────────────────────────────── */
 
 .confirm-body {
@@ -1149,23 +1375,28 @@ button svg {
   min-width:     0;
 }
 
-.btn-star {
-  background:    none;
-  border:        none;
-  color:         rgba(255,255,255,0.35);
-  cursor:        pointer;
-  padding:       0.15rem;
-  line-height:   1;
-  transition:    color 0.15s;
+.hotkey-fav {
+  color: rgba(255,255,255,0.35);
 }
 
-.btn-star:hover { color: rgba(255,220,80,0.7); }
+.hotkey-fav:hover {
+  color: rgba(255,220,80,0.7);
+  background: rgba(255,220,80,0.10);
+}
 
-.btn-star.starred {
+.hotkey-fav svg,
+#hotkey-favs-browser svg {
+  width:  0.85rem;
+  height: 0.85rem;
+}
+
+.hotkey-fav.starred {
   color: rgba(255,220,80,0.9);
+  border-color: rgba(255,220,80,0.35);
+  background: rgba(255,220,80,0.10);
 }
 
-.btn-star.starred svg { fill: currentColor; }
+.hotkey-fav.starred svg { fill: currentColor; }
 
 /* ── Favourites dialog ─────────────────────────────────────────────────── */
 

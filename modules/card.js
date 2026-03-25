@@ -158,7 +158,8 @@ export function generateCard({
   const symbolLightness = modeFlipped ? (isDark ? 87 : 15) : symbolLightnessFromSeed;
 
   // ── Symbol style: seed-derived or explicit override ───────────────────────
-  const autoStyle   = stylePRNG.int(0, 24);
+  const autoStyle   = logoPRNG.int(0, 24);   // auto style derived from logoPRNG (logo seed)
+  stylePRNG.int(0, 24);                     // consume stylePRNG to preserve legacy sequence
   const symbolStyle = logoStyle === -2 ? -2 : (logoStyle >= 0 && logoStyle <= 24) ? logoStyle : autoStyle;
 
   // ── Logo variation: drawn from logoPRNG (internals only, not style) ───────

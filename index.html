@@ -15,8 +15,31 @@
     <!-- ── Left control panel ─────────────────────────────────────────────── -->
     <aside class="panel">
 
+      <div class="brand brand-mobile">
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <clipPath id="lm-c2">
+              <circle cx="16" cy="16" r="13.4"/>
+            </clipPath>
+          </defs>
+          <g clip-path="url(#lm-c2)" stroke="rgba(255,255,255,0.70)" stroke-width="1.15" stroke-linecap="butt">
+            <line x1="-5" y1="20"   x2="20"   y2="-5"/>
+            <line x1="-5" y1="24.3" x2="24.3" y2="-5"/>
+            <line x1="-5" y1="28.5" x2="28.5" y2="-5"/>
+            <line x1="-5" y1="32.8" x2="32.8" y2="-5"/>
+            <line x1="-5" y1="37"   x2="37"   y2="-5"/>
+            <line x1="-5" y1="41.2" x2="41.2" y2="-5"/>
+            <line x1="-5" y1="45.5" x2="45.5" y2="-5"/>
+            <line x1="-5" y1="49.7" x2="49.7" y2="-5"/>
+            <line x1="-5" y1="54"   x2="54"   y2="-5"/>
+          </g>
+          <circle cx="16" cy="16" r="13.4" fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="1.15"/>
+        </svg>
+        <span class="brand-name">LIMINAL</span>
+      </div>
+
       <div class="panel-section">
-        <h2><i data-lucide="monitor"></i>Actions</h2>
+        <h2><i data-lucide="fingerprint"></i>Card</h2>
         <div class="render-mode-toggle">
           <button id="btn-size-id"     class="mode-btn active">ID Card</button>
           <button id="btn-size-square" class="mode-btn">Square</button>
@@ -26,10 +49,33 @@
           <button id="btn-mode-canvas" class="mode-btn">Canvas</button>
           <button id="btn-mode-svg"    class="mode-btn active">SVG</button>
         </div>
+        <div class="field">
+          <span>Seed</span>
+          <input id="seed" type="text" value="42" placeholder="number or text" />
+        </div>
+        <div class="field field--row">
+          <label class="toggle-switch"><input id="show-lanyard" type="checkbox" /><span class="toggle-track"></span></label>
+          <span>Lanyard Hole</span>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Corners <span id="border-radius-display">20%</span></span>
+            <button class="btn-reset" id="border-radius-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="border-radius" type="range" min="0" max="100" step="1" value="20" />
+        </div>
+      </div>
+
+     
+      <div class="panel-section">
+        <h2><i data-lucide="monitor"></i>Actions</h2>
         <div class="card-actions">
-          <button id="btn-render"><i data-lucide="refresh-cw"></i>Render</button>
-          <button id="btn-reset-all" class="btn-action-reset" title="Reset all overrides (keep name, title, seed)"><i data-lucide="rotate-ccw"></i></button>
           <button id="btn-rand"><i data-lucide="shuffle"></i>Shuffle</button>
+          <button id="btn-micro-shuffle" title="Shuffle logo, pattern &amp; artifact seeds"><i data-lucide="dice-3"></i>Vary</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-favourites"><i data-lucide="bookmark"></i>Favourites</button>
+          <button id="btn-reset-all" class="btn-action-danger" title="Reset all overrides (keep name, title, seed)"><i data-lucide="rotate-ccw"></i>Reset</button>
         </div>
         <div class="card-actions">
           <button id="btn-export"><i data-lucide="download"></i>Export SVG</button>
@@ -44,16 +90,16 @@
           <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
         </div>
         <div class="card-actions">
-          <button id="btn-export-json"><i data-lucide="file-json"></i>Export JSON</button>
-          <button id="btn-import-json"><i data-lucide="file-input"></i>Import JSON</button>
+          <button id="btn-export-json"><i data-lucide="file-json"></i>Export</button>
+          <button id="btn-import-json"><i data-lucide="file-input"></i>Import</button>
         </div>
         <div class="card-actions">
-          <button id="btn-favourites"><i data-lucide="bookmark"></i>Favourites</button>
+          <button id="btn-enshittify" class="btn-enshittify"><i data-lucide="sparkles"></i>Go Pro</button>
         </div>
       </div>
 
       <div class="panel-section">
-        <h2><i data-lucide="user"></i>Identity</h2>
+        <h2><i data-lucide="type"></i>Text</h2>
         <div class="field">
           <span>Name</span>
           <input id="person-name" type="text" value="Alex Reeves" placeholder="Full name" />
@@ -99,24 +145,6 @@
         </div>
       </div>
 
-      <div class="panel-section">
-        <h2><i data-lucide="fingerprint"></i>Card</h2>
-        <div class="field">
-          <span>Seed</span>
-          <input id="seed" type="text" value="42" placeholder="number or text" />
-        </div>
-        <div class="field field--row">
-          <label class="toggle-switch"><input id="show-lanyard" type="checkbox" /><span class="toggle-track"></span></label>
-          <span>Lanyard Hole</span>
-        </div>
-        <div class="field">
-          <div class="field-hdr">
-            <span>Corners <span id="border-radius-display">20%</span></span>
-            <button class="btn-reset" id="border-radius-reset" title="Reset to default">↺</button>
-          </div>
-          <input id="border-radius" type="range" min="0" max="100" step="1" value="20" />
-        </div>
-      </div>
 
       <div class="panel-section">
         <h2><i data-lucide="palette"></i>Colour</h2>
@@ -398,7 +426,6 @@
           </div>
         </div>
         <div class="descriptor-row">
-          <button id="btn-favourite" class="btn-star" title="Save to favourites"><i data-lucide="star"></i></button>
           <p class="descriptor" id="card-descriptor"></p>
         </div>
       </div>
@@ -450,11 +477,80 @@
       </div>
     </dialog>
 
+    <!-- ── Pro upsell dialog ──────────────────────────────────────────────── -->
+    <dialog id="pro-dialog" class="app-dialog app-dialog--wide pro-dialog">
+      <div class="dialog-header">
+        <h3 class="pro-title">LIMINAL PRO</h3>
+        <button id="pro-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <div class="pro-hero">
+        <span class="pro-badge">MOST POPULAR*</span>
+        <span class="pro-price"><s class="pro-price-old">$24.99</s> $16.99<span class="pro-price-period">/mo</span></span>
+        <span class="pro-tagline">Unlock the full LIMINAL experience.<br>You deserve this. Probably.</span>
+      </div>
+      <ul class="pro-features">
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>Smart Export Pacing&trade;</strong><br>
+          We limit you to 3 exports per day so you can really <em>sit with</em> each card. Mindful design starts with artificial scarcity. The counter resets at midnight UTC &mdash; not your midnight. Never your midnight.</div>
+        </li>
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>Premium Rendering Engine&trade;</strong><br>
+          Our proprietary 3-second generation pipeline gives you time to reflect while a progress bar fills up. The card rendered instantly. The spinner is a journey.</div>
+        </li>
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>Full Spectrum Unlock</strong><br>
+          Free users only get half the colour wheel. That's right &mdash; we locked hues past 180&deg;. With Pro, you finally get access to <em>teal</em>. You're welcome.</div>
+        </li>
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>Exclusive Vector Export</strong><br>
+          SVG downloads are now a Pro-only feature, due to server costs. There is no server. The SVG is generated in your browser. We just wanted to charge for it.</div>
+        </li>
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>AI-Powered Seed Suggestions</strong><br>
+          Our algorithm analyzes your preferences and suggests seeds that are, without exception, worse than random. Every single time. We trained a model for this.</div>
+        </li>
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>Unlimited Shuffles</strong><br>
+          Free users are capped at 3 shuffles per day. Yes, we rate-limited a random number generator. No, we are not embarrassed. Upgrade to shuffle with dignity.</div>
+        </li>
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>Personalized Card Vault&trade;</strong><br>
+          Store your cards behind a mandatory login wall. Can't view your own card without an account. It's not a bug &mdash; it's a <em>relationship</em>.</div>
+        </li>
+        <li>
+          <span class="pro-check">&#10003;</span>
+          <div><strong>Immersive Cookie Experience</strong><br>
+          Our lovingly crafted consent banner covers 40% of your mobile viewport. Dismiss it and it comes back. It misses you.</div>
+        </li>
+      </ul>
+      <div class="pro-testimonial">
+        <p>&ldquo;I used to generate cards for free. Now I pay $16.99 to do the same thing, but slower.&rdquo;</p>
+        <span>&mdash; A Real Customer (we made them up)</span>
+      </div>
+      <div class="dialog-actions pro-actions">
+        <button id="pro-subscribe" class="btn-pro-subscribe">Subscribe Now</button>
+      </div>
+      <p class="pro-fine-print">* Most Popular among the 0 people currently subscribed. By clicking Subscribe you agree to our 847-page Terms of Service, waive your right to a refund, and acknowledge that "Pro" features may be moved to a future Ultra tier at any time. Cancel anytime (by registered mail to our Zurich office, singed in triplicate &mdash; singed, not signed). Price does not include the upcoming Convenience Fee ($4.99/mo), the Fee Fee ($1.99/mo), or the Fee For The Fee Fee ($0.99/mo). We reserve the right to increase pricing whenever Mercury is in retrograde.</p>
+    </dialog>
+
     <!-- ── Hotkey legend ──────────────────────────────────────────────────── -->
     <div class="hotkey-legend" id="hotkey-legend">
-      <button class="hotkey-toggle" id="hotkey-toggle" title="Keyboard shortcuts">?</button>
+      <div class="hotkey-buttons">
+        <button class="hotkey-toggle hotkey-pro" id="hotkey-pro" title="Go Pro"><i data-lucide="sparkles"></i></button>
+        <button class="hotkey-toggle hotkey-fav" id="btn-favourite" title="Save to favourites"><i data-lucide="star"></i></button>
+        <button class="hotkey-toggle" id="hotkey-favs-browser" title="Favourites"><i data-lucide="bookmark"></i></button>
+        <button class="hotkey-toggle" id="hotkey-toggle" title="Keyboard shortcuts">?</button>
+      </div>
       <div class="hotkey-panel" id="hotkey-panel">
         <div class="hotkey-row"><kbd>Space</kbd><span>Shuffle</span></div>
+        <div class="hotkey-row"><kbd>X</kbd><span>Vary</span></div>
         <div class="hotkey-row"><kbd>E</kbd><span>Export</span></div>
         <div class="hotkey-row"><kbd>R</kbd><span>Render</span></div>
         <div class="hotkey-row"><kbd>C</kbd><span>Copy link</span></div>
@@ -482,7 +578,7 @@
       import { drawSymbol }   from "./modules/symbols.js";
       import { makePRNG }     from "./modules/prng.js";
       import { hsla }         from "./modules/utils.js";
-      import { colorOverrides, seedOverrides, clearAllOverrides } from "./modules/state.js";
+      import { colorOverrides, seedOverrides, clearColorOverrides, clearAllOverrides } from "./modules/state.js";
       import { getSeed, updateColorSliders, updateSeedInputs, updateResetButtons,
                updateLogoName, updatePatternName, updateBgName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
       import { applyQueryString, syncURL } from "./modules/url-sync.js";
@@ -740,8 +836,9 @@
           const thumbColor = (lAdj = 0, a = 0.9) =>
             hsla(0, 0, 72 + lAdj, a);
 
-          // Match the card's logoPRNG state: same seed, consume symbolRadiusFactor
+          // Match the card's logoPRNG state: same seed, consume autoStyle + symbolRadiusFactor
           const rng = makePRNG(nonce);
+          rng.int(0, 24);           // skip autoStyle (consumed in card.js before symbolRadiusFactor)
           rng.float(0.169, 0.286);  // skip symbolRadiusFactor (consumed in card.js before drawSymbol)
           drawSymbol(tctx, cx, cy, r * 0.85, i, thumbColor, rng);
 
@@ -1181,7 +1278,6 @@
       });
 
       dom.seedInput.addEventListener("change", () => {
-        clearAllOverrides();
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);
@@ -1414,15 +1510,13 @@
       embossBtns.deboss.addEventListener("click", () => setEmbossMode('deboss'));
 
       // Actions
-      document.getElementById("btn-render").addEventListener("click", () => render(true));
-
       document.getElementById("btn-reset-all").addEventListener("click", () => {
         clearAllOverrides();
         setCardSize('id');
         selectLogoStyle('-1', false);
         dom.logoScaleSlider.value         = 100;
         dom.logoScaleDisplay.textContent  = '100%';
-        selectBgStyle('0', false);
+        selectBgStyle('-1', false);
         dom.noiseZoomSlider.value         = 4;
         dom.noiseZoomDisplay.textContent  = '4';
         selectPatternType('-1', false);
@@ -1466,6 +1560,16 @@
       document.getElementById("btn-rand").addEventListener("click", () => {
         dom.seedInput.value = (Math.random() * 99999) | 0;
         updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      document.getElementById("btn-micro-shuffle").addEventListener("click", () => {
+        const rand = () => (Math.random() * 999999) | 0;
+        seedOverrides.logoNonce    = rand();
+        seedOverrides.artifactSeed = rand();
+        seedOverrides.patternSeed  = rand();
         updateSeedInputs(dom);
         updateResetButtons(dom);
         render(true);
@@ -1743,6 +1847,40 @@
       document.getElementById("confirm-close").addEventListener("click",  () => { confirmDialog.close(); confirmResolve?.(false); confirmResolve = null; });
       confirmDialog.addEventListener("close", () => { if (confirmResolve) { confirmResolve(false); confirmResolve = null; } });
 
+      // ── Pro upsell dialog ──────────────────────────────────────────────────
+      const proDialog    = document.getElementById("pro-dialog");
+      const proSubscribe = document.getElementById("pro-subscribe");
+
+      function openProDialog() {
+        proSubscribe.textContent = "Subscribe Now";
+        proSubscribe.disabled    = false;
+        proDialog.showModal();
+      }
+      document.getElementById("btn-enshittify").addEventListener("click", openProDialog);
+      document.getElementById("hotkey-pro").addEventListener("click", openProDialog);
+      document.getElementById("hotkey-favs-browser").addEventListener("click", () => {
+        renderFavouritesGrid();
+        favDialog.showModal();
+      });
+      document.getElementById("pro-close").addEventListener("click", () => proDialog.close());
+
+      let proClickCount = 0;
+      const proRejections = [
+        "Just kidding. This is all free forever.",
+        "Still free. We meant it.",
+        "You can stop clicking now.",
+        "Okay, we admire your persistence.",
+        "There is no payment form. There never was.",
+        "The real Pro was the cards you made along the way.",
+      ];
+      proSubscribe.addEventListener("click", () => {
+        proSubscribe.textContent = proRejections[Math.min(proClickCount, proRejections.length - 1)];
+        proSubscribe.disabled = true;
+        setTimeout(() => { proSubscribe.disabled = false; }, 800);
+        proClickCount++;
+        if (proClickCount >= proRejections.length) proClickCount = 0;
+      });
+
       document.getElementById("favourites-clear-all").addEventListener("click", async () => {
         const ok = await showConfirm({
           title: 'Clear favourites',
@@ -1906,7 +2044,6 @@
           case ' ':
             e.preventDefault();
             dom.seedInput.value = (Math.random() * 99999) | 0;
-            clearAllOverrides();
             updateColorSliders(dom);
             updateSeedInputs(dom);
             updateResetButtons(dom);
@@ -1931,7 +2068,6 @@
           case 'ArrowLeft':
             e.preventDefault();
             dom.seedInput.value = Math.max(0, getSeed(dom) - 1);
-            clearAllOverrides();
             updateColorSliders(dom);
             updateSeedInputs(dom);
             updateResetButtons(dom);
@@ -1940,7 +2076,6 @@
           case 'ArrowRight':
             e.preventDefault();
             dom.seedInput.value = getSeed(dom) + 1;
-            clearAllOverrides();
             updateColorSliders(dom);
             updateSeedInputs(dom);
             updateResetButtons(dom);
@@ -1949,7 +2084,6 @@
           case 'ArrowUp':
             e.preventDefault();
             dom.seedInput.value = getSeed(dom) + 10;
-            clearAllOverrides();
             updateColorSliders(dom);
             updateSeedInputs(dom);
             updateResetButtons(dom);
@@ -1958,7 +2092,6 @@
           case 'ArrowDown':
             e.preventDefault();
             dom.seedInput.value = Math.max(0, getSeed(dom) - 10);
-            clearAllOverrides();
             updateColorSliders(dom);
             updateSeedInputs(dom);
             updateResetButtons(dom);
@@ -1991,6 +2124,9 @@
             break;
           case 'b':
             document.getElementById('btn-favourites').click();
+            break;
+          case 'x':
+            document.getElementById('btn-micro-shuffle').click();
             break;
           case '?':
             hotkeyPanel.classList.toggle('open');
