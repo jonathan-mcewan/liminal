@@ -119,7 +119,7 @@ New render aesthetics and reasons to keep exploring.
 - [x] **Holographic foil effect** — iridescent shimmer overlay on hover
 - [x] **Generative card back** — procedural easter eggs (fine print, seal, hologram, customer disservice)
 - [x] **Logo & text position controls** — 9-position grid (left/center/right × top/middle/bottom) for independent placement of logo and text block
-- [ ] **Text style controls** — font weight, size, letter-spacing
+- [x] **Text style controls** — font weight, size, letter-spacing
 - [ ] **Multi-logo composition** — place 2–3 smaller logos in a layout
 - [ ] **Glow / neon mode** — logo and text emit light with bloom bleed into the card. Dark cards only.
 - [ ] **Duotone / risograph** — post-process filter reducing to 2–3 ink colours with halftone dots and slight misregistration. Print aesthetic.
