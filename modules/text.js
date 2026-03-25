@@ -16,12 +16,12 @@
  * @param {string}   jobTitle    - job title to render beneath the name
  * @param {function} symbolColor - (lightnessAdjust, alpha) => CSS colour string
  */
-export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor, textPosition = 'lb') {
+export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor, textPosition = 'lb', textSize = 1, textWeight = 500, textTracking = 0) {
   const { cardLeft, cardTop, cardWidth, cardHeight, shortSide } = geometry;
 
   const basis         = shortSide || cardWidth; // short side keeps text proportional across aspect ratios
-  const nameFontSize  = basis * 0.072;
-  const titleFontSize = basis * 0.048;
+  const nameFontSize  = basis * 0.072 * textSize;
+  const titleFontSize = basis * 0.048 * textSize;
   const lineGap       = nameFontSize * 0.40; // space between bottom of name and top of title
 
   const hasName  = personName.length > 0;
@@ -63,18 +63,22 @@ export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor, t
       : blockBottom - nameFontSize;
   }
 
+  const titleWeight = Math.max(100, textWeight - 100);
+  const trackingPx  = basis * textTracking / 1000; // em-like scaling
+
   ctx.save();
   ctx.textBaseline = 'top';
   ctx.textAlign    = align;
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = `${trackingPx}px`;
 
   if (hasName) {
-    ctx.font      = `500 ${nameFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.font      = `${textWeight} ${nameFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
     ctx.fillStyle = symbolColor(0, 0.92);
     ctx.fillText(personName, textX, nameTop);
   }
 
   if (hasTitle) {
-    ctx.font      = `400 ${titleFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.font      = `${titleWeight} ${titleFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
     ctx.fillStyle = symbolColor(0, 0.44);
     ctx.fillText(jobTitle, textX, titleTop);
   }

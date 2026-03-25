@@ -66,6 +66,7 @@ export class SvgContext {
     this.font        = '10px sans-serif';
     this.textBaseline = 'alphabetic';
     this.textAlign   = 'left';
+    this.letterSpacing = '0px';
 
     // 2D affine transform: [a, b, c, d, e, f] — column-major
     // | a c e |
@@ -112,6 +113,7 @@ export class SvgContext {
       font:        this.font,
       textBaseline: this.textBaseline,
       textAlign:   this.textAlign,
+      letterSpacing: this.letterSpacing,
       globalCompositeOperation: this.globalCompositeOperation,
       transform:   this._transform.slice(),
     });
@@ -131,6 +133,7 @@ export class SvgContext {
     this.font        = s.font;
     this.textBaseline = s.textBaseline;
     this.textAlign   = s.textAlign;
+    this.letterSpacing = s.letterSpacing;
     this.globalCompositeOperation = s.globalCompositeOperation;
     this._transform  = s.transform;
   }
@@ -405,10 +408,13 @@ export class SvgContext {
     const [tx, ty] = this._tx(x, y);
     const [a, b] = this._transform;
     const tScale = Math.hypot(a, b);
+    const ls = parseFloat(this.letterSpacing) || 0;
+    const lsAttr = ls !== 0 ? ` letter-spacing="${f(ls * tScale)}"` : '';
     this._body.push(
       `<text x="${f(tx)}" y="${f(ty)}"` +
       ` font-size="${f(size * tScale)}" font-weight="${weight}" font-family="${family}"` +
       ` dominant-baseline="${baseline}" text-anchor="${anchor}"` +
+      lsAttr +
       ` fill="${this._paint(this.fillStyle)}">${escXml(text)}</text>`,
     );
   }

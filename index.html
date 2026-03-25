@@ -76,6 +76,27 @@
             <button data-pos="rb" title="Right Bottom">&#8600;</button>
           </div>
         </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Size <span id="text-size-display">100%</span></span>
+            <button class="btn-reset" id="text-size-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="text-size" type="range" min="50" max="200" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Weight <span id="text-weight-display">500</span></span>
+            <button class="btn-reset" id="text-weight-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="text-weight" type="range" min="100" max="900" step="100" value="500" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Tracking <span id="text-tracking-display">0</span></span>
+            <button class="btn-reset" id="text-tracking-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="text-tracking" type="range" min="-50" max="200" step="5" value="0" />
+        </div>
       </div>
 
       <div class="panel-section">
@@ -558,6 +579,15 @@
         textPosition:           'lb',
         logoPosGrid:            document.getElementById("logo-pos-grid"),
         textPosGrid:            document.getElementById("text-pos-grid"),
+        textSizeSlider:         document.getElementById("text-size"),
+        textSizeDisplay:        document.getElementById("text-size-display"),
+        textSizeReset:          document.getElementById("text-size-reset"),
+        textWeightSlider:       document.getElementById("text-weight"),
+        textWeightDisplay:      document.getElementById("text-weight-display"),
+        textWeightReset:        document.getElementById("text-weight-reset"),
+        textTrackingSlider:     document.getElementById("text-tracking"),
+        textTrackingDisplay:    document.getElementById("text-tracking-display"),
+        textTrackingReset:      document.getElementById("text-tracking-reset"),
       };
 
       // ── Position grids ─────────────────────────────────────────────────
@@ -582,6 +612,44 @@
           syncPosGrid(dom.textPosGrid, dom.textPosition);
           render(true);
         });
+      });
+
+      // ── Text style controls ─────────────────────────────────────────────
+
+      dom.textSizeSlider.addEventListener("input", () => {
+        dom.textSizeDisplay.textContent = dom.textSizeSlider.value + '%';
+        dom.textSizeReset.classList.toggle('visible', dom.textSizeSlider.value !== '100');
+        render();
+      });
+      dom.textSizeReset.addEventListener("click", () => {
+        dom.textSizeSlider.value = 100;
+        dom.textSizeDisplay.textContent = '100%';
+        dom.textSizeReset.classList.remove('visible');
+        render(true);
+      });
+
+      dom.textWeightSlider.addEventListener("input", () => {
+        dom.textWeightDisplay.textContent = dom.textWeightSlider.value;
+        dom.textWeightReset.classList.toggle('visible', dom.textWeightSlider.value !== '500');
+        render();
+      });
+      dom.textWeightReset.addEventListener("click", () => {
+        dom.textWeightSlider.value = 500;
+        dom.textWeightDisplay.textContent = '500';
+        dom.textWeightReset.classList.remove('visible');
+        render(true);
+      });
+
+      dom.textTrackingSlider.addEventListener("input", () => {
+        dom.textTrackingDisplay.textContent = dom.textTrackingSlider.value;
+        dom.textTrackingReset.classList.toggle('visible', dom.textTrackingSlider.value !== '0');
+        render();
+      });
+      dom.textTrackingReset.addEventListener("click", () => {
+        dom.textTrackingSlider.value = 0;
+        dom.textTrackingDisplay.textContent = '0';
+        dom.textTrackingReset.classList.remove('visible');
+        render(true);
       });
 
       // ── Card size ────────────────────────────────────────────────────────
@@ -1098,6 +1166,9 @@
         syncCardSizeButtons();
         syncPosGrid(dom.logoPosGrid, dom.logoPosition);
         syncPosGrid(dom.textPosGrid, dom.textPosition);
+        dom.textSizeReset.classList.toggle('visible', dom.textSizeSlider.value !== '100');
+        dom.textWeightReset.classList.toggle('visible', dom.textWeightSlider.value !== '500');
+        dom.textTrackingReset.classList.toggle('visible', dom.textTrackingSlider.value !== '0');
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);
@@ -1380,6 +1451,12 @@
         dom.textPosition = 'lb';
         syncPosGrid(dom.logoPosGrid, dom.logoPosition);
         syncPosGrid(dom.textPosGrid, dom.textPosition);
+        dom.textSizeSlider.value       = 100;
+        dom.textSizeDisplay.textContent = '100%';
+        dom.textWeightSlider.value     = 500;
+        dom.textWeightDisplay.textContent = '500';
+        dom.textTrackingSlider.value   = 0;
+        dom.textTrackingDisplay.textContent = '0';
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);

@@ -106,6 +106,9 @@ export function generateCard({
   artifactTypeLock   = null,         // null = auto, [0,3] = only these types
   logoPosition       = 'ct',        // 2-char: [l|c|r][t|m|b]
   textPosition       = 'lb',        // 2-char: [l|c|r][t|m|b]
+  textSize           = 1,           // scale multiplier for text
+  textWeight         = 500,         // font weight for name (title = weight - 100)
+  textTracking       = 0,           // letter-spacing in 1/1000 em
   ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
   // ── Compute card dimensions early so we can size the canvas ───────────
@@ -263,7 +266,7 @@ export function generateCard({
     ctx.restore();
   }
 
-  drawCardText(ctx, geometry, personName, jobTitle, symbolColor, textPosition);
+  drawCardText(ctx, geometry, personName, jobTitle, symbolColor, textPosition, textSize, textWeight, textTracking);
   drawTopGloss(ctx, geometry);
   if (showLanyard) drawLanyardHole(ctx, geometry, isDark);
 

@@ -39,6 +39,12 @@ export function applyQueryString(dom) {
   if (q.has("emboss"))    dom.embossMode                  = q.get("emboss");
   if (q.has("lpos"))      dom.logoPosition               = q.get("lpos");
   if (q.has("tpos"))      dom.textPosition               = q.get("tpos");
+  if (q.has("tsize"))   { dom.textSizeSlider.value       = q.get("tsize");
+                           dom.textSizeDisplay.textContent = dom.textSizeSlider.value + '%'; }
+  if (q.has("tweight")) { dom.textWeightSlider.value     = q.get("tweight");
+                           dom.textWeightDisplay.textContent = dom.textWeightSlider.value; }
+  if (q.has("ttrack"))  { dom.textTrackingSlider.value   = q.get("ttrack");
+                           dom.textTrackingDisplay.textContent = dom.textTrackingSlider.value; }
   if (q.has("art_type")) {
     const raw = q.get("art_type");
     dom.artTypeLock = raw === '' ? null : raw.split(',').map(Number).filter(n => n >= 0 && n <= 10);
@@ -95,6 +101,9 @@ export function syncURL(dom, push = false) {
   set("emboss",      dom.embossMode || "none",                            "none");
   set("lpos",        dom.logoPosition || "ct",                            "ct");
   set("tpos",        dom.textPosition || "lb",                            "lb");
+  set("tsize",       dom.textSizeSlider.value,                            "100");
+  set("tweight",     dom.textWeightSlider.value,                          "500");
+  set("ttrack",      dom.textTrackingSlider.value,                        "0");
   if (dom.artTypeLock) q.set("art_type", dom.artTypeLock.join(","));
 
   // Colour overrides — only if user has set them

@@ -32,6 +32,9 @@ export function gatherSettings(dom) {
   obj.emboss      = dom.embossMode || 'none';
   obj.lpos        = dom.logoPosition || 'ct';
   obj.tpos        = dom.textPosition || 'lb';
+  obj.tsize       = dom.textSizeSlider.value;
+  obj.tweight     = dom.textWeightSlider.value;
+  obj.ttrack      = dom.textTrackingSlider.value;
 
   // Colour overrides (only if set)
   if (colorOverrides.isDark          !== undefined) obj.dark     = colorOverrides.isDark ? "1" : "0";
@@ -99,6 +102,12 @@ export function applySettings(json, dom) {
   if (has("emboss"))    dom.embossMode                   = get("emboss");
   if (has("lpos"))      dom.logoPosition               = get("lpos");
   if (has("tpos"))      dom.textPosition               = get("tpos");
+  if (has("tsize"))   { dom.textSizeSlider.value       = get("tsize");
+                         dom.textSizeDisplay.textContent = dom.textSizeSlider.value + '%'; }
+  if (has("tweight")) { dom.textWeightSlider.value     = get("tweight");
+                         dom.textWeightDisplay.textContent = dom.textWeightSlider.value; }
+  if (has("ttrack"))  { dom.textTrackingSlider.value   = get("ttrack");
+                         dom.textTrackingDisplay.textContent = dom.textTrackingSlider.value; }
 
   // Colour overrides
   if (has("dark"))      colorOverrides.isDark          = get("dark") !== "0";

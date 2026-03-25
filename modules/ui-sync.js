@@ -144,6 +144,9 @@ export function buildParams(dom) {
     artifactTypeLock:      dom.artTypeLock && dom.artTypeLock.length ? dom.artTypeLock : null,
     logoPosition:          dom.logoPosition || 'ct',
     textPosition:          dom.textPosition || 'lb',
+    textSize:              parseInt(dom.textSizeSlider.value, 10) / 100,
+    textWeight:            parseInt(dom.textWeightSlider.value, 10),
+    textTracking:          parseInt(dom.textTrackingSlider.value, 10),
   };
 }
 
