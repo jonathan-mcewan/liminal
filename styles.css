@@ -67,7 +67,7 @@ body {
 .panel-section:nth-child(odd) {
   background: oklch(1 0 0 / 6%);
 }
-.panel-section:first-child { padding-top: 0.75rem; }
+.panel-section:nth-child(1) { padding-top: 0.75rem; margin-top: -0.75rem;  }
 
 /* Section heading */
 .panel-section > h2 {
@@ -1195,7 +1195,8 @@ button svg {
 }
 
 .pro-dialog {
-  max-width: 960px;
+  max-width: 1024px;
+  width:     95vw;
 }
 
 .pro-title {
@@ -1459,7 +1460,6 @@ button svg {
 }
 
 .btn-tier:hover:not(:disabled) {
-  opacity: 0.88;
   transform: scale(1.02);
 }
 
@@ -1472,10 +1472,22 @@ button svg {
   background: linear-gradient(135deg, #ffd666, #ff8ec6);
   color: #1a1a22;
 }
+.btn-tier.btn-tier--pro:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ffe088, #ffa4d4);
+  color: #1a1a22;
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(255,214,102,0.3);
+}
 
 .btn-tier--corporate {
   background: linear-gradient(135deg, #60d4c8, #38a89d);
   color: #1a1a22;
+}
+.btn-tier.btn-tier--corporate:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7de4d8, #4cbfb4);
+  color: #1a1a22;
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(96,212,200,0.3);
 }
 
 .btn-tier--umbral {
@@ -1483,10 +1495,22 @@ button svg {
   color: rgba(200,180,255,0.5);
   border: 1px solid rgba(160,120,255,0.2);
 }
+.btn-tier.btn-tier--umbral:hover:not(:disabled) {
+  background: rgba(120,80,200,0.40);
+  color: rgba(200,180,255,0.7);
+  border-color: rgba(160,120,255,0.45);
+  box-shadow: 0 0 12px rgba(160,120,255,0.2);
+}
 
 .btn-tier--enterprise {
   background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
   color: #1a1a22;
+}
+.btn-tier.btn-tier--enterprise:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d0d0d0, #f5f5f5);
+  color: #1a1a22;
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(200,200,200,0.25);
 }
 
 /* ── Fine print ─────────────────────────────────────────────────────────── */

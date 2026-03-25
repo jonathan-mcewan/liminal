@@ -478,7 +478,7 @@
     </dialog>
 
     <!-- ── Pro upsell dialog ──────────────────────────────────────────────── -->
-    <dialog id="pro-dialog" class="app-dialog app-dialog--wide pro-dialog">
+    <dialog id="pro-dialog" class="app-dialog pro-dialog">
       <div class="dialog-header">
         <h3 class="pro-title">LIMINAL PRICING</h3>
         <button id="pro-close" class="btn-dialog-close" title="Close">&times;</button>
@@ -1885,7 +1885,6 @@
 
       function openProDialog() {
         proSubscribe.textContent = "Subscribe Now";
-        proSubscribe.disabled    = false;
         proDialog.showModal();
       }
       document.getElementById("btn-enshittify").addEventListener("click", openProDialog);
@@ -1898,11 +1897,8 @@
 
       function tierButtonCycle(btn, messages) {
         let i = 0;
-        const original = btn.textContent;
         btn.addEventListener("click", () => {
           btn.textContent = messages[i % messages.length];
-          btn.disabled = true;
-          setTimeout(() => { btn.disabled = false; }, 800);
           i++;
           if (i >= messages.length) i = 0;
         });
