@@ -1882,10 +1882,13 @@
       // ── Pro upsell dialog ──────────────────────────────────────────────────
       const proDialog    = document.getElementById("pro-dialog");
       const proSubscribe = document.getElementById("pro-subscribe");
+      const tierButtonOriginals = new Map();
 
       function openProDialog() {
-        proSubscribe.textContent = "Subscribe Now";
-        proSubscribe.disabled    = false;
+        tierButtonOriginals.forEach((original, btn) => {
+          btn.textContent = original;
+          btn.disabled = false;
+        });
         proDialog.showModal();
       }
       document.getElementById("btn-enshittify").addEventListener("click", openProDialog);
@@ -1898,7 +1901,7 @@
 
       function tierButtonCycle(btn, messages) {
         let i = 0;
-        const original = btn.textContent;
+        tierButtonOriginals.set(btn, btn.textContent);
         btn.addEventListener("click", () => {
           btn.textContent = messages[i % messages.length];
           btn.disabled = true;
