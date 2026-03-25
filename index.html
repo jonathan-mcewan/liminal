@@ -480,64 +480,96 @@
     <!-- ── Pro upsell dialog ──────────────────────────────────────────────── -->
     <dialog id="pro-dialog" class="app-dialog app-dialog--wide pro-dialog">
       <div class="dialog-header">
-        <h3 class="pro-title">LIMINAL PRO</h3>
+        <h3 class="pro-title">LIMINAL PRICING</h3>
         <button id="pro-close" class="btn-dialog-close" title="Close">&times;</button>
       </div>
-      <div class="pro-hero">
-        <span class="pro-badge">MOST POPULAR*</span>
-        <span class="pro-price"><s class="pro-price-old">$24.99</s> $16.99<span class="pro-price-period">/mo</span></span>
-        <span class="pro-tagline">Unlock the full LIMINAL experience.<br>You deserve this. Probably.</span>
+      <p class="pricing-subtitle">Choose the tier that matches your tolerance for paying money for free software.</p>
+      <div class="pricing-grid">
+
+        <!-- ── Pro ──────────────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-pro">
+          <span class="tier-badge badge-pro">MOST POPULAR*</span>
+          <h4 class="tier-name tier-name--pro">Pro</h4>
+          <div class="tier-price tier-price--pro"><s class="tier-price-old">$24.99</s> $16.99<span class="tier-period">/mo</span></div>
+          <p class="tier-tagline">You deserve this. Probably.</p>
+          <ul class="tier-features">
+            <li><span class="ft-check check-pro">&#10003;</span>Smart Export Pacing&trade; (3/day)</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Premium 3-Second Render Delay</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Unlock hues past 180&deg;</li>
+            <li><span class="ft-check check-pro">&#10003;</span>SVG export (it&rsquo;s free, we just gate it)</li>
+            <li><span class="ft-check check-pro">&#10003;</span>AI seeds that are worse than random</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Unlimited shuffles (was 3/day)</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Mandatory-login Card Vault&trade;</li>
+            <li><span class="ft-check check-pro">&#10003;</span>40% viewport cookie banner</li>
+          </ul>
+          <div class="tier-testimonial">
+            <p>&ldquo;I pay $16.99 to do the same thing, but slower.&rdquo;</p>
+            <span>&mdash; A Real Customer (we made them up)</span>
+          </div>
+          <button id="pro-subscribe" class="btn-tier btn-tier--pro">Subscribe Now</button>
+        </div>
+
+        <!-- ── Corporate ────────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-corporate">
+          <span class="tier-badge badge-corporate">FOR TEAMS</span>
+          <h4 class="tier-name tier-name--corporate">Corporate</h4>
+          <div class="tier-price tier-price--corporate">$7<span class="tier-period">/user/mo</span></div>
+          <p class="tier-tagline">Put your logo on it. Theoretically.</p>
+          <ul class="tier-features">
+            <li><span class="ft-check check-corporate">&#10003;</span>Remove &ldquo;Made with Liminal&rdquo; watermark&thinsp;<sup>&dagger;</sup></li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Custom client logo on every card&thinsp;<sup>&Dagger;</sup></li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Priority access to features that will never ship</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Brand-Compliant Seed Algorithm&trade;</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Dedicated account manager (Derek&thinsp;<sup>&sect;</sup>)</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Team analytics dashboard (it&rsquo;s a spreadsheet)</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Volume discount at 10,000+ seats</li>
+          </ul>
+          <div class="tier-footnotes">
+            <p><sup>&dagger;</sup> The watermark does not exist.</p>
+            <p><sup>&Dagger;</sup> This feature is perpetually with the developers. If someone actually pays money we might panic and build it. &thinsp;&#129335;</p>
+            <p><sup>&sect;</sup> Derek is a chatbot. Derek does not have answers. Derek has <em>enthusiasm</em>.</p>
+          </div>
+          <button id="corporate-demo" class="btn-tier btn-tier--corporate">Request Demo</button>
+        </div>
+
+        <!-- ── ??? ──────────────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-umbral">
+          <span class="tier-badge badge-umbral">BY INVITATION ONLY</span>
+          <h4 class="tier-name tier-name--umbral">Umbral</h4>
+          <div class="tier-price tier-price--umbral">&block;&block;&block;&block;&block;<span class="tier-period">/mo</span></div>
+          <p class="tier-tagline">If you have to ask, you&rsquo;re not ready.</p>
+          <ul class="tier-features tier-features--umbral">
+            <li><span class="ft-check check-umbral">&#10003;</span><span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></li>
+            <li><span class="ft-check check-umbral">&#10003;</span>Access to The Room</li>
+            <li><span class="ft-check check-umbral">&#10003;</span><span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span> with <span class="redacted">&#9608;&#9608;&#9608;&#9608;</span></li>
+            <li><span class="ft-check check-umbral">&#10003;</span>You&rsquo;ll know when you&rsquo;re ready</li>
+            <li><span class="ft-check check-umbral">&#10003;</span>Includes [REDACTED]</li>
+            <li><span class="ft-check check-umbral">&#10003;</span>Seeds from the other side</li>
+            <li><span class="ft-check check-umbral">&#10003;</span>NDA required. NDA is also redacted.</li>
+          </ul>
+          <button class="btn-tier btn-tier--umbral" disabled>You Are Not Ready</button>
+        </div>
+
+        <!-- ── Enterprise ───────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-enterprise">
+          <span class="tier-badge badge-enterprise">ENTERPRISE</span>
+          <h4 class="tier-name tier-name--enterprise">Enterprise</h4>
+          <div class="tier-price tier-price--enterprise">Let&rsquo;s Talk</div>
+          <p class="tier-tagline">For organisations that need a receipt.</p>
+          <ul class="tier-features">
+            <li><span class="ft-check check-enterprise">&#10003;</span>Everything in all tiers (except Umbral)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>99.9% uptime SLA (it runs in your browser)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>SOC 2 compliance (we wrote it on a Post-it)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>Dedicated Slack channel (it&rsquo;s just us)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>White-glove onboarding (we watch you open the URL)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>Custom seed generation aligned to brand values</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>Quarterly Business Review (we show you a card)</li>
+          </ul>
+          <button id="enterprise-contact" class="btn-tier btn-tier--enterprise">Contact Sales</button>
+        </div>
+
       </div>
-      <ul class="pro-features">
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>Smart Export Pacing&trade;</strong><br>
-          We limit you to 3 exports per day so you can really <em>sit with</em> each card. Mindful design starts with artificial scarcity. The counter resets at midnight UTC &mdash; not your midnight. Never your midnight.</div>
-        </li>
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>Premium Rendering Engine&trade;</strong><br>
-          Our proprietary 3-second generation pipeline gives you time to reflect while a progress bar fills up. The card rendered instantly. The spinner is a journey.</div>
-        </li>
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>Full Spectrum Unlock</strong><br>
-          Free users only get half the colour wheel. That's right &mdash; we locked hues past 180&deg;. With Pro, you finally get access to <em>teal</em>. You're welcome.</div>
-        </li>
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>Exclusive Vector Export</strong><br>
-          SVG downloads are now a Pro-only feature, due to server costs. There is no server. The SVG is generated in your browser. We just wanted to charge for it.</div>
-        </li>
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>AI-Powered Seed Suggestions</strong><br>
-          Our algorithm analyzes your preferences and suggests seeds that are, without exception, worse than random. Every single time. We trained a model for this.</div>
-        </li>
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>Unlimited Shuffles</strong><br>
-          Free users are capped at 3 shuffles per day. Yes, we rate-limited a random number generator. No, we are not embarrassed. Upgrade to shuffle with dignity.</div>
-        </li>
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>Personalized Card Vault&trade;</strong><br>
-          Store your cards behind a mandatory login wall. Can't view your own card without an account. It's not a bug &mdash; it's a <em>relationship</em>.</div>
-        </li>
-        <li>
-          <span class="pro-check">&#10003;</span>
-          <div><strong>Immersive Cookie Experience</strong><br>
-          Our lovingly crafted consent banner covers 40% of your mobile viewport. Dismiss it and it comes back. It misses you.</div>
-        </li>
-      </ul>
-      <div class="pro-testimonial">
-        <p>&ldquo;I used to generate cards for free. Now I pay $16.99 to do the same thing, but slower.&rdquo;</p>
-        <span>&mdash; A Real Customer (we made them up)</span>
-      </div>
-      <div class="dialog-actions pro-actions">
-        <button id="pro-subscribe" class="btn-pro-subscribe">Subscribe Now</button>
-      </div>
-      <p class="pro-fine-print">* Most Popular among the 0 people currently subscribed. By clicking Subscribe you agree to our 847-page Terms of Service, waive your right to a refund, and acknowledge that "Pro" features may be moved to a future Ultra tier at any time. Cancel anytime (by registered mail to our Zurich office, singed in triplicate &mdash; singed, not signed). Price does not include the upcoming Convenience Fee ($4.99/mo), the Fee Fee ($1.99/mo), or the Fee For The Fee Fee ($0.99/mo). We reserve the right to increase pricing whenever Mercury is in retrograde.</p>
+      <p class="pro-fine-print">* Most Popular among the 0 people currently subscribed. By clicking any button you agree to our 847-page Terms of Service, waive your right to a refund, and acknowledge that features may be moved to a future Ultra tier at any time. Cancel anytime (by registered mail to our Zurich office, singed in triplicate &mdash; singed, not signed). Corporate pricing does not include the upcoming Convenience Fee ($4.99/mo), the Fee Fee ($1.99/mo), or the Fee For The Fee Fee ($0.99/mo). Umbral tier participants agree not to discuss the existence of the Umbral tier. Enterprise SLA is measured in vibes. We reserve the right to increase pricing whenever Mercury is in retrograde.</p>
     </dialog>
 
     <!-- ── Hotkey legend ──────────────────────────────────────────────────── -->
@@ -1864,22 +1896,45 @@
       });
       document.getElementById("pro-close").addEventListener("click", () => proDialog.close());
 
-      let proClickCount = 0;
-      const proRejections = [
+      function tierButtonCycle(btn, messages) {
+        let i = 0;
+        const original = btn.textContent;
+        btn.addEventListener("click", () => {
+          btn.textContent = messages[i % messages.length];
+          btn.disabled = true;
+          setTimeout(() => { btn.disabled = false; }, 800);
+          i++;
+          if (i >= messages.length) i = 0;
+        });
+      }
+
+      tierButtonCycle(proSubscribe, [
         "Just kidding. This is all free forever.",
         "Still free. We meant it.",
         "You can stop clicking now.",
         "Okay, we admire your persistence.",
         "There is no payment form. There never was.",
         "The real Pro was the cards you made along the way.",
-      ];
-      proSubscribe.addEventListener("click", () => {
-        proSubscribe.textContent = proRejections[Math.min(proClickCount, proRejections.length - 1)];
-        proSubscribe.disabled = true;
-        setTimeout(() => { proSubscribe.disabled = false; }, 800);
-        proClickCount++;
-        if (proClickCount >= proRejections.length) proClickCount = 0;
-      });
+      ]);
+
+      tierButtonCycle(document.getElementById("corporate-demo"), [
+        "Derek is setting up the demo environment…",
+        "Derek has encountered an error.",
+        "Derek is rebooting.",
+        "The demo is a screenshot of this website.",
+        "Derek has left the building.",
+        "There is no demo. There is only Derek.",
+        "Derek says hi. Derek cannot help you.",
+      ]);
+
+      tierButtonCycle(document.getElementById("enterprise-contact"), [
+        "Our sales team is at an offsite.",
+        "They are doing trust falls.",
+        "Someone got hurt. Meeting paused.",
+        "Sales will return Q3. Of which year? Yes.",
+        "Please fax your enquiry to nobody.",
+        "Have you tried the Corporate tier? Derek is available.",
+      ]);
 
       document.getElementById("favourites-clear-all").addEventListener("click", async () => {
         const ok = await showConfirm({
