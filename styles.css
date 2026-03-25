@@ -1453,6 +1453,9 @@ button svg {
   transition: opacity 0.15s, transform 0.15s;
   width: 100%;
   font-family: inherit;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .btn-tier:hover:not(:disabled) {
