@@ -1,7 +1,7 @@
 /**
  * SvgContext — Canvas 2D API shim that emits SVG markup instead of raster pixels.
  *
- * Drop-in replacement for CanvasRenderingContext2D for the Access Card Generator
+ * Drop-in replacement for CanvasRenderingContext2D for the LIMINAL
  * drawing pipeline. Pass an instance anywhere a canvas ctx is expected, then
  * call toSVG() to retrieve the serialised SVG string.
  *

@@ -1,6 +1,6 @@
 # LIMINAL
 
-Procedural access card generator. One seed, one unique card.
+Procedural card generator. One seed, one unique card.
 
 ![Status: Active Development](https://img.shields.io/badge/status-active%20development-brightgreen)
 ![License: Custom](https://img.shields.io/badge/license-custom%20(no%20AI%20training)-blue)

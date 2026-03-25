@@ -1,4 +1,4 @@
-# Access Card Generator — Development Patterns
+# LIMINAL — Development Patterns
 
 ## Architecture Overview
 

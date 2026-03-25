@@ -1,6 +1,6 @@
 # Implementation Plans
 
-Archived plans for completed work on the Access Card Generator.
+Archived plans for completed work on LIMINAL.
 
 | # | Plan | Status |
 |---|------|--------|

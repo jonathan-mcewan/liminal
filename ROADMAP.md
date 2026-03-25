@@ -1,6 +1,6 @@
 # Roadmap
 
-A living document tracking where the Access Card Generator has been and where it's headed.
+A living document tracking where LIMINAL has been and where it's headed.
 
 ---
 
