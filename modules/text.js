@@ -16,8 +16,8 @@
  * @param {string}   jobTitle    - job title to render beneath the name
  * @param {function} symbolColor - (lightnessAdjust, alpha) => CSS colour string
  */
-export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor) {
-  const { cardLeft, cardTop, cardWidth, cardHeight, shortSide, landscape } = geometry;
+export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor, textPosition = 'lb') {
+  const { cardLeft, cardTop, cardWidth, cardHeight, shortSide } = geometry;
 
   const basis         = shortSide || cardWidth; // short side keeps text proportional across aspect ratios
   const nameFontSize  = basis * 0.072;
@@ -28,24 +28,34 @@ export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor) {
   const hasTitle = jobTitle.length   > 0;
   const hasBoth  = hasName && hasTitle;
 
-  // Total height of the text block (used for vertical centering in landscape)
+  // Total height of the text block (used for vertical centering)
   const blockH = (hasName  ? nameFontSize  : 0)
                + (hasBoth  ? lineGap       : 0)
                + (hasTitle ? titleFontSize : 0);
 
+  const TEXT_X     = { l: 0.09, c: 0.50, r: 0.91 };
+  const TEXT_ALIGN = { l: 'left', c: 'center', r: 'right' };
+
+  const hPos = textPosition[0]; // l, c, r
+  const vPos = textPosition[1]; // t, m, b
+
   let textX, nameTop, titleTop, align;
 
-  if (landscape) {
-    // ── Landscape: text on the right, right-aligned, vertically centred ─
-    textX = cardLeft + cardWidth * 0.91;   // right margin matching portrait's 9%
-    align = 'right';
+  textX = cardLeft + cardWidth * TEXT_X[hPos];
+  align = TEXT_ALIGN[hPos];
+
+  if (vPos === 't') {
+    // Top-anchored: text block hangs from top margin
+    const blockTop = cardTop + cardHeight * 0.08;
+    nameTop  = blockTop;
+    titleTop = hasName ? nameTop + nameFontSize + lineGap : blockTop;
+  } else if (vPos === 'm') {
+    // Middle: vertically centred
     const blockTop = cardTop + (cardHeight - blockH) / 2;
     nameTop  = blockTop;
     titleTop = hasName ? nameTop + nameFontSize + lineGap : blockTop;
   } else {
-    // ── Portrait / square: bottom-anchored, left-aligned ────────────────
-    textX = cardLeft + cardWidth * 0.09;
-    align = 'left';
+    // Bottom-anchored: text block sits above bottom margin
     const blockBottom = cardTop + cardHeight * 0.92;
     titleTop = blockBottom - titleFontSize;
     nameTop  = hasBoth

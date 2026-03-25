@@ -241,6 +241,41 @@ select option {
   background:   oklch(1 0 0 / 8%);
 }
 
+/* ── Position grid (3×3) ─────────────────────────────────────────────────── */
+.pos-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   2px;
+  max-width:             6.5rem;
+}
+
+.pos-grid button {
+  width:          100%;
+  aspect-ratio:   1;
+  border-radius:  var(--radius);
+  border:         1px solid var(--border);
+  background:     transparent;
+  cursor:         pointer;
+  transition:     border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  color:          var(--muted-foreground);
+  font-size:      0.75rem;
+  line-height:    1;
+  display:        flex;
+  align-items:    center;
+  justify-content:center;
+}
+
+.pos-grid button:hover {
+  border-color: var(--ring);
+  background:   oklch(1 0 0 / 6%);
+}
+
+.pos-grid button.active {
+  border-color: var(--ring);
+  box-shadow:   0 0 0 2px oklch(0.556 0 0 / 25%);
+  background:   oklch(1 0 0 / 8%);
+}
+
 /* ── Range — minimal, matches shadcn aesthetic ───────────────────────────── */
 input[type="range"] {
   -webkit-appearance: none;

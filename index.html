@@ -62,6 +62,20 @@
           <span>Job Title</span>
           <input id="job-title" type="text" value="Senior Engineer" placeholder="Job title" />
         </div>
+        <div class="field">
+          <span>Text Position</span>
+          <div id="text-pos-grid" class="pos-grid">
+            <button data-pos="lt" title="Left Top">&#8598;</button>
+            <button data-pos="ct" title="Center Top">&#8593;</button>
+            <button data-pos="rt" title="Right Top">&#8599;</button>
+            <button data-pos="lm" title="Left Middle">&#8592;</button>
+            <button data-pos="cm" title="Center Middle">&#183;</button>
+            <button data-pos="rm" title="Right Middle">&#8594;</button>
+            <button data-pos="lb" title="Left Bottom" class="active">&#8601;</button>
+            <button data-pos="cb" title="Center Bottom">&#8595;</button>
+            <button data-pos="rb" title="Right Bottom">&#8600;</button>
+          </div>
+        </div>
       </div>
 
       <div class="panel-section">
@@ -184,6 +198,20 @@
         <div class="field">
           <span>Style <span id="logo-name-display"></span></span>
           <div id="logo-style-grid" class="logo-grid"></div>
+        </div>
+        <div class="field">
+          <span>Position</span>
+          <div id="logo-pos-grid" class="pos-grid">
+            <button data-pos="lt" title="Left Top">&#8598;</button>
+            <button data-pos="ct" title="Center Top" class="active">&#8593;</button>
+            <button data-pos="rt" title="Right Top">&#8599;</button>
+            <button data-pos="lm" title="Left Middle">&#8592;</button>
+            <button data-pos="cm" title="Center Middle">&#183;</button>
+            <button data-pos="rm" title="Right Middle">&#8594;</button>
+            <button data-pos="lb" title="Left Bottom">&#8601;</button>
+            <button data-pos="cb" title="Center Bottom">&#8595;</button>
+            <button data-pos="rb" title="Right Bottom">&#8600;</button>
+          </div>
         </div>
         <div class="field">
           <div class="field-hdr">
@@ -526,7 +554,35 @@
         cardScene:              document.querySelector(".card-scene"),
         cardBody:               document.querySelector(".card-body"),
         cardSize:               'id',
+        logoPosition:           'ct',
+        textPosition:           'lb',
+        logoPosGrid:            document.getElementById("logo-pos-grid"),
+        textPosGrid:            document.getElementById("text-pos-grid"),
       };
+
+      // ── Position grids ─────────────────────────────────────────────────
+
+      function syncPosGrid(gridEl, activePos) {
+        gridEl.querySelectorAll('button').forEach(btn =>
+          btn.classList.toggle('active', btn.dataset.pos === activePos)
+        );
+      }
+
+      dom.logoPosGrid.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dom.logoPosition = btn.dataset.pos;
+          syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+          render(true);
+        });
+      });
+
+      dom.textPosGrid.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dom.textPosition = btn.dataset.pos;
+          syncPosGrid(dom.textPosGrid, dom.textPosition);
+          render(true);
+        });
+      });
 
       // ── Card size ────────────────────────────────────────────────────────
 
@@ -1040,6 +1096,8 @@
       window.addEventListener("popstate", () => {
         applyQueryString(dom);
         syncCardSizeButtons();
+        syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+        syncPosGrid(dom.textPosGrid, dom.textPosition);
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);
@@ -1318,6 +1376,10 @@
         dom.artTypeLock = null;
         dom.embossMode = 'none';
         for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === 'none');
+        dom.logoPosition = 'ct';
+        dom.textPosition = 'lb';
+        syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+        syncPosGrid(dom.textPosGrid, dom.textPosition);
         updateColorSliders(dom);
         updateSeedInputs(dom);
         updateResetButtons(dom);
@@ -1455,6 +1517,8 @@
           const json = JSON.parse(importTextarea.value);
           applySettings(json, dom);
           syncCardSizeButtons();
+          syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+          syncPosGrid(dom.textPosGrid, dom.textPosition);
           updateColorSliders(dom);
           updateSeedInputs(dom);
           updateResetButtons(dom);
@@ -1550,6 +1614,8 @@
           card.querySelector('.fav-load').addEventListener('click', () => {
             applySettings(fav.settings, dom);
             syncCardSizeButtons();
+            syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+            syncPosGrid(dom.textPosGrid, dom.textPosition);
             updateColorSliders(dom);
             updateSeedInputs(dom);
             updateResetButtons(dom);
@@ -1862,6 +1928,8 @@
       lucide.createIcons();
       applyQueryString(dom);
       syncCardSizeButtons();
+      syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+      syncPosGrid(dom.textPosGrid, dom.textPosition);
       updateColorSliders(dom);
       updateSeedInputs(dom);
       updateResetButtons(dom);

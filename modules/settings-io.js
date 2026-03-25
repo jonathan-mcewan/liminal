@@ -30,6 +30,8 @@ export function gatherSettings(dom) {
   obj.bblend      = dom.bgBlendMode.value;
   obj.pat_rot     = dom.patternRotationSlider.value;
   obj.emboss      = dom.embossMode || 'none';
+  obj.lpos        = dom.logoPosition || 'ct';
+  obj.tpos        = dom.textPosition || 'lb';
 
   // Colour overrides (only if set)
   if (colorOverrides.isDark          !== undefined) obj.dark     = colorOverrides.isDark ? "1" : "0";
@@ -95,6 +97,8 @@ export function applySettings(json, dom) {
   if (has("pat_rot")) { dom.patternRotationSlider.value  = get("pat_rot");
                          dom.patternRotationDisplay.textContent = dom.patternRotationSlider.value; }
   if (has("emboss"))    dom.embossMode                   = get("emboss");
+  if (has("lpos"))      dom.logoPosition               = get("lpos");
+  if (has("tpos"))      dom.textPosition               = get("tpos");
 
   // Colour overrides
   if (has("dark"))      colorOverrides.isDark          = get("dark") !== "0";

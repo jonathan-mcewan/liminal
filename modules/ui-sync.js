@@ -142,6 +142,8 @@ export function buildParams(dom) {
     bgBlendMode:           dom.bgBlendMode.value,
     embossMode:            dom.embossMode || 'none',
     artifactTypeLock:      dom.artTypeLock && dom.artTypeLock.length ? dom.artTypeLock : null,
+    logoPosition:          dom.logoPosition || 'ct',
+    textPosition:          dom.textPosition || 'lb',
   };
 }
 

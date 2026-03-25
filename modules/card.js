@@ -104,6 +104,8 @@ export function generateCard({
   patternRotation    = 0,           // degrees
   embossMode         = 'none',      // 'none' | 'emboss' | 'deboss'
   artifactTypeLock   = null,         // null = auto, [0,3] = only these types
+  logoPosition       = 'ct',        // 2-char: [l|c|r][t|m|b]
+  textPosition       = 'lb',        // 2-char: [l|c|r][t|m|b]
   ctx:               ctxOverride = null,  // optional: pass an SvgContext for SVG output
 } = {}) {
   // ── Compute card dimensions early so we can size the canvas ───────────
@@ -194,11 +196,11 @@ export function generateCard({
     hsla(hue + symbolHueDrift, saturation, symbolLightness + lightnessAdjust, alpha);
 
   // ── Derived logo metrics ──────────────────────────────────────────────────
+  const LOGO_X = { l: 0.30, c: 0.50, r: 0.70 };
+  const LOGO_Y = { t: 0.38, m: 0.50, b: 0.62 };
   const symbolRadius = shortSide * symbolRadiusFactor * logoScale;
-  const symbolX      = landscape ? cardLeft + cardWidth * 0.30 : centerX;
-  const isSquare     = Math.abs(cardAspect - 1) < 0.01;
-  const symbolY      = landscape ? cardTop + cardHeight * 0.50
-                     : cardTop + cardHeight * 0.38;
+  const symbolX      = cardLeft + cardWidth  * LOGO_X[logoPosition[0]];
+  const symbolY      = cardTop  + cardHeight * LOGO_Y[logoPosition[1]];
 
   // ── Drawing ───────────────────────────────────────────────────────────────
 
@@ -261,7 +263,7 @@ export function generateCard({
     ctx.restore();
   }
 
-  drawCardText(ctx, geometry, personName, jobTitle, symbolColor);
+  drawCardText(ctx, geometry, personName, jobTitle, symbolColor, textPosition);
   drawTopGloss(ctx, geometry);
   if (showLanyard) drawLanyardHole(ctx, geometry, isDark);
 
