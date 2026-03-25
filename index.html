@@ -20,7 +20,7 @@
         <div class="render-mode-toggle">
           <button id="btn-size-id"     class="mode-btn active">ID Card</button>
           <button id="btn-size-square" class="mode-btn">Square</button>
-          <button id="btn-size-moo"    class="mode-btn">MOO</button>
+          <button id="btn-size-credit" class="mode-btn">Credit</button>
         </div>
         <div class="render-mode-toggle">
           <button id="btn-mode-canvas" class="mode-btn">Canvas</button>
@@ -413,7 +413,7 @@
         <div class="hotkey-row"><kbd>F</kbd><span>Flip card</span></div>
         <div class="hotkey-row"><kbd>&larr; &rarr;</kbd><span>Seed &plusmn;1</span></div>
         <div class="hotkey-row"><kbd>&uarr; &darr;</kbd><span>Seed &plusmn;10</span></div>
-        <div class="hotkey-row"><kbd>1 2 3</kbd><span>ID / Sq / MOO</span></div>
+        <div class="hotkey-row"><kbd>1 2 3</kbd><span>ID / Sq / Credit</span></div>
         <div class="hotkey-row"><kbd>S</kbd><span>SVG mode</span></div>
         <div class="hotkey-row"><kbd>V</kbd><span>Canvas mode</span></div>
         <div class="hotkey-row"><kbd>D</kbd><span>Toggle theme</span></div>
@@ -485,7 +485,7 @@
         embossMode:             'none',  // 'none' | 'emboss' | 'deboss'
         btnSizeId:              document.getElementById("btn-size-id"),
         btnSizeSquare:          document.getElementById("btn-size-square"),
-        btnSizeMoo:             document.getElementById("btn-size-moo"),
+        btnSizeCredit:          document.getElementById("btn-size-credit"),
         patternStyleGrid:       document.getElementById("pattern-style-grid"),
         patternTypeSelect:      { value: '-1' },  // virtual select — grid sets this
         patternNameDisplay:     document.getElementById("pattern-name-display"),
@@ -533,7 +533,7 @@
       function syncCardSizeButtons() {
         dom.btnSizeId.classList.toggle('active',     dom.cardSize === 'id');
         dom.btnSizeSquare.classList.toggle('active', dom.cardSize === 'square');
-        dom.btnSizeMoo.classList.toggle('active',    dom.cardSize === 'moo');
+        dom.btnSizeCredit.classList.toggle('active',  dom.cardSize === 'credit');
       }
 
       function setCardSize(size) {
@@ -1619,7 +1619,7 @@
 
       dom.btnSizeId.addEventListener("click",     () => setCardSize('id'));
       dom.btnSizeSquare.addEventListener("click", () => setCardSize('square'));
-      dom.btnSizeMoo.addEventListener("click",    () => setCardSize('moo'));
+      dom.btnSizeCredit.addEventListener("click",  () => setCardSize('credit'));
 
       // Border radius control
       dom.borderRadiusSlider.addEventListener("input", () => {
@@ -1828,7 +1828,7 @@
             setCardSize('square');
             break;
           case '3':
-            setCardSize('moo');
+            setCardSize('credit');
             break;
           case 's':
             setRenderMode('svg');

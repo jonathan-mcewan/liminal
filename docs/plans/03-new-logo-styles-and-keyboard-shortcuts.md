@@ -67,7 +67,7 @@ Expanding the generative logo system from 17 styles (0-16) to 24 (0-23), and add
 | F | Flip card |
 | ← / → | Nudge seed ±1 |
 | ↑ / ↓ | Nudge seed ±10 |
-| 1 / 2 / 3 | Card size: ID / Square / MOO |
+| 1 / 2 / 3 | Card size: ID / Square / Credit |
 | S | SVG mode |
 | V | Canvas mode |
 | D | Toggle dark/light |

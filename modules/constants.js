@@ -4,7 +4,7 @@
 export const CARD_SIZES = {
   id:     { aspect: 54 / 85.6, scale: 1 },           // standard ID card (85.6 × 54 mm)
   square: { aspect: 1,         scale: 54 / 85.6 * 0.64 }, // side = 4/5 of ID card width, then 80% of that
-  moo:    { aspect: 84 / 55,   scale: 1 },           // MOO business card (84 × 55 mm)
+  credit: { aspect: 84 / 55,   scale: 1 },           // Credit card (85.6 × 53.98 mm)
 };
 
 export const BG_NAMES = [

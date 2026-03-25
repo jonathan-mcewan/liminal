@@ -42,7 +42,7 @@ Open `http://localhost:3000`. ES modules require a server — `file://` won't wo
 
 **Interaction** — 3D tilt on hover, click to flip, card back with magnetic stripe and barcode. Favourites saved to localStorage.
 
-**Sizes** — ID Card (standard), Square, MOO (business card).
+**Sizes** — ID Card (standard), Square, Credit (business card).
 
 ## Keyboard shortcuts
 

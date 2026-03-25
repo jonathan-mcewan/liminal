@@ -154,7 +154,7 @@ export function getCardDescriptor(dom) {
   const isText   = String(seed) !== raw;
   const seedLabel = isText ? `${raw} (#${seed})` : `#${seed}`;
   const theme    = color.isDark ? 'Dark' : 'Light';
-  const SIZE_LABELS = { id: null, square: 'Square', moo: 'MOO' };
+  const SIZE_LABELS = { id: null, square: 'Square', credit: 'Credit' };
   const sizeLabel = SIZE_LABELS[dom.cardSize] ?? null;
   const name     = dom.personNameInput.value.trim();
   const colourName = hueToColorName(color.hue);

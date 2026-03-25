@@ -334,7 +334,7 @@ Example: `Dark · Blue · Alex Reeves · Celtic Knot · Marble bg · Multiply ·
 
 Controls per panel, in DOM order. When adding new controls, maintain this order.
 
-**Actions:** Card size (ID/Square/MOO) · Render mode (Canvas/SVG) · Render / Reset / Shuffle · Export + DPI · Copy Image / Copy Link · Export JSON / Import JSON · Favourites
+**Actions:** Card size (ID/Square/Credit) · Render mode (Canvas/SVG) · Render / Reset / Shuffle · Export + DPI · Copy Image / Copy Link · Export JSON / Import JSON · Favourites
 
 **Identity:** Name · Job Title
 
@@ -366,7 +366,7 @@ All shortcuts are disabled when an `<input>`, `<select>`, or `<textarea>` is foc
 | F | Flip card |
 | ← / → | Seed ±1 |
 | ↑ / ↓ | Seed ±10 |
-| 1 / 2 / 3 | Card size: ID / Square / MOO |
+| 1 / 2 / 3 | Card size: ID / Square / Credit |
 | S | SVG mode |
 | V | Canvas mode |
 | D | Toggle dark/light |

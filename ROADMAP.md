@@ -13,7 +13,7 @@ The core engine: a single seed produces a unique, deterministic card every time.
 - Hue, saturation, and lightness sliders with per-parameter override and reset
 - URL persistence — every card is a shareable link
 - Canvas rendering with PNG export
-- 3 card size presets (ID Card, Square, MOO)
+- 3 card size presets (ID Card, Square, Credit)
 - Lanyard hole toggle
 - Keyboard shortcuts (17 bindings) with toggleable hotkey legend
 
