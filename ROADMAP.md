@@ -51,13 +51,14 @@ Making the card feel like a real object.
 
 - SVG render mode with vector export
 - 3D tilt-on-hover and click-to-flip animation
-- Card back face — magnetic stripe, hatched pattern, brand mark, procedural barcode
+- Card back face — magnetic stripe, hatched pattern, brand mark, procedural barcode, easter eggs (fine print, seal of adequacy, hologram, customer disservice)
+- Hologram sheen overlay — iridescent conic-gradient that follows cursor tilt
 - Responsive layout for mobile and desktop viewports
 - Phosphor Duotone icon set for the Icons logo style
 
 ---
 
-## Phase 4 — Customisation Depth ✅
+## Phase 4 — Customisation Depth 🔶
 
 Finer control over every visual layer.
 
@@ -72,14 +73,16 @@ Finer control over every visual layer.
 
 ---
 
-## Phase 5 — Templates & Theming 🔶
+## Phase 5 — World-Building & Theming 🔶
 
-One-click starting points and collections.
+One-click starting points, collections, and a fictional universe.
 
 - [x] **Curated theme presets** — 20 named presets in a collapsible panel (Corporate, Midnight, Neon, Pastel, Brutalist, etc.)
 - [x] **Favourites** — star seeds to a local collection, browse and recall later
 - [x] **Import / export settings** — JSON blob of all overrides for sharing full configs
-- [ ] **Colour harmony modes** — complementary, analogous, and triadic palette generation
+- [ ] **Procedural personas** — generate a full identity: name, title, department ("Bureau of Missing Staplers"), employee number (EMP-00000-WHY), access level ("LEVEL 4: MAY ADJUST THERMOSTAT"). One button fills the card.
+- [ ] **Company name generator** — procedural org names ("Synergex", "Paradigm Dynamics", "OmniCorp Solutions") as a subtle card watermark or header
+- [ ] **Serial number** — formatted badge number on the card back that encodes the seed in a bureaucratic format
 - [ ] **Lucky dip gallery** — grid of random seeds to browse and pick from
 
 ---
@@ -91,38 +94,40 @@ Getting cards out into the world.
 - [x] **High-DPI PNG** — 1×, 2×, 3× resolution selector for print-quality raster export
 - [x] **Copy as image** — clipboard copy (PNG) for quick paste into docs or chat (keyboard shortcut: I)
 - [ ] **Batch export** — generate and download N cards as a ZIP
-- [ ] **PDF export** — single or multi-card PDF with crop marks for print
 - [ ] **QR code on back** — encode the card URL into a QR code on the back face
-- [ ] **OG image meta tag** — dynamic preview image when sharing card URLs on social
+- [ ] **Ambient mode** — full-screen screensaver: card slowly rotates, lighting shifts, optionally cycles favourites. `A` key to toggle.
 
 ---
 
-## Phase 7 — Quality of Life
+## Phase 7 — Physicality & Presence
 
-Small things that make a big difference.
+The card feels like a real object you've been carrying for years.
 
-- [ ] **Undo / redo** — step through parameter changes (Ctrl+Z / Ctrl+Shift+Z)
+- [ ] **Patina & wear** — seed-derived scuffs, scratches, fingerprints, coffee ring stains, bent corners. A "wear" slider from mint to well-loved.
+- [ ] **Parallax tilt** — on hover, layers move at different depths. Background shifts slowly, logo floats, text sits on top.
+- [ ] **Edge lighting** — metallic foil edge catch on the card border as you tilt. Like real laminated badges under fluorescents.
+- [ ] **Animated hologram** — the back-face rosette rotates and shimmers in real-time with rAF, not just a static hover effect.
 - [ ] **Seed history** — remember recently visited seeds with browser back/forward
-- [ ] **Comparison mode** — side-by-side view of two seeds or override states
-- [ ] **Randomise single layer** — re-roll just the logo, pattern, or background
-- [ ] **Slider fine-tune** — hold Shift while dragging for precise control
-- [ ] **WCAG contrast info** — show contrast ratio for text against card background
-- [ ] **Colour-blind preview** — simulate deuteranopia / protanopia / tritanopia
 - [ ] **Touch gestures** — swipe to shuffle, pinch to scale on mobile
-- [ ] **UI theme toggle** — light / dark UI independent of card theme
-- [ ] **Performance budget** — lazy-render thumbnail grids, debounce rapid slider input
 
 ---
 
-## Phase 8 — Advanced Generation
+## Phase 8 — Visual Experiments & Discovery
 
-Pushing the generative system further.
+New render aesthetics and reasons to keep exploring.
 
+- [x] **Holographic foil effect** — iridescent shimmer overlay on hover
+- [x] **Generative card back** — procedural easter eggs (fine print, seal, hologram, customer disservice)
 - [ ] **Text style controls** — font weight, size, letter-spacing, position
 - [ ] **Multi-logo composition** — place 2–3 smaller logos in a layout
-- [ ] **Photo overlay** — import a headshot with circular or rounded mask
-- [ ] **Holographic foil effect** — animated iridescent shimmer on hover
-- [ ] **Generative card back** — procedural back designs beyond the current magnetic stripe
+- [ ] **Glow / neon mode** — logo and text emit light with bloom bleed into the card. Dark cards only.
+- [ ] **Duotone / risograph** — post-process filter reducing to 2–3 ink colours with halftone dots and slight misregistration. Print aesthetic.
+- [ ] **Thermal print mode** — render as if from a receipt printer. Monochrome, slightly warped, fading at edges.
+- [ ] **Card scanner** — RFID reader interaction: click to scan, approve/deny animation with absurd reason ("ACCESS GRANTED: You brought donuts" / "ACCESS DENIED: Mercury is in retrograde")
+- [ ] **Card rarity score** — analyse the seed's feature combo rarity. Display as a subtle badge or in the descriptor. Turns seed browsing into a collection game.
+- [ ] **Achievement toasts** — discover rare combos, get a subtle notification ("First hologram!", "Found the pigeon helpdesk")
+- [ ] **Magnetic stripe encoding** — the decorative barcode visually encodes the seed, so different seeds produce visibly different stripe patterns
+- [ ] **Seed story** — tiny prose blurb generated from the card's parameters ("A dark teal card bearing the Celtic Knot sigil, issued during the great stapler shortage of Q3")
 
 ---
 
