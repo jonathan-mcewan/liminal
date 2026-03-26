@@ -362,7 +362,7 @@
             <span>Count <span id="art-count-display"></span></span>
             <button class="btn-reset" id="art-count-reset" title="Reset to default">↺</button>
           </div>
-          <input id="art-count" type="range" min="0" max="14" step="1" value="5" />
+          <input id="art-count" type="range" min="0" max="14" step="1" value="0" />
         </div>
         <div class="field">
           <div class="field-hdr">
@@ -636,7 +636,7 @@
         cardLightnessDisplay:   document.getElementById("lightness-value-display"),
         cardLightnessReset:     document.getElementById("lightness-reset"),
         bgStyleGrid:            document.getElementById("bg-style-grid"),
-        bgStyleSelect:          { value: '0' },   // virtual select — grid sets this; default = Noise
+        bgStyleSelect:          { value: '-1' },   // virtual select — grid sets this; default = Auto
         bgNameDisplay:          document.getElementById("bg-name-display"),
         bgBlurSlider:           document.getElementById("bg-blur"),
         bgBlurDisplay:          document.getElementById("bg-blur-display"),
