@@ -1757,16 +1757,12 @@
 
       function generateThumbnail() {
         const thumbCanvas = document.createElement('canvas');
-        const thumbSize   = 300;
+        const tw = 200;
         const p = buildParams(dom);
-        // Let generateCard compute geometry, then match canvas to it
-        const padding = 0.08;
-        const refDim  = thumbSize * (1 - 2 * padding);
-        let tw, th;
-        if (p.cardAspect <= 1) { th = refDim * p.cardScale; tw = th * p.cardAspect; }
-        else                    { tw = refDim * p.cardScale; th = tw / p.cardAspect; }
-        thumbCanvas.width  = Math.round(tw);
-        thumbCanvas.height = Math.round(th);
+        const th = Math.round(tw / p.cardAspect);
+        thumbCanvas.width  = tw;
+        thumbCanvas.height = th;
+        const thumbSize = Math.ceil(tw / ((1 - 2 * 0.08) * (p.cardAspect <= 1 ? p.cardScale * p.cardAspect : p.cardScale)));
         const thumbCtx = thumbCanvas.getContext('2d');
         generateCard({ ...p, size: thumbSize, ctx: thumbCtx });
         return thumbCanvas.toDataURL('image/png', 0.8);
@@ -1814,17 +1810,15 @@
 
           card.innerHTML = `
             <img class="fav-thumb" src="${fav.thumbnail}" alt="" />
+            <button class="fav-delete" title="Delete">&times;</button>
             <div class="fav-info">
               <span class="fav-descriptor">${fav.descriptor}</span>
               <span class="fav-date">${dateStr}</span>
             </div>
-            <div class="fav-actions">
-              <button class="fav-load btn-secondary" title="Load">Load</button>
-              <button class="fav-delete btn-secondary" title="Delete">&times;</button>
-            </div>
           `;
 
-          card.querySelector('.fav-load').addEventListener('click', () => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.fav-delete')) return;
             applySettings(fav.settings, dom);
             syncCardSizeButtons();
             syncPosGrid(dom.logoPosGrid, dom.logoPosition);

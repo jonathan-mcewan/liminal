@@ -1599,30 +1599,48 @@ button svg {
 .favourites-grid {
   display:               grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap:                   0.75rem;
+  gap:                   1.25rem;
   max-height:            60vh;
   overflow-y:            auto;
   padding-right:         0.25rem;
 }
 
 .fav-card {
-  background:    rgba(255,255,255,0.05);
-  border:        1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  overflow:      hidden;
+  position:      relative;
   display:       flex;
   flex-direction: column;
+  cursor:        pointer;
 }
 
 .fav-thumb {
   width:      100%;
   aspect-ratio: auto;
   display:    block;
-  background: #111;
 }
 
+.fav-delete {
+  position:      absolute;
+  top:           0.3rem;
+  right:         0.3rem;
+  width:         1.4rem;
+  height:        1.4rem;
+  padding:       0;
+  border-radius: 50%;
+  border:        none;
+  background:    rgba(0,0,0,0.55);
+  color:         rgba(255,255,255,0.7);
+  font-size:     0.85rem;
+  line-height:   1.4rem;
+  text-align:    center;
+  cursor:        pointer;
+  opacity:       0;
+  transition:    opacity 0.15s;
+}
+.fav-card:hover .fav-delete { opacity: 1; }
+.fav-delete:hover { background: rgba(200,50,50,0.8); color: #fff; }
+
 .fav-info {
-  padding:  0.4rem 0.5rem;
+  padding:  0.4rem 0.1rem;
   flex:     1;
 }
 
@@ -1644,18 +1662,6 @@ button svg {
   font-size: 0.6rem;
   color:     rgba(255,255,255,0.3);
   margin-top: 0.15rem;
-}
-
-.fav-actions {
-  display:  flex;
-  gap:      0.25rem;
-  padding:  0.3rem 0.5rem 0.5rem;
-}
-
-.fav-actions button {
-  flex: 1;
-  font-size: 0.7rem;
-  padding: 0.2rem 0.4rem;
 }
 
 .favourites-footer {
