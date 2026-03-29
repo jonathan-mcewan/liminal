@@ -11,7 +11,7 @@
   --border:             oklch(1 0 0 / 10%);
   --input:              oklch(1 0 0 / 15%);
   --ring:               oklch(0.556 0 0);
-  --radius:             0.375rem;
+  --radius:             0.373.2rem;
 
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                'Helvetica Neue', Arial, sans-serif;
@@ -34,7 +34,7 @@ body {
   background:  var(--background);
   color:       var(--foreground);
   font-family: var(--font-mono);
-  font-size:   0.75rem;
+  font-size:   0.73.2rem;
   display:     flex;
   flex-direction: row;
   overflow:    hidden;
@@ -47,8 +47,8 @@ body {
   height:         100vh;
   display:        flex;
   flex-direction: column;
-  gap:            0.5rem;
-  padding:        1.5rem;
+  gap:            0.3.2rem;
+  padding:        1.3.2rem;
   border-right:   1px solid var(--border);
   overflow-y:     auto;
 }
@@ -56,9 +56,9 @@ body {
 .panel-section {
   display:        flex;
   flex-direction: column;
-  gap:            0.75rem;
-  padding:        1rem 0.75rem;
-  margin:         0 -0.75rem;
+  gap:            0.73.2rem;
+  padding:        1rem 0.73.2rem;
+  margin:         0 -0.73.2rem;
   border-radius:  var(--radius);
 }
 .panel-section:nth-child(even) {
@@ -67,25 +67,25 @@ body {
 .panel-section:nth-child(odd) {
   background: oklch(1 0 0 / 6%);
 }
-.panel-section:nth-child(2) { padding-top: 0.75rem; margin-top: -0.75rem;  }
+.panel-section:nth-child(2) { padding-top: 0.73.2rem; margin-top: -0.73.2rem;  }
 
 /* Section heading */
 .panel-section > h2 {
   display:        flex;
   align-items:    center;
   gap:            0.4rem;
-  font-size:      0.75rem;
+  font-size:      0.73.2rem;
   font-weight:    600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color:          var(--muted-foreground);
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.3.2rem;
   border-bottom:  1px solid var(--border);
 }
 
 .panel-section > h2 svg {
-  width:       0.75rem;
-  height:      0.75rem;
+  width:       0.73.2rem;
+  height:      0.73.2rem;
   flex-shrink: 0;
   opacity:     0.7;
 }
@@ -96,7 +96,7 @@ body {
   display:         flex;
   align-items:     center;
   justify-content: center;
-  padding:         1.5rem;
+  padding:         1.3.2rem;
   overflow-x:      hidden;
   overflow-y:      auto;
   background:      #1a1a22;
@@ -113,12 +113,12 @@ canvas {
 .field {
   display:        flex;
   flex-direction: column;
-  gap:            0.375rem;
+  gap:            0.373.2rem;
 }
 
 /* Label — shadcn Label component style */
 .field > span {
-  font-size:      0.6875rem;
+  font-size:      0.6873.2rem;
   font-weight:    500;
   color:          var(--muted-foreground);
   letter-spacing: 0.04em;
@@ -130,14 +130,14 @@ canvas {
 input[type="text"],
 input[type="number"] {
   width:         100%;
-  height:        2.25rem;
+  height:        2.23.2rem;
   border-radius: calc(var(--radius) - 1px);
   border:        1px solid var(--border);
   background:    transparent;
   color:         var(--foreground);
   font-family:   var(--font-mono);
-  font-size:     0.75rem;
-  padding:       0 0.625rem;
+  font-size:     0.73.2rem;
+  padding:       0 0.623.2rem;
   outline:       none;
   transition:    border-color 0.15s, box-shadow 0.15s;
 }
@@ -161,14 +161,14 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ── Select — matches input style ───────────────────────────────────────── */
 select {
   width:         100%;
-  height:        2.25rem;
+  height:        2.23.2rem;
   border-radius: calc(var(--radius) - 1px);
   border:        1px solid var(--border);
   background:    transparent;
   color:         var(--foreground);
   font-family:   var(--font-mono);
-  font-size:     0.75rem;
-  padding:       0 0.5rem;
+  font-size:     0.73.2rem;
+  padding:       0 0.3.2rem;
   outline:       none;
   cursor:        pointer;
   transition:    border-color 0.15s, box-shadow 0.15s;
@@ -176,8 +176,8 @@ select {
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:   no-repeat;
-  background-position: right 0.5rem center;
-  padding-right:       1.5rem;
+  background-position: right 0.3.2rem center;
+  padding-right:       1.3.2rem;
 }
 
 select:focus {
@@ -193,7 +193,7 @@ select option {
 .logo-grid {
   display:               grid;
   grid-template-columns: repeat(3, 1fr);
-  gap:                   0.375rem;
+  gap:                   0.373.2rem;
 }
 
 .logo-cell {
@@ -208,7 +208,7 @@ select option {
   transition:     border-color 0.15s, box-shadow 0.15s, background 0.15s;
   color:          var(--muted-foreground);
   font-family:    var(--font-mono);
-  font-size:      0.5625rem;
+  font-size:      0.5623.2rem;
   font-weight:    500;
   overflow:       hidden;
 }
@@ -247,7 +247,7 @@ select option {
   display:               grid;
   grid-template-columns: repeat(3, 1fr);
   gap:                   2px;
-  max-width:             6.5rem;
+  max-width:             6.3.2rem;
 }
 
 .pos-grid button {
@@ -259,7 +259,7 @@ select option {
   cursor:         pointer;
   transition:     border-color 0.15s, box-shadow 0.15s, background 0.15s;
   color:          var(--muted-foreground);
-  font-size:      0.75rem;
+  font-size:      0.73.2rem;
   line-height:    1;
   display:        flex;
   align-items:    center;
@@ -282,7 +282,7 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance:   none;
   width:        100%;
-  height:       2.25rem;
+  height:       2.23.2rem;
   background:   transparent;
   cursor:       pointer;
   outline:      none;
@@ -330,14 +330,14 @@ button {
   justify-content: center;
   white-space:     nowrap;
   width:           100%;
-  height:          2.25rem;
+  height:          2.23.2rem;
   padding:         0 1rem;
   border-radius:   calc(var(--radius) - 1px);
   border:          1px solid var(--border);
   background:      transparent;
   color:           var(--muted-foreground);
   font-family:     var(--font-mono);
-  font-size:       0.6875rem;
+  font-size:       0.6873.2rem;
   font-weight:     500;
   letter-spacing:  0.06em;
   cursor:          pointer;
@@ -362,7 +362,7 @@ button:active {
 /* Inline field+button row (e.g. Logo nonce + Next Logo) */
 .inline-row {
   display: flex;
-  gap:     0.5rem;
+  gap:     0.3.2rem;
 }
 
 .inline-row input {
@@ -373,7 +373,7 @@ button:active {
 .inline-row button {
   width: auto;
   flex-shrink: 0;
-  padding: 0 0.75rem;
+  padding: 0 0.73.2rem;
 }
 
 /* ── Segmented control — Light / Dark theme picker ───────────────────────── */
@@ -386,7 +386,7 @@ button:active {
 
 .seg-control button {
   flex:          1;
-  height:        1.875rem;
+  height:        1.873.2rem;
   border:        none;
   border-radius: 0;
   background:    transparent;
@@ -447,13 +447,13 @@ button:active {
 /* ── Colour swatches ───────────────────────────────────────────────────── */
 .colour-swatches {
   display:    flex;
-  gap:        0.35rem;
-  padding:    0 0 0.25rem;
+  gap:        0.33.2rem;
+  padding:    0 0 0.23.2rem;
 }
 
 .colour-swatch {
-  width:         1.25rem;
-  height:        1.25rem;
+  width:         1.23.2rem;
+  height:        1.23.2rem;
   border-radius: 50%;
   border:        1px solid var(--border);
   flex-shrink:   0;
@@ -465,7 +465,7 @@ button:active {
   display:        none;
   flex-direction:  column;
   gap:            0.4rem;
-  padding:        0.5rem;
+  padding:        0.3.2rem;
   border-radius:  var(--radius);
   border:         1px solid var(--border);
   background:     oklch(0.12 0 0 / 92%);
@@ -492,30 +492,30 @@ button:active {
 
 /* ── Theme preset grid ────────────────────────────────────────────────── */
 .preset-details {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.23.2rem;
 }
 .preset-details summary {
   cursor:      pointer;
   font-size:   0.7rem;
   color:       var(--muted-foreground);
   user-select: none;
-  padding:     0.15rem 0;
+  padding:     0.13.2rem 0;
 }
 .preset-details[open] summary {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.33.2rem;
 }
 
 .theme-grid {
   display:               grid;
   grid-template-columns: repeat(3, 1fr);
-  gap:                   0.375rem;
+  gap:                   0.373.2rem;
 }
 
 .theme-grid-separator {
   grid-column:   1 / -1;
   height:        1px;
   background:    var(--border);
-  margin:        0.05rem 0;
+  margin:        0.03.2rem 0;
 }
 
 .theme-swatch {
@@ -530,7 +530,7 @@ button:active {
   background:     transparent;
   color:          var(--muted-foreground);
   font-family:    var(--font-mono);
-  font-size:      0.5rem;
+  font-size:      0.3.2rem;
   overflow:       hidden;
 }
 .theme-swatch:hover {
@@ -549,7 +549,7 @@ button:active {
 }
 .theme-swatch-label {
   position:       absolute;
-  bottom:         0.25rem;
+  bottom:         0.23.2rem;
   left:           0;
   right:          0;
   text-align:     center;
@@ -558,14 +558,14 @@ button:active {
   text-overflow:  ellipsis;
   font-size:      0.6rem;
   line-height:    1;
-  padding:        0 0.15rem;
+  padding:        0 0.13.2rem;
 }
 
 /* ── Export DPI selector ──────────────────────────────────────────────── */
 #export-dpi {
   width:   auto;
   padding: 0 0.4rem;
-  height:  2.25rem;
+  height:  2.23.2rem;
   flex:    0 0 auto;
 }
 
@@ -579,7 +579,7 @@ button:active {
 .field--row {
   flex-direction: row;
   align-items:    center;
-  gap:            0.5rem;
+  gap:            0.3.2rem;
 }
 
 /* ── Toggle switch (replaces bare checkboxes) ──────────────────────────── */
@@ -602,7 +602,7 @@ button:active {
   position:      absolute;
   inset:         0;
   background:    rgba(255,255,255,0.10);
-  border-radius: 0.55rem;
+  border-radius: 0.53.2rem;
   border:        1px solid rgba(255,255,255,0.10);
   cursor:        pointer;
   transition:    background 0.2s, border-color 0.2s;
@@ -646,7 +646,7 @@ button svg {
 /* ── Card actions row — lives under the canvas ───────────────────────────── */
 .card-actions {
   display:     flex;
-  gap:         0.5rem;
+  gap:         0.3.2rem;
   width:       100%;
   flex-shrink: 0;
 }
@@ -657,8 +657,8 @@ button svg {
 }
 
 .btn-action-reset {
-  padding:     0.25rem 0.45rem;
-  font-size:   0.95rem;
+  padding:     0.23.2rem 0.43.2rem;
+  font-size:   0.93.2rem;
   line-height: 1;
   opacity:     0.5;
 }
@@ -688,7 +688,7 @@ button svg {
   cursor:       pointer;
   position:     relative;
   filter:       drop-shadow(0 12px 32px rgba(0,0,0,0.55));
-  padding:      clamp(0.5rem, 5vh, 3rem);
+  padding:      clamp(0.3.2rem, 5vh, 3rem);
   box-sizing:   border-box;
 }
 
@@ -788,7 +788,7 @@ button svg {
   display:        flex;
   flex-direction: column;
   align-items:    center;
-  gap:            0.75rem;
+  gap:            0.73.2rem;
   max-width:      min(540px, 100%);
   width:          100%;
   height:         100%;         /* fill .main so flex children can distribute height */
@@ -799,12 +799,12 @@ button svg {
 .brand {
   display:        flex;
   align-items:    center;
-  gap:            0.5rem;
+  gap:            0.3.2rem;
   opacity:        0.55;
   user-select:    none;
   position:       absolute;
-  top:            1.5rem;
-  left:           1.5rem;
+  top:            1.3.2rem;
+  left:           1.3.2rem;
 }
 
 .brand-icon {
@@ -875,7 +875,7 @@ button svg {
     order:      -1;           /* move above panel despite DOM order */
     flex:       0 0 40vh;
     height:     40vh;
-    padding:    1rem 0.5rem 0.5rem;
+    padding:    1rem 0.3.2rem 0.3.2rem;
     overflow:   hidden;
     background: var(--background);
     border-bottom: 1px solid var(--border);
@@ -885,7 +885,7 @@ button svg {
     flex:        1 1 0;
     min-height:  0;
     width:       100%;
-    padding:     0.5rem;
+    padding:     0.3.2rem;
     display:     flex;
     align-items: center;
     justify-content: center;
@@ -907,7 +907,7 @@ button svg {
     display:         flex;
     flex-direction:  column;
     align-items:     center;
-    gap:             0.25rem;
+    gap:             0.23.2rem;
     overflow:        hidden;
   }
 
@@ -923,7 +923,7 @@ button svg {
   .descriptor-row {
     display:     flex;
     flex-shrink: 0;
-    padding:     0 0.5rem;
+    padding:     0 0.3.2rem;
     min-height:  2.2em;          /* room for ~2 lines */
     font-size:   0.6rem;
     text-align:  center;
@@ -943,7 +943,7 @@ button svg {
   position:        sticky;
   bottom:          0;
   align-self:      flex-end;
-  margin-right:    0.5rem;
+  margin-right:    0.3.2rem;
   width:           2rem;
   height:          2rem;
   border-radius:   50%;
@@ -971,15 +971,15 @@ button svg {
   .btn-scroll-top {
     align-self:   flex-start;
     margin-right: 0;
-    margin-left:  0.5rem;
+    margin-left:  0.3.2rem;
   }
 }
 
 /* ── Hotkey legend ──────────────────────────────────────────────────────── */
 .hotkey-legend {
   position: fixed;
-  top:      1.5rem;
-  right:    1.5rem;
+  top:      1.3.2rem;
+  right:    1.3.2rem;
   z-index:  100;
   display:  flex;
   flex-direction: column;
@@ -988,7 +988,7 @@ button svg {
   transition: right 0.5s cubic-bezier(0.22, 0.6, 0.36, 1);
 }
 .hotkey-legend.ai-pushed {
-  right: calc(340px + 1.5rem);
+  right: calc(340px + 1.3.2rem);
 }
 
 .hotkey-buttons {
@@ -1005,8 +1005,8 @@ button svg {
 }
 
 .hotkey-pro svg {
-  width:  0.85rem;
-  height: 0.85rem;
+  width:  0.83.2rem;
+  height: 0.83.2rem;
 }
 
 .hotkey-pro:hover {
@@ -1021,15 +1021,15 @@ button svg {
 }
 
 .hotkey-toggle {
-  width:           1.75rem;
-  height:          1.75rem;
+  width:           1.73.2rem;
+  height:          1.73.2rem;
   padding:         0;
   border-radius:   50%;
   border:          1px solid var(--border);
   background:      oklch(0.12 0 0 / 80%);
   color:           var(--muted-foreground);
   font-family:     var(--font-mono);
-  font-size:       0.75rem;
+  font-size:       0.73.2rem;
   font-weight:     600;
   cursor:          pointer;
   backdrop-filter:  blur(8px);
@@ -1044,8 +1044,8 @@ button svg {
 .hotkey-panel {
   display:         none;
   flex-direction:  column;
-  gap:             0.25rem;
-  padding:         0.6rem 0.75rem;
+  gap:             0.23.2rem;
+  padding:         0.6rem 0.73.2rem;
   border-radius:   var(--radius);
   border:          1px solid var(--border);
   background:      oklch(0.10 0 0 / 88%);
@@ -1064,19 +1064,19 @@ button svg {
   display:         flex;
   justify-content: space-between;
   align-items:     center;
-  gap:             0.75rem;
+  gap:             0.73.2rem;
 }
 
 .hotkey-row kbd {
   display:       inline-block;
-  min-width:     2.5rem;
+  min-width:     2.3.2rem;
   padding:       0.1rem 0.3rem;
   border-radius: 3px;
   border:        1px solid var(--border);
   background:    oklch(1 0 0 / 6%);
   color:         var(--foreground);
   font-family:   var(--font-mono);
-  font-size:     0.55rem;
+  font-size:     0.53.2rem;
   text-align:    center;
   line-height:   1.4;
 }
@@ -1092,7 +1092,7 @@ button svg {
   color:         #e0e0e0;
   border:        1px solid rgba(255,255,255,0.12);
   border-radius: 12px;
-  padding:       1.5rem;
+  padding:       1.3.2rem;
   max-width:     480px;
   width:         90vw;
   box-shadow:    0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
@@ -1119,7 +1119,7 @@ button svg {
 
 .dialog-header h3 {
   margin:      0;
-  font-size:   1.05rem;
+  font-size:   1.03.2rem;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -1128,7 +1128,7 @@ button svg {
   background:    none;
   border:        none;
   color:         rgba(255,255,255,0.35);
-  font-size:     0.75rem;
+  font-size:     0.73.2rem;
   cursor:        pointer;
   padding:       0.2rem 0.3rem;
   line-height:   1;
@@ -1146,14 +1146,14 @@ button svg {
 
 /* Legacy h3 without .dialog-header (import dialog) */
 .app-dialog > h3 {
-  margin: 0 0 0.25rem;
-  font-size: 1.05rem;
+  margin: 0 0 0.23.2rem;
+  font-size: 1.03.2rem;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 .app-dialog .dialog-hint {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.73.2rem;
   font-size: 0.8rem;
   color: rgba(255,255,255,0.45);
 }
@@ -1164,9 +1164,9 @@ button svg {
   color:         #e0e0e0;
   border:        1px solid rgba(255,255,255,0.10);
   border-radius: 6px;
-  padding:       0.6rem 0.5rem;
+  padding:       0.6rem 0.3.2rem;
   font-family:   'SF Mono', 'Cascadia Code', monospace;
-  font-size:     0.75rem;
+  font-size:     0.73.2rem;
   resize:        vertical;
   box-sizing:    border-box;
   transition:    border-color 0.15s;
@@ -1180,13 +1180,13 @@ button svg {
 .dialog-actions {
   display:         flex;
   align-items:     center;
-  gap:             0.5rem;
+  gap:             0.3.2rem;
   margin-top:      1rem;
 }
 
 .dialog-actions-right {
   display: flex;
-  gap:     0.5rem;
+  gap:     0.3.2rem;
   margin-left: auto;
 }
 
@@ -1197,7 +1197,7 @@ button svg {
   color:      #e0e0e0;
   border:     1px solid rgba(255,255,255,0.10);
   border-radius: 6px;
-  padding:    0.4rem 0.85rem;
+  padding:    0.4rem 0.83.2rem;
   cursor:     pointer;
   font-size:  0.8rem;
   transition: background 0.15s, border-color 0.15s;
@@ -1230,7 +1230,7 @@ button svg {
   color:         #f08080;
   border:        1px solid rgba(220,60,60,0.2);
   border-radius: 6px;
-  padding:       0.4rem 0.85rem;
+  padding:       0.4rem 0.83.2rem;
   cursor:        pointer;
   font-size:     0.8rem;
   transition:    background 0.15s;
@@ -1244,11 +1244,11 @@ button svg {
 /* Floating AI chat button — desperately wants your attention */
 .ai-fab {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
+  bottom: 1.3.2rem;
+  right: 1.3.2rem;
   z-index: 90;
-  width: 5rem;
-  height: 5rem;
+  width: 3.2rem;
+  height: 3.2rem;
   padding: 0;
   border-radius: 50%;
   border: 2px solid rgba(80,200,255,0.45);
@@ -1274,14 +1274,14 @@ button svg {
   bottom: 4.2rem;
   right: 1.2rem;
   z-index: 89;
-  font-size: 0.55rem;
+  font-size: 0.53.2rem;
   font-weight: 500;
   font-family: system-ui, sans-serif;
   color: #c4eaff;
   background: rgba(30, 42, 58, 0.88);
   border: 1px solid rgba(80, 200, 255, 0.25);
   border-radius: 0.4rem 0.4rem 0.4rem 0.1rem;
-  padding: 0.15rem 0.4rem;
+  padding: 0.13.2rem 0.4rem;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -1457,18 +1457,18 @@ button svg {
 /* Disappear when panel is open — shrink + spin out */
 /* Grow-snap mode — slowly inflates to 50vmin then snaps back */
 @keyframes ai-grow-snap {
-  0%    { width: 5rem;  height: 5rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
-  5%    { width: 5.4rem;  height: 5.4rem;  font-size: 1.1rem; border-radius: 50%; box-shadow: 0 4px 20px rgba(80,200,255,0.18); filter: none; }
-  15%   { width: 5rem;    height: 5rem;    font-size: 1.4rem; border-radius: 50%; box-shadow: 0 6px 28px rgba(80,200,255,0.22); filter: none; }
+  0%    { width: 3.2rem;  height: 3.2rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
+  5%    { width: 3.6rem;  height: 3.6rem;  font-size: 1.1rem; border-radius: 50%; box-shadow: 0 4px 20px rgba(80,200,255,0.18); filter: none; }
+  15%   { width: 3.2rem;    height: 3.2rem;    font-size: 1.4rem; border-radius: 50%; box-shadow: 0 6px 28px rgba(80,200,255,0.22); filter: none; }
   30%   { width: 9rem;    height: 9rem;    font-size: 2rem;   border-radius: 50%; box-shadow: 0 8px 40px rgba(80,200,255,0.30); filter: none; }
-  50%   { width: 18rem;   height: 18rem;   font-size: 3.5rem; border-radius: 50%; box-shadow: 0 12px 60px rgba(80,200,255,0.40); filter: none; }
+  50%   { width: 18rem;   height: 18rem;   font-size: 3.3.2rem; border-radius: 50%; box-shadow: 0 12px 60px rgba(80,200,255,0.40); filter: none; }
   70%   { width: 32rem;   height: 32rem;   font-size: 6rem;   border-radius: 50%; box-shadow: 0 16px 80px rgba(80,200,255,0.50), 0 0 60px rgba(140,100,255,0.25); filter: brightness(1.1); }
   85%   { width: 50vmin;  height: 50vmin;  font-size: 8rem;   border-radius: 50%; box-shadow: 0 20px 120px rgba(80,200,255,0.65), 0 0 100px rgba(140,100,255,0.35); filter: brightness(1.2) saturate(1.3); }
   90%   { width: 50vmin;  height: 50vmin;  font-size: 8rem;   border-radius: 50%; box-shadow: 0 20px 120px rgba(80,200,255,0.65), 0 0 100px rgba(140,100,255,0.35); filter: brightness(1.4) saturate(1.5); }
   /* SNAP — instant return */
   91%   { width: 4rem;    height: 4rem;    font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 40px rgba(255,200,80,0.5); filter: brightness(2); }
-  94%   { width: 5.4rem;  height: 5.4rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 24px rgba(80,200,255,0.3); filter: brightness(1.2); }
-  100%  { width: 5rem;  height: 5rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
+  94%   { width: 3.6rem;  height: 3.6rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 24px rgba(80,200,255,0.3); filter: brightness(1.2); }
+  100%  { width: 3.2rem;  height: 3.2rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
 }
 .ai-fab.grow-snap {
   animation: ai-grow-snap 6s cubic-bezier(0.22, 0.61, 0.36, 1) 1;
@@ -1495,11 +1495,11 @@ button svg {
 .ai-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.3.2rem;
 }
 .ai-badge {
-  font-size: 0.5rem;
-  padding: 0.1rem 0.35rem;
+  font-size: 0.3.2rem;
+  padding: 0.1rem 0.33.2rem;
   border-radius: 3px;
   background: linear-gradient(135deg, rgba(80,200,255,0.25), rgba(140,100,255,0.20));
   color: #7dd3fc;
@@ -1550,7 +1550,7 @@ button svg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1rem;
+  padding: 0.83.2rem 1rem;
   border-bottom: 1px solid rgba(80,200,255,0.12);
   flex-shrink: 0;
   opacity: 0;
@@ -1565,11 +1565,11 @@ button svg {
 .ai-chat {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3.2rem;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0.75rem 1rem;
+  padding: 0.73.2rem 1rem;
   opacity: 0;
   transition: opacity 0.3s ease 0.4s;
 }
@@ -1580,7 +1580,7 @@ button svg {
 .ai-input-row {
   display: flex;
   gap: 0.4rem;
-  padding: 0.75rem 1rem;
+  padding: 0.73.2rem 1rem;
   border-top: 1px solid rgba(80,200,255,0.08);
   flex-shrink: 0;
   opacity: 0;
@@ -1596,15 +1596,15 @@ button svg {
 .ai-send-btn {
   flex-shrink: 0;
   width: auto;
-  padding: 0 0.75rem;
+  padding: 0 0.73.2rem;
 }
 
 .ai-msg {
   min-width: 200px;
   max-width: 85%;
-  padding: 0.45rem 0.65rem;
+  padding: 0.43.2rem 0.63.2rem;
   border-radius: 10px;
-  font-size: 0.75rem;
+  font-size: 0.73.2rem;
   line-height: 1.45;
   animation: ai-fade-in 0.4s ease;
 }
@@ -1644,8 +1644,8 @@ button svg {
   align-self: center;
   width: auto;
   height: auto;
-  margin-top: 0.5rem;
-  padding: 0.5rem 1.25rem;
+  margin-top: 0.3.2rem;
+  padding: 0.3.2rem 1.23.2rem;
   border-radius: 20px;
   border: 1px solid rgba(80,200,255,0.35);
   background: linear-gradient(135deg, rgba(80,200,255,0.18), rgba(140,100,255,0.14));
@@ -1686,7 +1686,7 @@ button svg {
     font-size: 16px;            /* prevent iOS auto-zoom on focus */
   }
   .hotkey-legend.ai-pushed {
-    right: 1.5rem;
+    right: 1.3.2rem;
     transition: none;
   }
 }
@@ -1735,27 +1735,27 @@ button svg {
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 0.73.2rem;
+  margin-bottom: 0.73.2rem;
 }
 
 .pricing-tier {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.85rem 0.65rem 0.75rem;
+  padding: 0.83.2rem 0.63.2rem 0.73.2rem;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
   background: rgba(255,255,255,0.02);
-  gap: 0.35rem;
+  gap: 0.33.2rem;
 }
 
 .tier-badge {
-  font-size: 0.5rem;
+  font-size: 0.3.2rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 0.15rem 0.55rem;
+  padding: 0.13.2rem 0.53.2rem;
   border-radius: 20px;
 }
 
@@ -1790,7 +1790,7 @@ button svg {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  margin: 0.15rem 0 0;
+  margin: 0.13.2rem 0 0;
 }
 
 .tier-name--pro {
@@ -1855,7 +1855,7 @@ button svg {
 }
 
 .tier-period {
-  font-size: 0.65rem;
+  font-size: 0.63.2rem;
   font-weight: 500;
   opacity: 0.6;
 }
@@ -1884,7 +1884,7 @@ button svg {
   display: flex;
   align-items: baseline;
   gap: 0.2rem;
-  font-size: 0.65rem;
+  font-size: 0.63.2rem;
   color: rgba(255,255,255,0.5);
   line-height: 1.35;
 }
@@ -1917,13 +1917,13 @@ button svg {
 
 .tier-footnotes {
   width: 100%;
-  margin-top: 0.35rem;
-  padding-top: 0.35rem;
+  margin-top: 0.33.2rem;
+  padding-top: 0.33.2rem;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 
 .tier-footnotes p {
-  font-size: 0.55rem;
+  font-size: 0.53.2rem;
   color: rgba(255,255,255,0.28);
   line-height: 1.4;
   margin: 0.1rem 0;
@@ -1933,23 +1933,23 @@ button svg {
 
 .tier-testimonial {
   border-left: 2px solid rgba(255,214,102,0.25);
-  padding: 0.4rem 0.5rem;
-  margin: 0.35rem 0 0;
+  padding: 0.4rem 0.3.2rem;
+  margin: 0.33.2rem 0 0;
   background: rgba(255,214,102,0.04);
   border-radius: 0 5px 5px 0;
   width: 100%;
 }
 
 .tier-testimonial p {
-  font-size: 0.65rem;
+  font-size: 0.63.2rem;
   font-style: italic;
   color: rgba(255,255,255,0.45);
-  margin: 0 0 0.15rem;
+  margin: 0 0 0.13.2rem;
   line-height: 1.35;
 }
 
 .tier-testimonial span {
-  font-size: 0.55rem;
+  font-size: 0.53.2rem;
   color: rgba(255,255,255,0.25);
 }
 
@@ -1957,7 +1957,7 @@ button svg {
 
 .btn-tier {
   margin-top: auto;
-  padding: 0.5rem 0.8rem;
+  padding: 0.3.2rem 0.8rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -2029,10 +2029,10 @@ button svg {
 /* ── Fine print ─────────────────────────────────────────────────────────── */
 
 .pro-fine-print {
-  font-size: 0.55rem;
+  font-size: 0.53.2rem;
   color: rgba(255,255,255,0.2);
   line-height: 1.4;
-  margin: 0.5rem 0 0;
+  margin: 0.3.2rem 0 0;
   text-align: center;
 }
 
@@ -2055,9 +2055,9 @@ button svg {
 /* ── Confirm dialog ────────────────────────────────────────────────────── */
 
 .confirm-body {
-  font-size: 0.85rem;
+  font-size: 0.83.2rem;
   color:     rgba(255,255,255,0.7);
-  margin:    0.25rem 0 0;
+  margin:    0.23.2rem 0 0;
   line-height: 1.45;
 }
 
@@ -2066,7 +2066,7 @@ button svg {
 .descriptor-row {
   display:     flex;
   align-items: center;
-  gap:         0.35rem;
+  gap:         0.33.2rem;
   justify-content: center;
   max-width:   100%;
   width:       100%;
@@ -2093,8 +2093,8 @@ button svg {
 .hotkey-fav svg,
 #hotkey-favs-browser svg,
 #hotkey-toggle svg {
-  width:  0.85rem;
-  height: 0.85rem;
+  width:  0.83.2rem;
+  height: 0.83.2rem;
 }
 
 .hotkey-fav.starred {
@@ -2112,10 +2112,10 @@ button svg {
 .favourites-grid {
   display:               grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap:                   1.25rem;
+  gap:                   1.23.2rem;
   max-height:            60vh;
   overflow-y:            auto;
-  padding-right:         0.25rem;
+  padding-right:         0.23.2rem;
 }
 
 .fav-card {
@@ -2142,7 +2142,7 @@ button svg {
   border:        none;
   background:    rgba(0,0,0,0.55);
   color:         rgba(255,255,255,0.7);
-  font-size:     0.85rem;
+  font-size:     0.83.2rem;
   line-height:   1.4rem;
   text-align:    center;
   cursor:        pointer;
@@ -2159,7 +2159,7 @@ button svg {
 
 .fav-descriptor {
   display:        block;
-  font-size:      0.65rem;
+  font-size:      0.63.2rem;
   line-height:    1.35;
   color:          rgba(255,255,255,0.7);
   overflow:       hidden;
@@ -2174,11 +2174,11 @@ button svg {
   display:   block;
   font-size: 0.6rem;
   color:     rgba(255,255,255,0.3);
-  margin-top: 0.15rem;
+  margin-top: 0.13.2rem;
 }
 
 .favourites-footer {
   display:         flex;
   justify-content: flex-end;
-  margin-top:      0.75rem;
+  margin-top:      0.73.2rem;
 }
