@@ -518,7 +518,49 @@
           <p class="descriptor" id="card-descriptor"></p>
         </div>
       </div>
+
+      <!-- ── Hotkey legend + AI fab (inside main so they stay with the content area) -->
+      <button id="btn-ai-generate" class="ai-fab" title="IdeateIQ™"><i data-lucide="sparkle"></i></button>
+      <div class="hotkey-legend" id="hotkey-legend">
+        <div class="hotkey-buttons">
+          <button class="hotkey-toggle hotkey-pro" id="hotkey-pro" title="Go Pro"><i data-lucide="sparkles"></i></button>
+          <button class="hotkey-toggle hotkey-fav" id="btn-favourite" title="Save to favourites"><i data-lucide="star"></i></button>
+          <button class="hotkey-toggle" id="hotkey-favs-browser" title="Favourites"><i data-lucide="bookmark"></i></button>
+          <button class="hotkey-toggle" id="hotkey-toggle" title="Keyboard shortcuts"><i data-lucide="keyboard"></i></button>
+        </div>
+        <div class="hotkey-panel" id="hotkey-panel">
+          <div class="hotkey-row"><kbd>Space</kbd><span>Shuffle</span></div>
+          <div class="hotkey-row"><kbd>X</kbd><span>Vary</span></div>
+          <div class="hotkey-row"><kbd>E</kbd><span>Export</span></div>
+          <div class="hotkey-row"><kbd>R</kbd><span>Render</span></div>
+          <div class="hotkey-row"><kbd>C</kbd><span>Copy link</span></div>
+          <div class="hotkey-row"><kbd>&#9003;</kbd><span>Reset all</span></div>
+          <div class="hotkey-row"><kbd>F</kbd><span>Flip card</span></div>
+          <div class="hotkey-row"><kbd>&larr; &rarr;</kbd><span>Seed &plusmn;1</span></div>
+          <div class="hotkey-row"><kbd>&uarr; &darr;</kbd><span>Seed &plusmn;10</span></div>
+          <div class="hotkey-row"><kbd>1 2 3</kbd><span>ID / Sq / Credit</span></div>
+          <div class="hotkey-row"><kbd>S</kbd><span>SVG mode</span></div>
+          <div class="hotkey-row"><kbd>V</kbd><span>Canvas mode</span></div>
+          <div class="hotkey-row"><kbd>D</kbd><span>Toggle theme</span></div>
+          <div class="hotkey-row"><kbd>I</kbd><span>Copy image</span></div>
+          <div class="hotkey-row"><kbd>J</kbd><span>Export JSON</span></div>
+          <div class="hotkey-row"><kbd>B</kbd><span>Favourites</span></div>
+        </div>
+      </div>
     </main>
+
+    <!-- ── IdeateIQ™ chat panel ──────────────────────────────────────────── -->
+    <div id="ai-panel" class="ai-panel">
+      <div class="ai-panel-header">
+        <span class="ai-title">IdeateIQ™ <span class="ai-badge">AI</span> <span class="ai-badge">NEURAL</span> <span class="ai-badge">GPT</span> <span class="ai-badge">LLM</span></span>
+        <button id="ai-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <div id="ai-chat" class="ai-chat"></div>
+      <div class="ai-input-row">
+        <input id="ai-input" type="text" placeholder="Describe your ideal badge…" />
+        <button id="ai-send" class="btn-primary ai-send-btn">Send</button>
+      </div>
+    </div>
 
     <!-- ── Favourites dialog ──────────────────────────────────────────────── -->
     <dialog id="favourites-dialog" class="app-dialog app-dialog--wide">
@@ -565,6 +607,7 @@
         </div>
       </div>
     </dialog>
+
 
     <!-- ── Pro upsell dialog ──────────────────────────────────────────────── -->
     <dialog id="pro-dialog" class="app-dialog pro-dialog">
@@ -661,38 +704,12 @@
       <p class="pro-fine-print">* Most Popular among the 0 people currently subscribed. By clicking any button you agree to our 847-page Terms of Service, waive your right to a refund, and acknowledge that features may be moved to a future Ultra tier at any time. Cancel anytime (by registered mail to our Zurich office, singed in triplicate &mdash; singed, not signed). Corporate pricing does not include the upcoming Convenience Fee ($4.99/mo), the Fee Fee ($1.99/mo), or the Fee For The Fee Fee ($0.99/mo). Umbral tier participants agree not to discuss the existence of the Umbral tier. Enterprise SLA is measured in vibes. We reserve the right to increase pricing whenever Mercury is in retrograde.</p>
     </dialog>
 
-    <!-- ── Hotkey legend ──────────────────────────────────────────────────── -->
-    <div class="hotkey-legend" id="hotkey-legend">
-      <div class="hotkey-buttons">
-        <button class="hotkey-toggle hotkey-pro" id="hotkey-pro" title="Go Pro"><i data-lucide="sparkles"></i></button>
-        <button class="hotkey-toggle hotkey-fav" id="btn-favourite" title="Save to favourites"><i data-lucide="star"></i></button>
-        <button class="hotkey-toggle" id="hotkey-favs-browser" title="Favourites"><i data-lucide="bookmark"></i></button>
-        <button class="hotkey-toggle" id="hotkey-toggle" title="Keyboard shortcuts"><i data-lucide="keyboard"></i></button>
-      </div>
-      <div class="hotkey-panel" id="hotkey-panel">
-        <div class="hotkey-row"><kbd>Space</kbd><span>Shuffle</span></div>
-        <div class="hotkey-row"><kbd>X</kbd><span>Vary</span></div>
-        <div class="hotkey-row"><kbd>E</kbd><span>Export</span></div>
-        <div class="hotkey-row"><kbd>R</kbd><span>Render</span></div>
-        <div class="hotkey-row"><kbd>C</kbd><span>Copy link</span></div>
-        <div class="hotkey-row"><kbd>&#9003;</kbd><span>Reset all</span></div>
-        <div class="hotkey-row"><kbd>F</kbd><span>Flip card</span></div>
-        <div class="hotkey-row"><kbd>&larr; &rarr;</kbd><span>Seed &plusmn;1</span></div>
-        <div class="hotkey-row"><kbd>&uarr; &darr;</kbd><span>Seed &plusmn;10</span></div>
-        <div class="hotkey-row"><kbd>1 2 3</kbd><span>ID / Sq / Credit</span></div>
-        <div class="hotkey-row"><kbd>S</kbd><span>SVG mode</span></div>
-        <div class="hotkey-row"><kbd>V</kbd><span>Canvas mode</span></div>
-        <div class="hotkey-row"><kbd>D</kbd><span>Toggle theme</span></div>
-        <div class="hotkey-row"><kbd>I</kbd><span>Copy image</span></div>
-        <div class="hotkey-row"><kbd>J</kbd><span>Export JSON</span></div>
-        <div class="hotkey-row"><kbd>B</kbd><span>Favourites</span></div>
-      </div>
-    </div>
 
     <script type="module">
       import { generateCard, deriveColorParams }  from "./modules/card.js";
       import { SvgContext }    from "./modules/svg-ctx.js";
-      import { artCountLabel, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, ARTIFACT_NAMES, THEME_PRESETS } from "./modules/constants.js";
+      import { artCountLabel, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, ARTIFACT_NAMES, THEME_PRESETS, hashString } from "./modules/constants.js";
+      import { AI_GREETINGS, AI_TRUISMS, AI_QUESTIONS, AI_THINKING, AI_FIRST_NAMES, AI_LAST_NAMES, AI_TITLE_PARTS, AI_FILLERS } from "./modules/ideate-iq.js";
       import { drawBackgroundTexture } from "./modules/bg-styles.js";
       import { drawArtifacts, getArtifactTypesForSeed } from "./modules/background.js";
       import { drawPatterns } from "./modules/patterns.js";
@@ -2139,6 +2156,207 @@
         favDialog.showModal();
       });
       document.getElementById("pro-close").addEventListener("click", () => proDialog.close());
+
+      // ── IdeateIQ™ chatbot ─────────────────────────────────────────────
+      const aiPanel = document.getElementById("ai-panel");
+      const aiChat  = document.getElementById("ai-chat");
+      const aiInput = document.getElementById("ai-input");
+      let aiMsgCount = 0;
+      let aiBusy = false;
+      let allKeywords = '';
+      let aiCloseTimer = null;
+
+      function aiScheduleClose() {
+        aiCancelClose();
+        aiCloseTimer = setTimeout(() => {
+          aiPanel.classList.remove('open');
+          document.getElementById("btn-ai-generate").classList.remove('ai-fab-hidden');
+          document.getElementById("hotkey-legend").classList.remove('ai-pushed');
+        }, 5000);
+      }
+      function aiCancelClose() {
+        if (aiCloseTimer) { clearTimeout(aiCloseTimer); aiCloseTimer = null; }
+      }
+
+      function aiFill(template, userInput) {
+        return template.replace(/\{(\w+)\}/g, (_, key) => {
+          if (key === 'input') return userInput;
+          const pool = AI_FILLERS[key];
+          return pool ? pool[Math.floor(Math.random() * pool.length)] : `{${key}}`;
+        });
+      }
+
+      function aiAddMsg(text, cls) {
+        const div = document.createElement('div');
+        div.className = `ai-msg ${cls}`;
+        div.textContent = text;
+        aiChat.appendChild(div);
+        aiChat.scrollTop = aiChat.scrollHeight;
+        return div;
+      }
+
+      function aiPickSeedWords(allKw) {
+        // Take 1-3 words from the user's input as the seed text
+        const words = allKw.trim().split(/\s+/).filter(w => w.length > 1);
+        if (words.length === 0) return 'liminal';
+        const shuffled = [...words].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, Math.min(3, shuffled.length)).join(' ');
+      }
+
+      function aiGenerate(allKw) {
+        const seedText = aiPickSeedWords(allKw);
+        const seed = hashString(seedText.toLowerCase());
+        const rng  = makePRNG(seed);
+        const first = AI_FIRST_NAMES[rng.int(0, AI_FIRST_NAMES.length - 1)];
+        const last  = AI_LAST_NAMES[rng.int(0, AI_LAST_NAMES.length - 1)];
+        const hasPrefix = rng.next() > 0.3;
+        const hasDomain = rng.next() > 0.4;
+        const prefix = hasPrefix ? AI_TITLE_PARTS.prefix[rng.int(0, AI_TITLE_PARTS.prefix.length - 1)] + ' ' : '';
+        const role   = AI_TITLE_PARTS.role[rng.int(0, AI_TITLE_PARTS.role.length - 1)];
+        const domain = hasDomain ? ' ' + AI_TITLE_PARTS.domain[rng.int(0, AI_TITLE_PARTS.domain.length - 1)] : '';
+        return { name: `${first} ${last}`, title: `${prefix}${role}${domain}`, seed: seedText };
+      }
+
+      function aiRespond(userText) {
+        if (aiBusy) return;
+        aiBusy = true;
+        aiMsgCount++;
+        allKeywords += ' ' + userText;
+
+        aiAddMsg(userText, 'ai-msg-user');
+        const typingEl = aiAddMsg(AI_THINKING[Math.floor(Math.random() * AI_THINKING.length)], 'ai-msg-typing');
+
+        // ~35% question (no reseed), ~65% statement (reseeds)
+        const isQuestion = Math.random() < 0.35;
+        const shouldGenerate =  /\b(generate|make|go|create|do it|yes|badge|card)\b/i.test(userText) || (!isQuestion && aiMsgCount >= 3) ;
+        const delay = 800 + Math.random() * 1200;
+
+        setTimeout(() => {
+          typingEl.remove();
+          if (shouldGenerate) {
+            const result = aiGenerate(allKeywords);
+            const truism = aiFill(AI_TRUISMS[Math.floor(Math.random() * AI_TRUISMS.length)], userText);
+            aiAddMsg(`${truism} Meet ${result.name}, ${result.title}.`, 'ai-msg-bot');
+
+            // Apply to card — seed text goes into the seed input (hashString converts it)
+            dom.personNameInput.value = result.name;
+            dom.jobTitleInput.value   = result.title;
+            dom.seedInput.value       = result.seed;
+            clearAllOverrides();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+
+            aiBusy = false;
+            if (window.innerWidth <= 768) {
+              const viewBtn = document.createElement('button');
+              viewBtn.className = 'ai-view-btn';
+              viewBtn.textContent = 'View Badge →';
+              viewBtn.addEventListener('click', () => {
+                aiCancelClose();
+                aiPanel.classList.remove('open');
+                aiFab.classList.remove('ai-fab-hidden');
+                hotkeyLegend.classList.remove('ai-pushed');
+              });
+              aiChat.appendChild(viewBtn);
+              aiChat.scrollTop = aiChat.scrollHeight;
+            }
+          } else {
+      
+            if (isQuestion) {
+              const q = aiFill(AI_QUESTIONS[Math.floor(Math.random() * AI_QUESTIONS.length)], userText);
+              aiAddMsg(q, 'ai-msg-bot');
+            } else {
+              const statement = aiFill(AI_TRUISMS[Math.floor(Math.random() * AI_TRUISMS.length)], userText);
+              aiAddMsg(statement, 'ai-msg-bot');
+
+              const result = aiGenerate(allKeywords);
+              dom.personNameInput.value = result.name;
+              dom.jobTitleInput.value   = result.title;
+              dom.seedInput.value       = result.seed;
+              clearAllOverrides();
+              updateColorSliders(dom);
+              updateSeedInputs(dom);
+              updateResetButtons(dom);
+              render(true);
+              if (window.innerWidth <= 768) {
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'ai-view-btn';
+                viewBtn.textContent = 'View Badge →';
+                viewBtn.addEventListener('click', () => {
+                  aiCancelClose();
+                  aiPanel.classList.remove('open');
+                  aiFab.classList.remove('ai-fab-hidden');
+                  hotkeyLegend.classList.remove('ai-pushed');
+                });
+                aiChat.appendChild(viewBtn);
+                aiChat.scrollTop = aiChat.scrollHeight;
+              }
+            }
+            aiBusy = false;
+          }
+        }, delay);
+      }
+
+      function aiSend() {
+        const text = aiInput.value.trim();
+        if (!text || aiBusy) return;
+        aiInput.value = '';
+        aiRespond(text);
+      }
+
+      const aiFab = document.getElementById("btn-ai-generate");
+      const hotkeyLegend = document.getElementById("hotkey-legend");
+
+      // Random freakouts — every 8-25s, chance of a meltdown or glitch
+      function scheduleFreakout() {
+        const delay = 8000 + Math.random() * 17000;
+        setTimeout(() => {
+          if (!aiFab.classList.contains('ai-fab-hidden')) {
+            const roll = Math.random();
+            const mode = roll < 0.12 ? 'glitching' : roll < 0.30 ? 'freaking-out' : null;
+            if (mode) {
+              aiFab.classList.add(mode);
+              aiFab.addEventListener('animationend', () => {
+                aiFab.classList.remove(mode);
+              }, { once: true });
+            }
+          }
+          scheduleFreakout();
+        }, delay);
+      }
+      scheduleFreakout();
+
+      // Console helpers: aiFreakout() / aiGlitch()
+      window.aiFreakout = () => { aiFab.classList.remove('freaking-out','glitching'); void aiFab.offsetWidth; aiFab.classList.add('freaking-out'); };
+      window.aiGlitch   = () => { aiFab.classList.remove('freaking-out','glitching'); void aiFab.offsetWidth; aiFab.classList.add('glitching'); };
+
+      document.getElementById("btn-ai-generate").addEventListener("click", () => {
+        const isOpen = aiPanel.classList.toggle('open');
+        aiFab.classList.toggle('ai-fab-hidden', isOpen);
+        hotkeyLegend.classList.toggle('ai-pushed', isOpen);
+        if (isOpen) {
+          // Only greet on first open; keep chat history on reopen
+          if (aiChat.children.length === 0) {
+            setTimeout(() => {
+              aiAddMsg(AI_GREETINGS[Math.floor(Math.random() * AI_GREETINGS.length)], 'ai-msg-bot');
+            }, 500);
+          }
+          aiInput.focus();
+        }
+      });
+      document.getElementById("ai-close").addEventListener("click", () => {
+        aiCancelClose();
+        aiPanel.classList.remove('open');
+        aiFab.classList.remove('ai-fab-hidden');
+        hotkeyLegend.classList.remove('ai-pushed');
+      });
+      document.getElementById("ai-send").addEventListener("click", aiSend);
+      aiInput.addEventListener("keydown", (e) => {
+        if (e.key === 'Enter') aiSend();
+      });
+      aiInput.addEventListener("input", aiCancelClose);
 
       function tierButtonCycle(btn, messages) {
         let i = 0;
