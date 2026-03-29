@@ -1268,7 +1268,33 @@ button svg {
   border-color: rgba(80,200,255,0.65);
   color: #a5e4ff;
 }
-.ai-fab svg { width: 1.3rem; height: 1.3rem; }
+.ai-fab svg.ai-eyes { width: 1.8rem; height: 0.9rem; overflow: visible; }
+.ai-fab .ai-pupil {
+  animation: ai-shifty-eyes 4s ease-in-out infinite;
+}
+.ai-fab .ai-pupil-r {
+  animation-delay: -0.15s; /* slight offset so eyes don't track in perfect unison */
+}
+@keyframes ai-shifty-eyes {
+  0%   { transform: translate(0, 0); }
+  8%   { transform: translate(3px, -1px); }     /* glance upper-right */
+  14%  { transform: translate(3px, -1px); }     /* hold */
+  18%  { transform: translate(0, 0); }          /* back to center */
+  25%  { transform: translate(-3px, 0.5px); }   /* glance left */
+  32%  { transform: translate(-3px, 0.5px); }   /* hold */
+  36%  { transform: translate(0, 0); }          /* center */
+  44%  { transform: translate(0, 0); }          /* pause — looking straight */
+  50%  { transform: translate(2px, 2px); }      /* glance down-right */
+  54%  { transform: translate(2px, 2px); }      /* hold */
+  58%  { transform: translate(0, 0); }          /* center */
+  66%  { transform: translate(-2px, -1.5px); }  /* glance upper-left */
+  72%  { transform: translate(-2px, -1.5px); }  /* hold */
+  76%  { transform: translate(0, 0); }          /* center */
+  82%  { transform: translate(3.5px, 0); }      /* hard right */
+  86%  { transform: translate(3.5px, 0); }      /* hold */
+  91%  { transform: translate(0, 0); }          /* snap back */
+  100% { transform: translate(0, 0); }          /* rest at center */
+}
 
 /* Resting state: gentle nudge */
 @keyframes ai-tantrum {
@@ -1366,6 +1392,25 @@ button svg {
 }
 
 /* Disappear when panel is open — shrink + spin out */
+/* Grow-snap mode — slowly inflates to 50vmin then snaps back */
+@keyframes ai-grow-snap {
+  0%    { width: 3.2rem;  height: 3.2rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
+  5%    { width: 3.6rem;  height: 3.6rem;  font-size: 1.1rem; border-radius: 50%; box-shadow: 0 4px 20px rgba(80,200,255,0.18); filter: none; }
+  15%   { width: 5rem;    height: 5rem;    font-size: 1.4rem; border-radius: 50%; box-shadow: 0 6px 28px rgba(80,200,255,0.22); filter: none; }
+  30%   { width: 9rem;    height: 9rem;    font-size: 2rem;   border-radius: 50%; box-shadow: 0 8px 40px rgba(80,200,255,0.30); filter: none; }
+  50%   { width: 18rem;   height: 18rem;   font-size: 3.5rem; border-radius: 50%; box-shadow: 0 12px 60px rgba(80,200,255,0.40); filter: none; }
+  70%   { width: 32rem;   height: 32rem;   font-size: 6rem;   border-radius: 50%; box-shadow: 0 16px 80px rgba(80,200,255,0.50), 0 0 60px rgba(140,100,255,0.25); filter: brightness(1.1); }
+  85%   { width: 50vmin;  height: 50vmin;  font-size: 8rem;   border-radius: 50%; box-shadow: 0 20px 120px rgba(80,200,255,0.65), 0 0 100px rgba(140,100,255,0.35); filter: brightness(1.2) saturate(1.3); }
+  90%   { width: 50vmin;  height: 50vmin;  font-size: 8rem;   border-radius: 50%; box-shadow: 0 20px 120px rgba(80,200,255,0.65), 0 0 100px rgba(140,100,255,0.35); filter: brightness(1.4) saturate(1.5); }
+  /* SNAP — instant return */
+  91%   { width: 4rem;    height: 4rem;    font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 40px rgba(255,200,80,0.5); filter: brightness(2); }
+  94%   { width: 3.6rem;  height: 3.6rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 24px rgba(80,200,255,0.3); filter: brightness(1.2); }
+  100%  { width: 3.2rem;  height: 3.2rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
+}
+.ai-fab.grow-snap {
+  animation: ai-grow-snap 6s cubic-bezier(0.22, 0.61, 0.36, 1) 1;
+}
+
 .ai-fab-hidden {
   transform: scale(0) rotate(180deg) !important;
   opacity: 0;
