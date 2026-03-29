@@ -520,7 +520,16 @@
       </div>
 
       <!-- ── Hotkey legend + AI fab (inside main so they stay with the content area) -->
-      <button id="btn-ai-generate" class="ai-fab" title="IdeateIQ™"><i data-lucide="sparkle"></i></button>
+      <button id="btn-ai-generate" class="ai-fab" title="IdeateIQ™">
+        <svg class="ai-eyes" viewBox="0 0 40 20" width="28" height="14">
+          <!-- left eye -->
+          <ellipse cx="11" cy="10" rx="8" ry="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <circle class="ai-pupil ai-pupil-l" cx="11" cy="10" r="3" fill="currentColor"/>
+          <!-- right eye -->
+          <ellipse cx="29" cy="10" rx="8" ry="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <circle class="ai-pupil ai-pupil-r" cx="29" cy="10" r="3" fill="currentColor"/>
+        </svg>
+      </button>
       <div class="hotkey-legend" id="hotkey-legend">
         <div class="hotkey-buttons">
           <button class="hotkey-toggle hotkey-pro" id="hotkey-pro" title="Go Pro"><i data-lucide="sparkles"></i></button>
@@ -2315,7 +2324,7 @@
         setTimeout(() => {
           if (!aiFab.classList.contains('ai-fab-hidden')) {
             const roll = Math.random();
-            const mode = roll < 0.25 ? 'glitching' : roll < 0.45 ? 'freaking-out' : null;
+            const mode = roll < 0.20 ? 'glitching' : roll < 0.35 ? 'freaking-out' : roll < 0.50 ? 'grow-snap' : null;
             if (mode) {
               aiFab.classList.add(mode);
               aiFab.addEventListener('animationend', () => {
@@ -2328,9 +2337,12 @@
       }
       scheduleFreakout();
 
-      // Console helpers: aiFreakout() / aiGlitch()
-      window.aiFreakout = () => { aiFab.classList.remove('freaking-out','glitching'); void aiFab.offsetWidth; aiFab.classList.add('freaking-out'); };
-      window.aiGlitch   = () => { aiFab.classList.remove('freaking-out','glitching'); void aiFab.offsetWidth; aiFab.classList.add('glitching'); };
+      // Console helpers: aiFreakout() / aiGlitch() / aiGrowSnap()
+      const aiModes = ['freaking-out','glitching','grow-snap'];
+      const aiClearModes = () => { aiModes.forEach(m => aiFab.classList.remove(m)); void aiFab.offsetWidth; };
+      window.aiFreakout = () => { aiClearModes(); aiFab.classList.add('freaking-out'); };
+      window.aiGlitch   = () => { aiClearModes(); aiFab.classList.add('glitching'); };
+      window.aiGrowSnap = () => { aiClearModes(); aiFab.classList.add('grow-snap'); };
 
       document.getElementById("btn-ai-generate").addEventListener("click", () => {
         const isOpen = aiPanel.classList.toggle('open');
