@@ -1574,7 +1574,7 @@ button svg {
     border-left: none;
     border-radius: 0;
   }
-  .ai-input-row input {
+  .ai-input-row input[type="text"] {
     font-size: 16px;            /* prevent iOS auto-zoom on focus */
   }
   .hotkey-legend.ai-pushed {
