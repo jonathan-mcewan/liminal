@@ -29,6 +29,7 @@ export const LOGO_NAMES = [
   'Variable Dot Mask', 'Inlaid Rings',
   'Fractal Tree', 'Voronoi Cells', 'Truchet Tiles', 'Celtic Knot',
   'Cross Hatch', 'Icons', 'ASCII Art', 'Organic Tree',
+  'Diagonal Stripes', 'Gear', 'Penrose',
 ];
 
 export const ARTIFACT_NAMES = [

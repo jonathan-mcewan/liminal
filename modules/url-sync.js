@@ -13,6 +13,10 @@ export function applyQueryString(dom) {
   if (q.has("lstyle"))    dom.logoStyleSelect.value        = q.get("lstyle");
   if (q.has("lscale"))  { dom.logoScaleSlider.value        = q.get("lscale");
                            dom.logoScaleDisplay.textContent = dom.logoScaleSlider.value + '%'; }
+  if (q.has("lopacity")){ dom.logoOpacitySlider.value      = q.get("lopacity");
+                           dom.logoOpacityDisplay.textContent = dom.logoOpacitySlider.value + '%'; }
+  if (q.has("lstroke")) { dom.logoStrokeSlider.value       = q.get("lstroke");
+                           dom.logoStrokeDisplay.textContent = dom.logoStrokeSlider.value + '%'; }
   if (q.has("bgstyle")) { dom.bgStyleSelect.value           = q.get("bgstyle"); }
   if (q.has("zoom"))    { dom.noiseZoomSlider.value        = q.get("zoom");
                            dom.noiseZoomDisplay.textContent = dom.noiseZoomSlider.value; }
@@ -86,6 +90,8 @@ export function syncURL(dom, push = false) {
   set("bgstyle",     dom.bgStyleSelect.value,                             "-1");
   set("lstyle",      dom.logoStyleSelect.value,                           "-1");
   set("lscale",      dom.logoScaleSlider.value,                           "100");
+  set("lopacity",    dom.logoOpacitySlider.value,                         "100");
+  set("lstroke",     dom.logoStrokeSlider.value,                          "100");
   set("zoom",        dom.noiseZoomSlider.value,                           "4");
   set("art_show",    dom.showArtifactsToggle.checked ? "1" : "0",         "0");
   set("art_count",   dom.artCountSlider.value,                            "0");

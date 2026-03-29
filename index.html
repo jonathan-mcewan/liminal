@@ -4,10 +4,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>LIMINAL — Procedural Card Generator</title>
+    <title>LIMINAL — Zero-Trust Badge-Native Infrastructure</title>
 
     <!-- SEO -->
-    <meta name="description" content="A procedural identity card generator. One seed, one unique card. Colour, pattern, logo, texture — every parameter lives in the space between randomness and intention." />
+    <meta name="description" content="Zero-trust badge-native infrastructure. Colour, pattern, logo, texture — every parameter lives in the space between randomness and intention." />
     <meta name="author" content="LIMINAL Team" />
     <meta name="application-name" content="LIMINAL" />
     <meta name="theme-color" content="#0d0d14" />
@@ -15,20 +15,20 @@
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="LIMINAL — Procedural Card Generator" />
-    <meta property="og:description" content="One seed, one unique card. A procedural identity card generator where colour, pattern, logo, and texture all derive from a single number." />
+    <meta property="og:title" content="LIMINAL — Zero-Trust Badge-Native Infrastructure" />
+    <meta property="og:description" content="Zero-trust badge-native infrastructure. Colour, pattern, logo, and texture all derive from a single number." />
     <meta property="og:site_name" content="LIMINAL" />
     <meta property="og:url" content="https://jonathan-mcewan.github.io/liminal/" />
     <meta property="og:image" content="https://jonathan-mcewan.github.io/liminal/og-image.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="LIMINAL — diagonal stripes through a dark field, one seed one unique card" />
+    <meta property="og:image:alt" content="LIMINAL — diagonal stripes through a dark field, zero-trust badge-native infrastructure" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="LIMINAL — Procedural Card Generator" />
-    <meta name="twitter:description" content="One seed, one unique card. A procedural identity card generator where colour, pattern, logo, and texture all derive from a single number." />
+    <meta name="twitter:title" content="LIMINAL — Zero-Trust Badge-Native Infrastructure" />
+    <meta name="twitter:description" content="Zero-trust badge-native infrastructure. Colour, pattern, logo, and texture all derive from a single number." />
     <meta name="twitter:image" content="https://jonathan-mcewan.github.io/liminal/og-image.png" />
 
     <!-- Favicon & touch icons -->
@@ -46,7 +46,7 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "LIMINAL",
-      "description": "A procedural identity card generator. One seed, one unique card.",
+      "description": "Zero-trust badge-native infrastructure.",
       "applicationCategory": "DesignApplication",
       "operatingSystem": "Any",
       "browserRequirements": "Requires a modern browser with ES module and Canvas 2D support",
@@ -349,6 +349,20 @@
             <button class="btn-reset" id="logo-scale-reset" title="Reset to default">↺</button>
           </div>
           <input id="logo-scale" type="range" min="25" max="200" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Opacity <span id="logo-opacity-display">100%</span></span>
+            <button class="btn-reset" id="logo-opacity-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="logo-opacity" type="range" min="0" max="100" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Stroke <span id="logo-stroke-display">100%</span></span>
+            <button class="btn-reset" id="logo-stroke-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="logo-stroke" type="range" min="25" max="300" step="5" value="100" />
         </div>
         <div class="field">
           <div class="field-hdr">
@@ -728,6 +742,12 @@
         logoScaleSlider:        document.getElementById("logo-scale"),
         logoScaleDisplay:       document.getElementById("logo-scale-display"),
         logoScaleReset:         document.getElementById("logo-scale-reset"),
+        logoOpacitySlider:      document.getElementById("logo-opacity"),
+        logoOpacityDisplay:     document.getElementById("logo-opacity-display"),
+        logoOpacityReset:       document.getElementById("logo-opacity-reset"),
+        logoStrokeSlider:       document.getElementById("logo-stroke"),
+        logoStrokeDisplay:      document.getElementById("logo-stroke-display"),
+        logoStrokeReset:        document.getElementById("logo-stroke-reset"),
         logoNonceInput:         document.getElementById("logo-nonce"),
         logoNonceReset:         document.getElementById("logo-nonce-reset"),
         embossMode:             'none',  // 'none' | 'emboss' | 'deboss'
@@ -884,7 +904,7 @@
 
       // ── Logo style grid ─────────────────────────────────────────────────
       const THUMB_SIZE = 48;
-      const LOGO_COUNT = LOGO_NAMES.length;  // 25 (0-24)
+      const LOGO_COUNT = LOGO_NAMES.length;  // 28 (0-27)
       let _lastGridKey = null;
 
       function buildLogoGrid(force = false) {
@@ -941,7 +961,7 @@
 
           // Match the card's logoPRNG state: same seed, consume autoStyle + symbolRadiusFactor
           const rng = makePRNG(nonce);
-          rng.int(0, 24);           // skip autoStyle (consumed in card.js before symbolRadiusFactor)
+          rng.int(0, 27);           // skip autoStyle (consumed in card.js before symbolRadiusFactor)
           rng.float(0.169, 0.286);  // skip symbolRadiusFactor (consumed in card.js before drawSymbol)
           drawSymbol(tctx, cx, cy, r * 0.85, i, thumbColor, rng);
 
@@ -1510,6 +1530,32 @@
         render(true);
       });
 
+      // Logo opacity
+      dom.logoOpacitySlider.addEventListener("input", () => {
+        dom.logoOpacityDisplay.textContent = dom.logoOpacitySlider.value + '%';
+        dom.logoOpacityReset.classList.toggle('visible', parseInt(dom.logoOpacitySlider.value, 10) !== 100);
+        render();
+      });
+      dom.logoOpacityReset.addEventListener("click", () => {
+        dom.logoOpacitySlider.value        = 100;
+        dom.logoOpacityDisplay.textContent = '100%';
+        dom.logoOpacityReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Logo stroke width
+      dom.logoStrokeSlider.addEventListener("input", () => {
+        dom.logoStrokeDisplay.textContent = dom.logoStrokeSlider.value + '%';
+        dom.logoStrokeReset.classList.toggle('visible', parseInt(dom.logoStrokeSlider.value, 10) !== 100);
+        render();
+      });
+      dom.logoStrokeReset.addEventListener("click", () => {
+        dom.logoStrokeSlider.value        = 100;
+        dom.logoStrokeDisplay.textContent = '100%';
+        dom.logoStrokeReset.classList.remove('visible');
+        render(true);
+      });
+
       // Logo seed
       document.getElementById("btn-next-logo").addEventListener("click", () => {
         seedOverrides.logoNonce  = (parseInt(dom.logoNonceInput.value, 10) | 0) + 1;
@@ -1619,6 +1665,10 @@
         selectLogoStyle('-1', false);
         dom.logoScaleSlider.value         = 100;
         dom.logoScaleDisplay.textContent  = '100%';
+        dom.logoOpacitySlider.value       = 100;
+        dom.logoOpacityDisplay.textContent = '100%';
+        dom.logoStrokeSlider.value        = 100;
+        dom.logoStrokeDisplay.textContent = '100%';
         selectBgStyle('-1', false);
         dom.noiseZoomSlider.value         = 4;
         dom.noiseZoomDisplay.textContent  = '4';

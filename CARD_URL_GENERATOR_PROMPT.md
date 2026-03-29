@@ -93,7 +93,7 @@ Keep the total number of URLs manageable — 3–5 seed variants is the sweet sp
 ### Logo
 | Param | Description | Values | Default |
 |-------|-------------|--------|---------|
-| `lstyle` | Logo style | `-2` None, `-1` Auto, `0–24` specific | `-1` |
+| `lstyle` | Logo style | `-2` None, `-1` Auto, `0–27` specific | `-1` |
 | `lscale` | Logo scale % | 25–200 | 100 |
 | `nonce` | Logo variation seed | 0–999999 | 0 |
 | `emboss` | Logo effect | `none`, `emboss`, `deboss` | `none` |

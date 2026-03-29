@@ -10,7 +10,7 @@ Vanilla ES modules, Canvas 2D + SVG, no build step. Served via local HTTP (ES mo
 - `modules/background.js`  — noise blobs, artifacts, gloss, edge
 - `modules/bg-styles.js`   — 16 background texture renderers (noise, marble, caustics, etc.)
 - `modules/patterns.js`    — 19 pattern overlay renderers (halftone, guilloche, moiré, etc.)
-- `modules/symbols.js`     — 25 logo variants (0–24)
+- `modules/symbols.js`     — 28 logo variants (0–27)
 - `modules/text.js`        — name + job title layout
 - `modules/utils.js`       — `hsla()`, `roundedRectPath()`
 - `modules/svg-ctx.js`     — `SvgContext` — Canvas 2D API shim that emits SVG markup (supports `mix-blend-mode`)
@@ -95,7 +95,7 @@ function getEffectiveColor() {
 - URL only includes overridden colour params (not seed-derived defaults)
 
 **URL param strategy:**
-- Standard params always in URL: `seed`, `lstyle`, `lscale`, `zoom`, `name`, `title`, `art_show`, `art_count`, `art_opacity`, `art_scale`, `art_type`, `pat_type`, `pat_opacity`, `pat_scale`, `lanyard`, `bradius`, `bblend`, `pat_rot`, `emboss`
+- Standard params always in URL: `seed`, `lstyle`, `lscale`, `lopacity`, `lstroke`, `zoom`, `name`, `title`, `art_show`, `art_count`, `art_opacity`, `art_scale`, `art_type`, `pat_type`, `pat_opacity`, `pat_scale`, `lanyard`, `bradius`, `bblend`, `pat_rot`, `emboss`
 - Colour overrides only if set: `dark`, `litness`, `hue`, `sat`, `nbright`, `ncontrast`, `pat_2t`, `bblur`
 - Seed overrides only if set: `nonce`, `art_seed`, `pat_seed`
 
@@ -215,13 +215,20 @@ Global opacity multiplier: `const opacity = 0.2`.
 | 22 | Icons |
 | 23 | ASCII Art |
 | 24 | Organic Tree |
+| 25 | Diagonal Stripes |
+| 26 | Gear |
+| 27 | Penrose |
 
-Style is selected by `stylePRNG.int(0, 24)` in auto mode, or forced via `logoStyle` param (0–24).
-Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 24)` — must match `stylePRNG` seed exactly.
+Style is selected by `stylePRNG.int(0, 27)` in auto mode, or forced via `logoStyle` param (0–27).
+Logo name display in the UI uses `makePRNG(seed ^ 0x9E3779B9).int(0, 27)` — must match `stylePRNG` seed exactly.
 
 **Dot Mask vs Variable Dot Mask:** Dot Mask (9) uses a single dot size across the grid. Variable Dot Mask (15) seed-derives 2–7 discrete size steps lerped between a min and max radius; each dot randomly picks a step, producing varied dot sizes within the same harmonic blob boundary.
 
 **`logoScale` override slot:** Controls the scale multiplier for the symbol radius. Default is 1 (100%). Not seed-derived — purely a UI control. URL param: `lscale`. The reset-all button resets it to 100%.
+
+**`logoOpacity` control:** Controls the opacity multiplier for the entire logo (all elements). Default is 1 (100%). Not seed-derived — purely a UI control. URL param: `lopacity`. Wraps `symbolColor` to multiply all alpha values by the opacity factor.
+
+**`logoStrokeWidth` control:** Controls the stroke weight multiplier for the logo. Default is 1 (100%). Not seed-derived — purely a UI control. URL param: `lstroke`. Passed through to `drawSymbol()` as `strokeScale`, which multiplies the base `radius * 0.040` stroke weight.
 
 **`borderRadius` control:** Controls the corner rounding of the card. 0 = sharp, 100 = pill shape (`shortSide / 2`). Default is 100% (which equals the original `cardWidth * 0.1` default). Not seed-derived — purely a UI control. URL param: `bradius`. Affects card clip path, card edge, and card back.
 
@@ -344,7 +351,7 @@ Controls per panel, in DOM order. When adding new controls, maintain this order.
 
 **Background:** Style (grid: None/Auto/0–15) · Zoom (slider, default 4) · Brightness (slider) · Contrast (slider) · Blur (slider) · Blend Mode (select, default Normal)
 
-**Logo:** Style (grid: None/Auto/0–24) · Seed (number + Next) · Scale (slider, default 100%) · Effect (None/Emboss/Deboss seg)
+**Logo:** Style (grid: None/Auto/0–27) · Seed (number + Next) · Scale (slider, default 100%) · Opacity (slider, default 100%) · Stroke (slider, default 100%) · Effect (None/Emboss/Deboss seg)
 
 **Patterns:** Type (grid: None/Auto/0–18) · Seed (number + Next) · Scale (slider, default 100%) · Rotation (slider, default 0°) · Opacity (slider, default 15) · Tone (Single/Two-Tone seg)
 

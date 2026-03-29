@@ -14,6 +14,8 @@ export function gatherSettings(dom) {
   obj.bgstyle     = dom.bgStyleSelect.value;
   obj.lstyle      = dom.logoStyleSelect.value;
   obj.lscale      = dom.logoScaleSlider.value;
+  obj.lopacity    = dom.logoOpacitySlider.value;
+  obj.lstroke     = dom.logoStrokeSlider.value;
   obj.zoom        = dom.noiseZoomSlider.value;
   obj.name        = dom.personNameInput.value.trim();
   obj.title       = dom.jobTitleInput.value.trim();
@@ -71,6 +73,10 @@ export function applySettings(json, dom) {
   if (has("lstyle"))    dom.logoStyleSelect.value        = get("lstyle");
   if (has("lscale"))  { dom.logoScaleSlider.value        = get("lscale");
                          dom.logoScaleDisplay.textContent = dom.logoScaleSlider.value + '%'; }
+  if (has("lopacity")){ dom.logoOpacitySlider.value      = get("lopacity");
+                         dom.logoOpacityDisplay.textContent = dom.logoOpacitySlider.value + '%'; }
+  if (has("lstroke")) { dom.logoStrokeSlider.value       = get("lstroke");
+                         dom.logoStrokeDisplay.textContent = dom.logoStrokeSlider.value + '%'; }
   if (has("bgstyle"))   dom.bgStyleSelect.value          = get("bgstyle");
   if (has("zoom"))    { dom.noiseZoomSlider.value        = get("zoom");
                          dom.noiseZoomDisplay.textContent = dom.noiseZoomSlider.value; }

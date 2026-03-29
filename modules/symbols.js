@@ -16,10 +16,10 @@ import { replayPath } from './svg-path.js';
  * @param {function} symbolColor  - (lightnessAdjust, alpha) => CSS colour string
  * @param {object}   rng          - logo PRNG { next, int, float }
  */
-export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng) {
+export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng, strokeScale = 1) {
   // One stroke weight drives primary strokes across all styles.
   // Secondary/decorative strokes are expressed as fractions of this.
-  const strokeWeight = radius * 0.040;
+  const strokeWeight = radius * 0.040 * strokeScale;
 
   const variants = [
     drawVenn,
@@ -47,6 +47,9 @@ export function drawSymbol(ctx, x, y, radius, style, symbolColor, rng) {
     drawIcons,
     drawAsciiArt,
     drawOrganicTree,
+    drawDiagonalStripes,
+    drawGear,
+    drawPenrose,
   ];
 
   (variants[style] ?? variants[0])(ctx, x, y, radius, strokeWeight, symbolColor, rng);
@@ -1488,5 +1491,280 @@ function drawAsciiArt(ctx, cx, cy, radius, sw, symbolColor, rng) {
   ctx.lineWidth   = sw * 0.4;
   ctx.strokeStyle = symbolColor(0, 0.20);
   ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.stroke();
+}
+
+// ── Style 25: Diagonal Stripes ──────────────────────────────────────────────
+// A field of evenly-spaced parallel lines at a seed-derived angle, clipped by
+// the bounding circle. Lines are positioned in world space (fixed spacing along
+// one axis) rather than derived from the circle geometry, so the circle acts
+// purely as a window — matching the LIMINAL OG-image motif.
+function drawDiagonalStripes(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const PI  = Math.PI;
+
+  const angle      = rng.float(PI * 0.15, PI * 0.45);  // bias toward diagonal
+  const lineCount  = rng.int(7, 18);
+  const baseAlpha  = rng.float(0.45, 0.80);
+  const alphaFade  = rng.float(0.0, 0.25);              // per-line fade amount
+  const thickVar   = rng.float(0.6, 1.4);
+  const hasDoubles = rng.next() > 0.65;
+  // consume to keep PRNG parity with original
+  rng.next(); rng.next();
+
+  // Lines share the same top-y and bottom-y (flat horizontal planes),
+  // spaced evenly along x. The angle controls horizontal drift between
+  // top and bottom — like the OG image where all lines run from y1 to y2
+  // with only x shifting per line.
+  const height  = radius * 1.3;                          // vertical span of lines
+  const yTop    = cy - height * 0.5;
+  const yBot    = cy + height * 0.5;
+  const xDrift  = Math.tan(angle) * height;              // how far x shifts top→bottom
+  const span    = radius * 2.2;
+  const spacing = span / lineCount;
+  const xStart  = cx - span * 0.5 - xDrift * 0.5;       // centre the drift around cx
+
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.clip();
+  ctx.lineCap = 'butt';
+
+  for (let i = 0; i < lineCount; i++) {
+    const x = xStart + spacing * (i + 0.5);
+
+    const alpha = baseAlpha - alphaFade * (i / lineCount);
+
+    ctx.lineWidth   = sw * thickVar;
+    ctx.strokeStyle = symbolColor(0, alpha);
+    ctx.beginPath();
+    ctx.moveTo(x,          yTop);
+    ctx.lineTo(x + xDrift, yBot);
+    ctx.stroke();
+
+    if (hasDoubles) {
+      const pairOff = spacing * 0.18;
+      ctx.lineWidth   = sw * thickVar * 0.4;
+      ctx.strokeStyle = symbolColor(0, alpha * 0.5);
+      ctx.beginPath();
+      ctx.moveTo(x + pairOff,          yTop);
+      ctx.lineTo(x + pairOff + xDrift, yBot);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+
+  // Outer ring
+  ctx.lineWidth   = sw * 0.6;
+  ctx.strokeStyle = symbolColor(0, 0.30);
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TAU); ctx.stroke();
+}
+
+// ── Style 26: Gear ──────────────────────────────────────────────────────────
+// Cog/gear shape with seed-varied tooth count, inner hub, and spokes.
+function drawGear(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+
+  const teeth      = rng.int(8, 20);
+  const toothDepth = rng.float(0.12, 0.22);
+  const hubRatio   = rng.float(0.22, 0.40);
+  const spokeCount = rng.int(0, 6);
+  const rotation   = rng.float(0, TAU);
+  const bevelAlpha = rng.float(0.06, 0.15);
+  const innerRings = rng.int(0, 2);
+  const toothFlat  = rng.float(0.3, 0.6);    // flat top fraction of tooth arc
+
+  const outerR = radius * 0.92;
+  const innerR = outerR * (1 - toothDepth);
+  const hubR   = outerR * hubRatio;
+
+  // Draw gear outline
+  ctx.save();
+  ctx.lineWidth   = sw;
+  ctx.strokeStyle = symbolColor(0, 0.80);
+  ctx.fillStyle   = symbolColor(0, bevelAlpha);
+
+  const toothAngle = TAU / teeth;
+  const flatHalf   = toothAngle * toothFlat * 0.5;
+  const gapHalf    = toothAngle * (1 - toothFlat) * 0.5;
+
+  ctx.beginPath();
+  for (let i = 0; i < teeth; i++) {
+    const base = rotation + i * toothAngle;
+
+    // Outer tooth edge
+    const a1 = base - flatHalf;
+    const a2 = base + flatHalf;
+    // Inner valley
+    const a3 = base + flatHalf;
+    const a4 = base + toothAngle - gapHalf;
+
+    if (i === 0) {
+      ctx.moveTo(cx + Math.cos(a1) * outerR, cy + Math.sin(a1) * outerR);
+    }
+    ctx.arc(cx, cy, outerR, a1, a2);
+    ctx.lineTo(cx + Math.cos(a3) * innerR, cy + Math.sin(a3) * innerR);
+    ctx.arc(cx, cy, innerR, a3, a4);
+    ctx.lineTo(cx + Math.cos(a4) * outerR, cy + Math.sin(a4) * outerR);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Hub hole
+  ctx.beginPath(); ctx.arc(cx, cy, hubR, 0, TAU);
+  ctx.fillStyle   = symbolColor(0, bevelAlpha * 0.8);
+  ctx.fill();
+  ctx.strokeStyle = symbolColor(0, 0.60);
+  ctx.lineWidth   = sw * 0.7;
+  ctx.stroke();
+
+  // Spokes
+  if (spokeCount > 0) {
+    ctx.lineWidth   = sw * 0.8;
+    ctx.strokeStyle = symbolColor(0, 0.50);
+    const spokeAngleStep = TAU / spokeCount;
+    for (let i = 0; i < spokeCount; i++) {
+      const a = rotation + i * spokeAngleStep + spokeAngleStep * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * hubR * 1.1, cy + Math.sin(a) * hubR * 1.1);
+      ctx.lineTo(cx + Math.cos(a) * innerR * 0.85, cy + Math.sin(a) * innerR * 0.85);
+      ctx.stroke();
+    }
+  }
+
+  // Optional inner decorative rings
+  for (let r = 0; r < innerRings; r++) {
+    const ringR = hubR + (innerR - hubR) * ((r + 1) / (innerRings + 1));
+    ctx.lineWidth   = sw * 0.35;
+    ctx.strokeStyle = symbolColor(0, 0.18);
+    ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, TAU); ctx.stroke();
+  }
+
+  // Centre dot
+  ctx.beginPath(); ctx.arc(cx, cy, hubR * 0.30, 0, TAU);
+  ctx.fillStyle = symbolColor(6, 0.90); ctx.fill();
+
+  ctx.restore();
+}
+
+// ── Style 27: Penrose Triangle ──────────────────────────────────────────────
+// Impossible triangle / Penrose-inspired geometry with layered depth illusion.
+function drawPenrose(ctx, cx, cy, radius, sw, symbolColor, rng) {
+  const TAU = Math.PI * 2;
+  const PI  = Math.PI;
+
+  const rotation   = rng.float(0, TAU);
+  const thickness  = rng.float(0.18, 0.30);     // bar thickness as fraction of radius
+  const sides      = rng.next() > 0.35 ? 3 : rng.int(4, 5); // mostly triangles, sometimes square/pentagon
+  const fillAlpha  = rng.float(0.08, 0.20);
+  const edgeAlpha  = rng.float(0.60, 0.88);
+  const hasInner   = rng.next() > 0.55;
+  const innerScale = rng.float(0.25, 0.40);
+
+  const r = radius * 0.85;
+  const t = r * thickness;
+
+  // Compute vertices of the outer polygon
+  function polyVerts(r2, offset) {
+    const verts = [];
+    for (let i = 0; i < sides; i++) {
+      const a = rotation + (i / sides) * TAU - PI / 2 + (offset || 0);
+      verts.push({ x: cx + Math.cos(a) * r2, y: cy + Math.sin(a) * r2 });
+    }
+    return verts;
+  }
+
+  const outer = polyVerts(r);
+
+  // For each edge, draw a thick bar with overlapping ends to create the
+  // impossible-object illusion
+  ctx.save();
+  ctx.lineCap  = 'butt';
+  ctx.lineJoin = 'miter';
+
+  // Draw filled bars (back layer first, then front overlap)
+  for (let pass = 0; pass < 2; pass++) {
+    for (let i = 0; i < sides; i++) {
+      const from = outer[i];
+      const to   = outer[(i + 1) % sides];
+
+      // Direction along edge
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const ux = dx / len, uy = dy / len;
+      // Perpendicular (inward)
+      const px = -uy, py = ux;
+
+      // Four corners of the bar
+      const corners = [
+        { x: from.x,          y: from.y },
+        { x: to.x,            y: to.y },
+        { x: to.x + px * t,   y: to.y + py * t },
+        { x: from.x + px * t, y: from.y + py * t },
+      ];
+
+      if (pass === 0) {
+        // Fill
+        ctx.beginPath();
+        ctx.moveTo(corners[0].x, corners[0].y);
+        for (let j = 1; j < 4; j++) ctx.lineTo(corners[j].x, corners[j].y);
+        ctx.closePath();
+        // Shade alternating faces for depth
+        ctx.fillStyle = symbolColor(0, fillAlpha + (i % 2 === 0 ? 0.04 : 0));
+        ctx.fill();
+      } else {
+        // Stroke edges
+        ctx.lineWidth   = sw * 0.9;
+        ctx.strokeStyle = symbolColor(0, edgeAlpha);
+        ctx.beginPath();
+        ctx.moveTo(corners[0].x, corners[0].y);
+        for (let j = 1; j < 4; j++) ctx.lineTo(corners[j].x, corners[j].y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Overlap illusion: redraw one corner's bar end on top to break the cycle
+  {
+    const i = 0;
+    const from = outer[i];
+    const to   = outer[(i + 1) % sides];
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const px = -(dy / len), py = dx / len;
+
+    const overlapLen = t * 1.3;
+    const ux = dx / len, uy = dy / len;
+    ctx.beginPath();
+    ctx.moveTo(from.x - ux * sw, from.y - uy * sw);
+    ctx.lineTo(from.x + ux * overlapLen, from.y + uy * overlapLen);
+    ctx.lineTo(from.x + ux * overlapLen + px * t, from.y + uy * overlapLen + py * t);
+    ctx.lineTo(from.x + px * t - ux * sw, from.y + py * t - uy * sw);
+    ctx.closePath();
+    ctx.fillStyle = symbolColor(0, fillAlpha + 0.04);
+    ctx.fill();
+    ctx.lineWidth   = sw * 0.9;
+    ctx.strokeStyle = symbolColor(0, edgeAlpha);
+    ctx.stroke();
+  }
+
+  // Optional inner shape
+  if (hasInner) {
+    const inner = polyVerts(r * innerScale);
+    ctx.lineWidth   = sw * 0.45;
+    ctx.strokeStyle = symbolColor(-5, 0.25);
+    ctx.beginPath();
+    ctx.moveTo(inner[0].x, inner[0].y);
+    for (let i = 1; i < sides; i++) ctx.lineTo(inner[i].x, inner[i].y);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Centre dot
+  ctx.beginPath(); ctx.arc(cx, cy, radius * 0.04, 0, TAU);
+  ctx.fillStyle = symbolColor(6, 0.85); ctx.fill();
+
+  ctx.restore();
 }
 

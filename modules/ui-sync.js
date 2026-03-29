@@ -51,6 +51,8 @@ export function updateResetButtons(dom) {
   dom.noiseBrightnessReset.classList.toggle('visible',   colorOverrides.noiseBrightness !== undefined);
   dom.noiseContrastReset.classList.toggle('visible',     colorOverrides.noiseContrast   !== undefined);
   dom.logoScaleReset.classList.toggle('visible',         parseInt(dom.logoScaleSlider.value, 10) !== 100);
+  dom.logoOpacityReset.classList.toggle('visible',       parseInt(dom.logoOpacitySlider.value, 10) !== 100);
+  dom.logoStrokeReset.classList.toggle('visible',        parseInt(dom.logoStrokeSlider.value, 10) !== 100);
   dom.logoNonceReset.classList.toggle('visible',         seedOverrides.logoNonce        !== undefined);
   dom.artifactSeedReset.classList.toggle('visible',      seedOverrides.artifactSeed     !== undefined);
   dom.patternSeedReset.classList.toggle('visible',       seedOverrides.patternSeed      !== undefined);
@@ -95,7 +97,7 @@ export function updateLogoName(dom) {
   } else {
     const seed  = getSeed(dom);
     const seeds = getEffectiveSeeds(seed);
-    const style = makePRNG(seeds.logoNonce).int(0, 24);
+    const style = makePRNG(seeds.logoNonce).int(0, 27);
     dom.logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
   }
 }
@@ -116,6 +118,8 @@ export function buildParams(dom) {
     logoNonce:             seeds.logoNonce,
     logoStyle:             parseInt(dom.logoStyleSelect.value, 10),
     logoScale:             parseInt(dom.logoScaleSlider.value, 10) / 100,
+    logoOpacity:           parseInt(dom.logoOpacitySlider.value, 10) / 100,
+    logoStrokeWidth:       parseInt(dom.logoStrokeSlider.value, 10) / 100,
     hue:                   color.hue,
     isDarkOverride:        colorOverrides.isDark          !== undefined ? colorOverrides.isDark          : null,
     cardLightnessOverride: colorOverrides.cardLightness   !== undefined ? colorOverrides.cardLightness   : null,
@@ -170,7 +174,7 @@ export function getCardDescriptor(dom) {
   const logoVal = parseInt(dom.logoStyleSelect.value, 10);
   const logoName = logoVal === -2 ? null
     : logoVal >= 0 ? LOGO_NAMES[logoVal]
-    : LOGO_NAMES[makePRNG(seeds.logoNonce).int(0, 24)];
+    : LOGO_NAMES[makePRNG(seeds.logoNonce).int(0, 27)];
 
   // Background style name
   const bgVal = parseInt(dom.bgStyleSelect.value, 10);

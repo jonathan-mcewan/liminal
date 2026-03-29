@@ -103,6 +103,8 @@ export function generateCard({
   bgBlendMode        = 'source-over',
   patternRotation    = 0,           // degrees
   embossMode         = 'none',      // 'none' | 'emboss' | 'deboss'
+  logoOpacity        = 1,           // 0–1 opacity multiplier for the logo
+  logoStrokeWidth    = 1,           // multiplier on base stroke weight
   artifactTypeLock   = null,         // null = auto, [0,3] = only these types
   logoPosition       = 'ct',        // 2-char: [l|c|r][t|m|b]
   textPosition       = 'lb',        // 2-char: [l|c|r][t|m|b]
@@ -158,9 +160,9 @@ export function generateCard({
   const symbolLightness = modeFlipped ? (isDark ? 87 : 15) : symbolLightnessFromSeed;
 
   // ── Symbol style: seed-derived or explicit override ───────────────────────
-  const autoStyle   = logoPRNG.int(0, 24);   // auto style derived from logoPRNG (logo seed)
-  stylePRNG.int(0, 24);                     // consume stylePRNG to preserve legacy sequence
-  const symbolStyle = logoStyle === -2 ? -2 : (logoStyle >= 0 && logoStyle <= 24) ? logoStyle : autoStyle;
+  const autoStyle   = logoPRNG.int(0, 27);   // auto style derived from logoPRNG (logo seed)
+  stylePRNG.int(0, 27);                     // consume stylePRNG to preserve legacy sequence
+  const symbolStyle = logoStyle === -2 ? -2 : (logoStyle >= 0 && logoStyle <= 27) ? logoStyle : autoStyle;
 
   // ── Logo variation: drawn from logoPRNG (internals only, not style) ───────
   const symbolRadiusFactor = logoPRNG.float(0.169, 0.286); // radius as fraction of card width
@@ -253,17 +255,21 @@ export function generateCard({
   // Symbol — drawn with its own save/restore so ctx state leaks don't affect text
   if (symbolStyle >= 0) {
     ctx.save();
+    // Wrap symbolColor to apply logo opacity multiplier
+    const logoColor = logoOpacity < 1
+      ? (adj, a) => symbolColor(adj, (a ?? 0.9) * logoOpacity)
+      : symbolColor;
     if (embossMode !== 'none') {
       const offset = cardWidth * 0.012;
       const sign = embossMode === 'emboss' ? 1 : -1;
       // Shadow pass — darker, offset toward light source
-      const shadowColor = (adj, a) => symbolColor(adj - 30, (a ?? 0.9) * 0.2);
-      drawSymbol(ctx, symbolX + offset * sign, symbolY + offset * sign, symbolRadius, symbolStyle, shadowColor, logoPRNG.clone());
+      const shadowColor = (adj, a) => logoColor(adj - 30, (a ?? 0.9) * 0.2);
+      drawSymbol(ctx, symbolX + offset * sign, symbolY + offset * sign, symbolRadius, symbolStyle, shadowColor, logoPRNG.clone(), logoStrokeWidth);
       // Highlight pass — lighter, offset away from light source
-      const highlightColor = (adj, a) => symbolColor(adj + 30, (a ?? 0.9) * 0.13);
-      drawSymbol(ctx, symbolX - offset * sign, symbolY - offset * sign, symbolRadius, symbolStyle, highlightColor, logoPRNG.clone());
+      const highlightColor = (adj, a) => logoColor(adj + 30, (a ?? 0.9) * 0.13);
+      drawSymbol(ctx, symbolX - offset * sign, symbolY - offset * sign, symbolRadius, symbolStyle, highlightColor, logoPRNG.clone(), logoStrokeWidth);
     }
-    drawSymbol(ctx, symbolX, symbolY, symbolRadius, symbolStyle, symbolColor, logoPRNG);
+    drawSymbol(ctx, symbolX, symbolY, symbolRadius, symbolStyle, logoColor, logoPRNG, logoStrokeWidth);
     ctx.restore();
   }
 

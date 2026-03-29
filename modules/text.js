@@ -28,10 +28,15 @@ export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor, t
   const hasTitle = jobTitle.length   > 0;
   const hasBoth  = hasName && hasTitle;
 
-  // Total height of the text block (used for vertical centering)
+  // Total height of the text block (used for vertical centering).
+  // Font descent (~20% of font size) is added to the bottom line so the
+  // visual centre of the text block aligns with the geometric centre.
+  const descent = 0.20;
+  const bottomFontSize = hasTitle ? titleFontSize : nameFontSize;
   const blockH = (hasName  ? nameFontSize  : 0)
                + (hasBoth  ? lineGap       : 0)
-               + (hasTitle ? titleFontSize : 0);
+               + (hasTitle ? titleFontSize : 0)
+               + bottomFontSize * descent;
 
   const TEXT_X     = { l: 0.09, c: 0.50, r: 0.91 };
   const TEXT_ALIGN = { l: 'left', c: 'center', r: 'right' };
@@ -66,6 +71,11 @@ export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor, t
   const titleWeight = Math.max(100, textWeight - 100);
   const trackingPx  = basis * textTracking / 1000; // em-like scaling
 
+  // When letterSpacing is active and textAlign is 'center', Canvas adds
+  // trailing space after the last character, shifting text left of true
+  // centre.  Compensate by nudging x by half the per-character spacing.
+  const trackingNudge = (align === 'center' && trackingPx) ? trackingPx * 0.5 : 0;
+
   ctx.save();
   ctx.textBaseline = 'top';
   ctx.textAlign    = align;
@@ -74,13 +84,13 @@ export function drawCardText(ctx, geometry, personName, jobTitle, symbolColor, t
   if (hasName) {
     ctx.font      = `${textWeight} ${nameFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
     ctx.fillStyle = symbolColor(0, 0.92);
-    ctx.fillText(personName, textX, nameTop);
+    ctx.fillText(personName, textX + trackingNudge, nameTop);
   }
 
   if (hasTitle) {
     ctx.font      = `${titleWeight} ${titleFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
     ctx.fillStyle = symbolColor(0, 0.44);
-    ctx.fillText(jobTitle, textX, titleTop);
+    ctx.fillText(jobTitle, textX + trackingNudge, titleTop);
   }
 
   ctx.restore();
