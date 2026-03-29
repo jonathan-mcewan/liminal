@@ -556,6 +556,7 @@
           <path d="M22.5 14 L24 16 L25.5 14" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
         </svg>
       </button>
+      <span class="ai-bubble" id="ai-bubble"></span>
       <div class="hotkey-legend" id="hotkey-legend">
         <div class="hotkey-buttons">
           <button class="hotkey-toggle hotkey-pro" id="hotkey-pro" title="Go Pro"><i data-lucide="sparkles"></i></button>
@@ -2362,6 +2363,35 @@
         }, delay);
       }
       scheduleFreakout();
+
+      // Speech bubble — non-sequitur single words
+      const AI_WORDS = [
+        'turmeric', 'carbuncle', 'plinth', 'vestibule', 'loam',
+        'spackle', 'dundee', 'fennel', 'corgi', 'pumice',
+        'grommet', 'slacks', 'gazebo', 'pewter', 'shale',
+        'brisket', 'lanyard', 'mulch', 'satchel', 'duvet',
+        'wainscot', 'grout', 'kibble', 'flange', 'caulk',
+        'bisque', 'tambourine', 'pliers', 'dirigible', 'yurt',
+        'parsnip', 'gasket', 'cupola', 'bollard', 'ramekin',
+        'pleat', 'groat', 'spigot', 'lintel', 'pergola',
+        'hamper', 'cleat', 'sorbet', 'trestle', 'wadding',
+        'thimble', 'bevel', 'crouton', 'dormer', 'nutmeg',
+      ];
+      const aiBubble = document.getElementById('ai-bubble');
+      function scheduleBubble() {
+        const delay = 4000 + Math.random() * 12000;
+        setTimeout(() => {
+          if (!aiFab.classList.contains('ai-fab-hidden') && !aiBubble.classList.contains('visible')) {
+            const word = AI_WORDS[Math.floor(Math.random() * AI_WORDS.length)];
+            aiBubble.textContent = word;
+            aiBubble.classList.add('visible');
+            setTimeout(() => { aiBubble.classList.remove('visible'); }, 1800 + Math.random() * 1200);
+          }
+          scheduleBubble();
+        }, delay);
+      }
+      scheduleBubble();
+      window.aiBubble = (w) => { aiBubble.textContent = w || AI_WORDS[Math.floor(Math.random() * AI_WORDS.length)]; aiBubble.classList.remove('visible'); void aiBubble.offsetWidth; aiBubble.classList.add('visible'); setTimeout(() => aiBubble.classList.remove('visible'), 2500); };
 
       // Console helpers: aiFreakout() / aiGlitch() / aiGrowSnap()
       const aiModes = ['freaking-out','glitching','grow-snap'];
