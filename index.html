@@ -224,6 +224,10 @@
           <div id="theme-preset-grid" class="theme-grid"></div>
         </details>
         <div class="colour-swatches" id="colour-swatches"></div>
+        <div class="hsl-picker" id="hsl-picker">
+          <canvas class="hsl-picker-sl" id="hsl-picker-sl" width="180" height="180"></canvas>
+          <canvas class="hsl-picker-hue" id="hsl-picker-hue" width="180" height="16"></canvas>
+        </div>
         <div class="field">
           <div class="field-hdr">
             <span>Hue <span id="hue-value-display"></span>&deg;</span>
@@ -1275,10 +1279,128 @@
           { label: 'Symbol / text',   color: hsla(hue + symDrift, sat, symLit, 0.9) },
           { label: 'Noise tint',      color: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)' },
         ];
-        dom.colourSwatches.innerHTML = swatches.map(s =>
-          `<div class="colour-swatch" style="background:${s.color}" title="${s.label}"></div>`
+        dom.colourSwatches.innerHTML = swatches.map((s, i) =>
+          `<div class="colour-swatch" style="background:${s.color}" title="${s.label}" data-idx="${i}"></div>`
         ).join('');
       }
+
+      // ── HSL colour picker ────────────────────────────────────────────────
+      const hslPickerEl = document.getElementById("hsl-picker");
+      const slCanvas    = document.getElementById("hsl-picker-sl");
+      const hueCanvas   = document.getElementById("hsl-picker-hue");
+      const slCtx       = slCanvas.getContext("2d");
+      const hueCtx      = hueCanvas.getContext("2d");
+      let pickerHue = 0, pickerSat = 50, pickerLit = 50;
+      let slDragging = false, hueDragging = false;
+
+      function drawHueBar() {
+        const w = hueCanvas.width, h = hueCanvas.height;
+        const grad = hueCtx.createLinearGradient(0, 0, w, 0);
+        for (let i = 0; i <= 12; i++) grad.addColorStop(i / 12, `hsl(${i * 30}, 100%, 50%)`);
+        hueCtx.fillStyle = grad;
+        hueCtx.fillRect(0, 0, w, h);
+        // Indicator
+        const x = (pickerHue / 359) * w;
+        hueCtx.strokeStyle = '#fff';
+        hueCtx.lineWidth = 2;
+        hueCtx.beginPath();
+        hueCtx.roundRect(x - 3, 0, 6, h, 3);
+        hueCtx.stroke();
+        hueCtx.strokeStyle = '#000';
+        hueCtx.lineWidth = 1;
+        hueCtx.beginPath();
+        hueCtx.roundRect(x - 2, 1, 4, h - 2, 2);
+        hueCtx.stroke();
+      }
+
+      function drawSLCanvas() {
+        const w = slCanvas.width, h = slCanvas.height;
+        const img = slCtx.createImageData(w, h);
+        for (let y = 0; y < h; y++) {
+          const lit = 100 - (y / (h - 1)) * 100; // top=100 (white), bottom=0 (black)
+          for (let x = 0; x < w; x++) {
+            const sat = (x / (w - 1)) * 100; // left=0 (grey), right=100 (vivid)
+            const idx = (y * w + x) * 4;
+            const [r, g, b] = hslToRGB(pickerHue, sat, lit);
+            img.data[idx]     = r;
+            img.data[idx + 1] = g;
+            img.data[idx + 2] = b;
+            img.data[idx + 3] = 255;
+          }
+        }
+        slCtx.putImageData(img, 0, 0);
+        // Crosshair indicator
+        const cx = (pickerSat / 100) * w;
+        const cy = (1 - pickerLit / 100) * h;
+        slCtx.beginPath(); slCtx.arc(cx, cy, 6, 0, Math.PI * 2);
+        slCtx.strokeStyle = '#fff'; slCtx.lineWidth = 2; slCtx.stroke();
+        slCtx.beginPath(); slCtx.arc(cx, cy, 5, 0, Math.PI * 2);
+        slCtx.strokeStyle = '#000'; slCtx.lineWidth = 1; slCtx.stroke();
+      }
+
+      function hslToRGB(h, s, l) {
+        s /= 100; l /= 100;
+        const a = s * Math.min(l, 1 - l);
+        const f = n => { const k = (n + h / 30) % 12; return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); };
+        return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+      }
+
+      function pickerApply() {
+        colorOverrides.hue = pickerHue;
+        colorOverrides.saturation = pickerSat;
+        colorOverrides.cardLightness = pickerLit;
+        updateColourSwatches();
+      }
+
+      function pickerCommit() {
+        pickerApply();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      }
+
+      // SL canvas interaction
+      function slPick(e) {
+        const rect = slCanvas.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+        pickerSat = Math.round(x * 100);
+        pickerLit = Math.round((1 - y) * 100);
+        drawSLCanvas();
+        pickerApply();
+      }
+      slCanvas.addEventListener("pointerdown", (e) => { slDragging = true; slCanvas.setPointerCapture(e.pointerId); slPick(e); });
+      slCanvas.addEventListener("pointermove", (e) => { if (slDragging) slPick(e); });
+      slCanvas.addEventListener("pointerup", () => { slDragging = false; pickerCommit(); });
+
+      // Hue bar interaction
+      function huePick(e) {
+        const rect = hueCanvas.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        pickerHue = Math.round(x * 359);
+        drawHueBar();
+        drawSLCanvas();
+        pickerApply();
+      }
+      hueCanvas.addEventListener("pointerdown", (e) => { hueDragging = true; hueCanvas.setPointerCapture(e.pointerId); huePick(e); });
+      hueCanvas.addEventListener("pointermove", (e) => { if (hueDragging) huePick(e); });
+      hueCanvas.addEventListener("pointerup", () => { hueDragging = false; pickerCommit(); });
+
+      // Toggle picker on swatch click
+      dom.colourSwatches.addEventListener("click", (e) => {
+        const swatch = e.target.closest('.colour-swatch');
+        if (!swatch) return;
+        const isOpen = hslPickerEl.classList.toggle('open');
+        if (isOpen) {
+          const seed = getSeed(dom);
+          const c = getEffectiveColor(seed);
+          pickerHue = c.hue;
+          pickerSat = c.saturation;
+          pickerLit = c.cardLightness;
+          drawHueBar();
+          drawSLCanvas();
+        }
+      });
 
       // ── Theme presets ──────────────────────────────────────────────────
       function applyThemePreset(preset) {
@@ -1298,7 +1420,15 @@
       function buildThemePresetGrid() {
         const grid = dom.themePresetGrid;
         grid.innerHTML = '';
+        let prevDark = null;
         for (const preset of THEME_PRESETS) {
+          // Insert separator between dark and light groups
+          if (prevDark !== null && prevDark !== preset.isDark) {
+            const sep = document.createElement('div');
+            sep.className = 'theme-grid-separator';
+            grid.appendChild(sep);
+          }
+          prevDark = preset.isDark;
           const btn = document.createElement('button');
           btn.className = 'theme-swatch';
           btn.title = preset.name;
