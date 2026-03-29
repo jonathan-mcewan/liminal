@@ -2315,7 +2315,7 @@
         setTimeout(() => {
           if (!aiFab.classList.contains('ai-fab-hidden')) {
             const roll = Math.random();
-            const mode = roll < 0.12 ? 'glitching' : roll < 0.30 ? 'freaking-out' : null;
+            const mode = roll < 0.25 ? 'glitching' : roll < 0.45 ? 'freaking-out' : null;
             if (mode) {
               aiFab.classList.add(mode);
               aiFab.addEventListener('animationend', () => {
