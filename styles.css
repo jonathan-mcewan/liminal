@@ -1247,8 +1247,8 @@ button svg {
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 90;
-  width: 5rem;
-  height: 5rem;
+  width: 3.2rem;
+  height: 3.2rem;
   padding: 0;
   border-radius: 50%;
   border: 2px solid rgba(80,200,255,0.45);
@@ -1457,8 +1457,8 @@ button svg {
 /* Disappear when panel is open — shrink + spin out */
 /* Grow-snap mode — slowly inflates to 50vmin then snaps back */
 @keyframes ai-grow-snap {
-  0%    { width: 5rem;  height: 5rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
-  5%    { width: 5.4rem;  height: 5.4rem;  font-size: 1.1rem; border-radius: 50%; box-shadow: 0 4px 20px rgba(80,200,255,0.18); filter: none; }
+  0%    { width: 3.2rem;  height: 3.2rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
+  5%    { width: 3.6rem;  height: 3.6rem;  font-size: 1.1rem; border-radius: 50%; box-shadow: 0 4px 20px rgba(80,200,255,0.18); filter: none; }
   15%   { width: 5rem;    height: 5rem;    font-size: 1.4rem; border-radius: 50%; box-shadow: 0 6px 28px rgba(80,200,255,0.22); filter: none; }
   30%   { width: 9rem;    height: 9rem;    font-size: 2rem;   border-radius: 50%; box-shadow: 0 8px 40px rgba(80,200,255,0.30); filter: none; }
   50%   { width: 18rem;   height: 18rem;   font-size: 3.5rem; border-radius: 50%; box-shadow: 0 12px 60px rgba(80,200,255,0.40); filter: none; }
@@ -1467,8 +1467,8 @@ button svg {
   90%   { width: 50vmin;  height: 50vmin;  font-size: 8rem;   border-radius: 50%; box-shadow: 0 20px 120px rgba(80,200,255,0.65), 0 0 100px rgba(140,100,255,0.35); filter: brightness(1.4) saturate(1.5); }
   /* SNAP — instant return */
   91%   { width: 4rem;    height: 4rem;    font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 40px rgba(255,200,80,0.5); filter: brightness(2); }
-  94%   { width: 5.4rem;  height: 5.4rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 24px rgba(80,200,255,0.3); filter: brightness(1.2); }
-  100%  { width: 5rem;  height: 5rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
+  94%   { width: 3.6rem;  height: 3.6rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 24px rgba(80,200,255,0.3); filter: brightness(1.2); }
+  100%  { width: 3.2rem;  height: 3.2rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
 }
 .ai-fab.grow-snap {
   animation: ai-grow-snap 6s cubic-bezier(0.22, 0.61, 0.36, 1) 1;
