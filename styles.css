@@ -1467,7 +1467,7 @@ button svg {
   85%   { width: 50vmin;  height: 50vmin;  font-size: 8rem;   border-radius: 50%; box-shadow: 0 20px 120px rgba(80,200,255,0.65), 0 0 100px rgba(140,100,255,0.35); filter: brightness(1.2) saturate(1.3); }
   90%   { width: 50vmin;  height: 50vmin;  font-size: 8rem;   border-radius: 50%; box-shadow: 0 20px 120px rgba(80,200,255,0.65), 0 0 100px rgba(140,100,255,0.35); filter: brightness(1.4) saturate(1.5); }
   /* SNAP — instant return */
-  91%   { width: 4rem;    height: 4rem;    font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 40px rgba(255,200,80,0.5); filter: brightness(2); }
+  91%   { width: 2.5rem;  height: 2.5rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 40px rgba(255,200,80,0.5); filter: brightness(2); }
   94%   { width: 3.6rem;  height: 3.6rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 24px rgba(80,200,255,0.3); filter: brightness(1.2); }
   100%  { width: 3.2rem;  height: 3.2rem;  font-size: 1rem;   border-radius: 50%; box-shadow: 0 4px 16px rgba(80,200,255,0.12); filter: none; }
 }
