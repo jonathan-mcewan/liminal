@@ -512,6 +512,7 @@
               <div id="svg-output-back"></div>
               <div class="holo-sheen" id="holo-sheen"></div>
             </div>
+            <div class="card-skeleton" id="card-skeleton"></div>
           </div>
         </div>
         <div class="descriptor-row">
@@ -865,6 +866,19 @@
         textTrackingDisplay:    document.getElementById("text-tracking-display"),
         textTrackingReset:      document.getElementById("text-tracking-reset"),
       };
+
+      // ── Skeleton loading overlay ───────────────────────────────────────
+      const skeleton = (() => {
+        const el = document.getElementById('card-skeleton');
+        return {
+          show() {
+            el.classList.remove('active');
+            void el.offsetHeight;
+            el.classList.add('active');
+          },
+          hide() { el.classList.remove('active'); }
+        };
+      })();
 
       // ── Position grids ─────────────────────────────────────────────────
 
@@ -1498,68 +1512,80 @@
         }
       }
 
+      let renderRAF = null;
+
       function render(push = false) {
-        buildLogoGrid();
-        buildPatternGrid();
-        buildBgGrid();
-        buildArtTypeGrid();
-        const { frameW, frameH } = getFrameDims(dom);
-        const aspect = `${frameW} / ${frameH}`;
+        skeleton.show();
+        if (renderRAF) cancelAnimationFrame(renderRAF);
+        renderRAF = requestAnimationFrame(() => {
+          renderRAF = requestAnimationFrame(() => {
+            renderRAF = null;
 
-        let backResult;
-        if (renderMode === 'svg') {
-          const p   = buildParams(dom);
-          // Front
-          const svg = new SvgContext(frameW, frameH);
-          generateCard({ ...p, ctx: svg });
-          dom.svgOutputEl.innerHTML = svg.toSVG();
-          // Back
-          const svgBack = new SvgContext(frameW, frameH);
-          backResult = generateCardBack({ ...p, ctx: svgBack });
-          dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
-        } else {
-          // Front
-          generateCard(buildParams(dom));
-          // Back
-          const backCtx = dom.canvasBackEl.getContext('2d');
-          const bp = buildParams(dom);
-          dom.canvasBackEl.width  = Math.round(frameW);
-          dom.canvasBackEl.height = Math.round(frameH);
-          backResult = generateCardBack({ ...bp, ctx: backCtx });
-        }
+            buildLogoGrid();
+            buildPatternGrid();
+            buildBgGrid();
+            buildArtTypeGrid();
+            const { frameW, frameH } = getFrameDims(dom);
+            const aspect = `${frameW} / ${frameH}`;
 
-        // Position hologram sheen overlay
-        const holoEl = document.getElementById('holo-sheen');
-        if (backResult && backResult.holoBounds) {
-          const b = backResult.holoBounds;
-          holoEl.style.display = 'block';
-          holoEl.style.left    = (b.left   * 100).toFixed(2) + '%';
-          holoEl.style.top     = (b.top    * 100).toFixed(2) + '%';
-          holoEl.style.width   = (b.width  * 100).toFixed(2) + '%';
-          holoEl.style.height  = (b.height * 100).toFixed(2) + '%';
-        } else {
-          holoEl.style.display = 'none';
-        }
+            let backResult;
+            if (renderMode === 'svg') {
+              const p   = buildParams(dom);
+              // Front
+              const svg = new SvgContext(frameW, frameH);
+              generateCard({ ...p, ctx: svg });
+              dom.svgOutputEl.innerHTML = svg.toSVG();
+              // Back
+              const svgBack = new SvgContext(frameW, frameH);
+              backResult = generateCardBack({ ...p, ctx: svgBack });
+              dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
+            } else {
+              // Front
+              generateCard(buildParams(dom));
+              // Back
+              const backCtx = dom.canvasBackEl.getContext('2d');
+              const bp = buildParams(dom);
+              dom.canvasBackEl.width  = Math.round(frameW);
+              dom.canvasBackEl.height = Math.round(frameH);
+              backResult = generateCardBack({ ...bp, ctx: backCtx });
+            }
 
-        dom.cardScene.style.setProperty('--card-ar', (frameW / frameH).toFixed(6));
-        fitCardBody();
+            // Position hologram sheen overlay
+            const holoEl = document.getElementById('holo-sheen');
+            if (backResult && backResult.holoBounds) {
+              const b = backResult.holoBounds;
+              holoEl.style.display = 'block';
+              holoEl.style.left    = (b.left   * 100).toFixed(2) + '%';
+              holoEl.style.top     = (b.top    * 100).toFixed(2) + '%';
+              holoEl.style.width   = (b.width  * 100).toFixed(2) + '%';
+              holoEl.style.height  = (b.height * 100).toFixed(2) + '%';
+            } else {
+              holoEl.style.display = 'none';
+            }
 
-        syncURL(dom, push);
-        updateLogoName(dom);
-        updatePatternName(dom);
-        updateBgName(dom);
-        updateDescriptor(dom);
-        updateColourSwatches();
-        updateArtResetButtons();
-        // Non-override control reset button visibility
-        noiseZoomReset.classList.toggle('visible', dom.noiseZoomSlider.value !== '4');
-        bgBlendReset.classList.toggle('visible', dom.bgBlendMode.value !== 'source-over');
-        if (typeof updateEmbossReset === 'function') updateEmbossReset();
-        patRotReset.classList.toggle('visible', dom.patternRotationSlider.value !== '0');
-        patOpacityReset.classList.toggle('visible', dom.patternOpacitySlider.value !== '15');
-        patScaleReset.classList.toggle('visible', dom.patternScaleSlider.value !== '100');
-        if (typeof syncToneButtons === 'function') syncToneButtons();
-        updateStarButton();
+            dom.cardScene.style.setProperty('--card-ar', (frameW / frameH).toFixed(6));
+            fitCardBody();
+
+            syncURL(dom, push);
+            updateLogoName(dom);
+            updatePatternName(dom);
+            updateBgName(dom);
+            updateDescriptor(dom);
+            updateColourSwatches();
+            updateArtResetButtons();
+            // Non-override control reset button visibility
+            noiseZoomReset.classList.toggle('visible', dom.noiseZoomSlider.value !== '4');
+            bgBlendReset.classList.toggle('visible', dom.bgBlendMode.value !== 'source-over');
+            if (typeof updateEmbossReset === 'function') updateEmbossReset();
+            patRotReset.classList.toggle('visible', dom.patternRotationSlider.value !== '0');
+            patOpacityReset.classList.toggle('visible', dom.patternOpacitySlider.value !== '15');
+            patScaleReset.classList.toggle('visible', dom.patternScaleSlider.value !== '100');
+            if (typeof syncToneButtons === 'function') syncToneButtons();
+            updateStarButton();
+
+            skeleton.hide();
+          });
+        });
       }
 
       // ── Events ────────────────────────────────────────────────────────────
