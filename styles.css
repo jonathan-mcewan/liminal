@@ -1271,38 +1271,39 @@ button svg {
 /* Speech bubble — tiny non-sequitur word */
 .ai-bubble {
   position: fixed;
-  bottom: 4.2rem;
-  right: 1.2rem;
+  bottom: 5rem;
+  right: 2.8rem;
   z-index: 89;
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   font-weight: 500;
   font-family: system-ui, sans-serif;
   color: #c4eaff;
-  background: rgba(30, 42, 58, 0.88);
-  border: 1px solid rgba(80, 200, 255, 0.25);
-  border-radius: 0.4rem 0.4rem 0.4rem 0.1rem;
-  padding: 0.15rem 0.4rem;
+  background: rgba(30, 42, 58, 0.92);
+  border: 1px solid rgba(80, 200, 255, 0.3);
+  border-radius: 0.75rem 0.75rem 0.2rem 0.75rem;
+  padding: 0.3rem 0.6rem;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(4px) scale(0.85);
+  transform: translateY(6px) scale(0.85);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .ai-bubble.visible {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
-/* tiny tail pointing down-right toward the button */
+/* tail pointing down-right toward the AI button */
 .ai-bubble::after {
   content: '';
   position: absolute;
-  bottom: -4px;
-  right: 8px;
+  bottom: -6px;
+  right: -2px;
   width: 0;
   height: 0;
-  border-left: 4px solid transparent;
-  border-right: 2px solid transparent;
-  border-top: 4px solid rgba(30, 42, 58, 0.88);
+  border-left: 7px solid rgba(30, 42, 58, 0.92);
+  border-right: 0px solid transparent;
+  border-top: 0px solid transparent;
+  border-bottom: 6px solid transparent;
 }
 
 .ai-fab svg.ai-eyes { width: 4em; height: 2em; overflow: visible; }
