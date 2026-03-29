@@ -1312,7 +1312,7 @@ button svg {
   color: #c4eaff;
   background: rgba(30, 42, 58, 0.92);
   border: 1px solid rgba(80, 200, 255, 0.3);
-  border-radius: 0.75rem 0.75rem 0.2rem 0.75rem;
+  border-radius: 0.75rem;
   padding: 0.3rem 0.6rem;
   white-space: nowrap;
   pointer-events: none;
@@ -1324,29 +1324,28 @@ button svg {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
-/* tail border (slightly larger shape in border colour, behind ::after) */
+/* thought-bubble trailing dots toward the AI button */
 .ai-bubble::before {
   content: '';
   position: absolute;
-  bottom: -10px;
-  right: -5px;
-  width: 20px;
-  height: 16px;
-  background: rgba(80, 200, 255, 0.3);
-  clip-path: path('M0,0 C5,0 15,2.67 20,16 C15,10.67 10,5.33 0,5.33 Z');
-  z-index: -1;
+  bottom: -8px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(30, 42, 58, 0.92);
+  border: 1px solid rgba(80, 200, 255, 0.3);
 }
-/* curved tail pointing down-right toward the AI button */
 .ai-bubble::after {
   content: '';
   position: absolute;
-  bottom: -8px;
-  right: -4px;
-  width: 16px;
-  height: 12px;
+  bottom: -14px;
+  right: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
   background: rgba(30, 42, 58, 0.92);
-  clip-path: path('M0,0 C4,0 12,2 16,12 C12,8 8,4 0,4 Z');
-  z-index: 0;
+  border: 1px solid rgba(80, 200, 255, 0.3);
 }
 
 .ai-fab svg.ai-eyes { width: 4em; height: 2em; overflow: visible; }
