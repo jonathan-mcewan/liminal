@@ -1268,32 +1268,107 @@ button svg {
   border-color: rgba(80,200,255,0.65);
   color: #a5e4ff;
 }
-.ai-fab svg.ai-eyes { width: 1.8rem; height: 0.9rem; overflow: visible; }
+/* Speech bubble — tiny non-sequitur word */
+.ai-bubble {
+  position: fixed;
+  bottom: 4.2rem;
+  right: 1.2rem;
+  z-index: 89;
+  font-size: 0.55rem;
+  font-weight: 500;
+  font-family: system-ui, sans-serif;
+  color: #c4eaff;
+  background: rgba(30, 42, 58, 0.88);
+  border: 1px solid rgba(80, 200, 255, 0.25);
+  border-radius: 0.4rem 0.4rem 0.4rem 0.1rem;
+  padding: 0.15rem 0.4rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px) scale(0.85);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.ai-bubble.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+/* tiny tail pointing down-right toward the button */
+.ai-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  right: 8px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 2px solid transparent;
+  border-top: 4px solid rgba(30, 42, 58, 0.88);
+}
+
+.ai-fab svg.ai-eyes { width: 2em; height: 1em; overflow: visible; }
 .ai-fab .ai-pupil {
-  animation: ai-shifty-eyes 4s ease-in-out infinite;
+  animation: ai-shifty-eyes 5.5s ease-in-out infinite;
+  transform-origin: center center;
 }
 .ai-fab .ai-pupil-r {
-  animation-delay: -0.15s; /* slight offset so eyes don't track in perfect unison */
+  animation-delay: -0.25s; /* slight desync — each eye has its own agenda */
 }
+/* Paranoid Chozo artifact shifting — quick snaps, twitchy holds, nervous returns */
 @keyframes ai-shifty-eyes {
-  0%   { transform: translate(0, 0); }
-  8%   { transform: translate(3px, -1px); }     /* glance upper-right */
-  14%  { transform: translate(3px, -1px); }     /* hold */
-  18%  { transform: translate(0, 0); }          /* back to center */
-  25%  { transform: translate(-3px, 0.5px); }   /* glance left */
-  32%  { transform: translate(-3px, 0.5px); }   /* hold */
-  36%  { transform: translate(0, 0); }          /* center */
-  44%  { transform: translate(0, 0); }          /* pause — looking straight */
-  50%  { transform: translate(2px, 2px); }      /* glance down-right */
-  54%  { transform: translate(2px, 2px); }      /* hold */
-  58%  { transform: translate(0, 0); }          /* center */
-  66%  { transform: translate(-2px, -1.5px); }  /* glance upper-left */
-  72%  { transform: translate(-2px, -1.5px); }  /* hold */
-  76%  { transform: translate(0, 0); }          /* center */
-  82%  { transform: translate(3.5px, 0); }      /* hard right */
-  86%  { transform: translate(3.5px, 0); }      /* hold */
-  91%  { transform: translate(0, 0); }          /* snap back */
-  100% { transform: translate(0, 0); }          /* rest at center */
+  0%    { transform: translate(0, 0); }
+  /* stare dead ahead... too long */
+  6%    { transform: translate(0, 0); }
+  /* snap right — something moved */
+  7%    { transform: translate(3.5px, -0.5px); }
+  11%   { transform: translate(3.5px, -0.5px); }
+  11.5% { transform: translate(3.5px, 1px); }           /* micro-twitch down */
+  12%   { transform: translate(3.5px, -0.5px); }
+  15%   { transform: translate(0, 0); }                  /* snap back */
+  /* uneasy pause */
+  20%   { transform: translate(0, 0); }
+  /* hard left — checking periphery */
+  20.5% { transform: translate(-4px, 0); }
+  26%   { transform: translate(-4px, 0); }
+  26.5% { transform: translate(-4px, -1px); }            /* twitch up */
+  27%   { transform: translate(-4px, 0.5px); }           /* twitch down */
+  27.5% { transform: translate(-4px, 0); }
+  30%   { transform: translate(0, 0); }                  /* return */
+  /* brief calm... */
+  34%   { transform: translate(0, 0); }
+  /* double-take right then left */
+  34.5% { transform: translate(3px, 0); }
+  36%   { transform: translate(3px, 0); }
+  36.5% { transform: translate(-3px, 0); }               /* whip left */
+  39%   { transform: translate(-3px, 0); }
+  41%   { transform: translate(0, 0); }
+  /* look up — heard something above */
+  47%   { transform: translate(0, 0); }
+  47.5% { transform: translate(0.5px, -3px); }
+  52%   { transform: translate(0.5px, -3px); }
+  52.5% { transform: translate(0, 0); }                  /* snap down */
+  /* suspicious squint (pupils narrow via scale) */
+  56%   { transform: translate(0, 0) scaleY(1); }
+  57%   { transform: translate(2px, 0) scaleY(0.6); }    /* narrowed */
+  62%   { transform: translate(2px, 0) scaleY(0.6); }    /* holding squint */
+  63%   { transform: translate(0, 0) scaleY(1); }        /* relax */
+  /* paranoid sweep — slow drift right */
+  68%   { transform: translate(0, 0); }
+  73%   { transform: translate(4px, 0.5px); }            /* slow creep */
+  74%   { transform: translate(4px, 0.5px); }
+  /* snap to opposite corner */
+  74.5% { transform: translate(-3.5px, -2px); }
+  78%   { transform: translate(-3.5px, -2px); }
+  80%   { transform: translate(0, 0); }
+  /* freeze — spotted something */
+  85%   { transform: translate(0, 0); }
+  /* rapid left-right-left flutter */
+  85.5% { transform: translate(-2.5px, 0); }
+  86%   { transform: translate(2.5px, 0); }
+  86.5% { transform: translate(-2px, 0); }
+  87%   { transform: translate(1.5px, 0); }
+  87.5% { transform: translate(0, 0); }
+  /* settle back to forward stare */
+  100%  { transform: translate(0, 0); }
 }
 
 /* Resting state: gentle nudge */
