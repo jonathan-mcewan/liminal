@@ -745,7 +745,7 @@
       import { generateCard, deriveColorParams }  from "./modules/card.js";
       import { SvgContext }    from "./modules/svg-ctx.js";
       import { artCountLabel, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, ARTIFACT_NAMES, THEME_PRESETS, hashString } from "./modules/constants.js";
-      import { AI_GREETINGS, AI_TRUISMS, AI_QUESTIONS, AI_THINKING, AI_FIRST_NAMES, AI_LAST_NAMES, AI_TITLE_PARTS, AI_FILLERS } from "./modules/ideate-iq.js";
+      import { AI_GREETINGS, AI_TRUISMS, AI_QUESTIONS, AI_THINKING, AI_REVEALS, AI_FIRST_NAMES, AI_LAST_NAMES, AI_TITLE_PARTS, AI_FILLERS } from "./modules/ideate-iq.js";
       import { drawBackgroundTexture } from "./modules/bg-styles.js";
       import { drawArtifacts, getArtifactTypesForSeed } from "./modules/background.js";
       import { drawPatterns } from "./modules/patterns.js";
@@ -2215,10 +2215,14 @@
       }
 
       function aiFill(template, userInput) {
+        const memo = {};
         return template.replace(/\{(\w+)\}/g, (_, key) => {
           if (key === 'input') return userInput;
+          if (memo[key] !== undefined) return memo[key];
           const pool = AI_FILLERS[key];
-          return pool ? pool[Math.floor(Math.random() * pool.length)] : `{${key}}`;
+          const value = pool ? pool[Math.floor(Math.random() * pool.length)] : `{${key}}`;
+          memo[key] = value;
+          return value;
         });
       }
 
@@ -2271,8 +2275,10 @@
           typingEl.remove();
           if (shouldGenerate) {
             const result = aiGenerate(allKeywords);
-            const truism = aiFill(AI_TRUISMS[Math.floor(Math.random() * AI_TRUISMS.length)], userText);
-            aiAddMsg(`${truism} Meet ${result.name}, ${result.title}.`, 'ai-msg-bot');
+            const reveal = aiFill(AI_REVEALS[Math.floor(Math.random() * AI_REVEALS.length)], userText)
+              .replace('{name}', result.name)
+              .replace('{title}', result.title);
+            aiAddMsg(reveal, 'ai-msg-bot');
 
             // Apply to card — seed text goes into the seed input (hashString converts it)
             dom.personNameInput.value = result.name;
