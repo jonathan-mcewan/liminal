@@ -1649,10 +1649,10 @@ button svg {
 /* Procedural SVG background injected by ai-panel-bg.js */
 .ai-panel-bg {
   position: absolute;
-  bottom: 3rem;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 92%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
   opacity: 0;

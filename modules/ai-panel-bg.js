@@ -377,7 +377,7 @@ export function generatePanelBackground(opts = {}) {
 
   // assemble
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax meet">`,
     buildDefs(),
     `<g mask="url(#pb-vm)" opacity="${groupOpacity}">`,
     parts.join(''),
