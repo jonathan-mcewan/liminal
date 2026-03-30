@@ -1601,41 +1601,41 @@ button svg {
   background:
     /* ── central orb glow ── */
     radial-gradient(circle at 50% 55%,
-      rgba(80,200,255,0.10) 0%, rgba(80,200,255,0.03) 8%, transparent 16%),
+      rgba(80,200,255,0.30) 0%, rgba(80,200,255,0.08) 10%, transparent 22%),
 
     /* ── inner diamond outline ── */
-    linear-gradient(45deg,  transparent 42%, rgba(80,200,255,0.07) 42.5%, transparent 43%),
-    linear-gradient(-45deg, transparent 42%, rgba(80,200,255,0.07) 42.5%, transparent 43%),
-    linear-gradient(135deg, transparent 42%, rgba(80,200,255,0.07) 42.5%, transparent 43%),
-    linear-gradient(225deg, transparent 42%, rgba(80,200,255,0.07) 42.5%, transparent 43%),
+    linear-gradient(45deg,  transparent 42%, rgba(80,200,255,0.18) 42.4%, transparent 43%),
+    linear-gradient(-45deg, transparent 42%, rgba(80,200,255,0.18) 42.4%, transparent 43%),
+    linear-gradient(135deg, transparent 42%, rgba(80,200,255,0.18) 42.4%, transparent 43%),
+    linear-gradient(225deg, transparent 42%, rgba(80,200,255,0.18) 42.4%, transparent 43%),
 
     /* ── outer diamond outline ── */
-    linear-gradient(45deg,  transparent 30%, rgba(80,200,255,0.04) 30.3%, transparent 30.6%),
-    linear-gradient(-45deg, transparent 30%, rgba(80,200,255,0.04) 30.3%, transparent 30.6%),
-    linear-gradient(135deg, transparent 30%, rgba(80,200,255,0.04) 30.3%, transparent 30.6%),
-    linear-gradient(225deg, transparent 30%, rgba(80,200,255,0.04) 30.3%, transparent 30.6%),
+    linear-gradient(45deg,  transparent 30%, rgba(80,200,255,0.10) 30.3%, transparent 30.7%),
+    linear-gradient(-45deg, transparent 30%, rgba(80,200,255,0.10) 30.3%, transparent 30.7%),
+    linear-gradient(135deg, transparent 30%, rgba(80,200,255,0.10) 30.3%, transparent 30.7%),
+    linear-gradient(225deg, transparent 30%, rgba(80,200,255,0.10) 30.3%, transparent 30.7%),
 
     /* ── amber accent lines — horizontal through center ── */
     linear-gradient(0deg,
-      transparent 49%, rgba(200,160,60,0.06) 49.5%, transparent 50%),
+      transparent 49%, rgba(200,160,60,0.16) 49.6%, transparent 50.2%),
     linear-gradient(0deg,
-      transparent 53%, rgba(200,160,60,0.04) 53.3%, transparent 53.6%),
+      transparent 53%, rgba(200,160,60,0.10) 53.3%, transparent 53.7%),
     linear-gradient(0deg,
-      transparent 45%, rgba(200,160,60,0.04) 45.3%, transparent 45.6%),
+      transparent 45%, rgba(200,160,60,0.10) 45.3%, transparent 45.7%),
 
     /* ── vertical light column ── */
     linear-gradient(90deg,
-      transparent 42%, rgba(80,200,255,0.03) 46%,
-      rgba(80,200,255,0.05) 50%,
-      rgba(80,200,255,0.03) 54%, transparent 58%),
+      transparent 40%, rgba(80,200,255,0.06) 45%,
+      rgba(80,200,255,0.12) 50%,
+      rgba(80,200,255,0.06) 55%, transparent 60%),
 
     /* ── base reflection / warm glow at bottom ── */
-    radial-gradient(ellipse 60% 30% at 50% 90%,
-      rgba(200,160,60,0.08) 0%, rgba(200,160,60,0.03) 40%, transparent 70%),
+    radial-gradient(ellipse 60% 25% at 50% 92%,
+      rgba(200,160,60,0.22) 0%, rgba(200,160,60,0.06) 50%, transparent 80%),
 
-    /* ── fade to panel background at edges ── */
-    radial-gradient(ellipse 70% 60% at 50% 55%,
-      transparent 40%, oklch(0.08 0.01 250 / 98%) 100%);
+    /* ── soft fade at outer edges ── */
+    radial-gradient(ellipse 80% 70% at 50% 55%,
+      transparent 50%, oklch(0.08 0.01 250) 100%);
 }
 .ai-panel.open::after {
   opacity: 1;
