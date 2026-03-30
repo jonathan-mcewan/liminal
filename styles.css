@@ -1601,7 +1601,10 @@ button svg {
   flex-direction: column;
   overflow: hidden;
   visibility: hidden;
-  background: oklch(0.08 0.01 250 / 98%);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 90%, rgba(80,200,255,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 50% 85%, rgba(200,160,60,0.025) 0%, transparent 60%),
+    oklch(0.08 0.01 250 / 98%);
   border-left: 0px solid rgba(80,200,255,0.0);
   box-shadow: none;
   transition:
@@ -1617,7 +1620,10 @@ button svg {
   width: 340px;
   min-width: 340px;
   border-left: 1px solid rgba(80,200,255,0.20);
-  box-shadow: -8px 0 40px rgba(0,0,0,0.4), 0 0 60px rgba(80,200,255,0.04) inset;
+  box-shadow:
+    -8px 0 40px rgba(0,0,0,0.4),
+    0 0 60px rgba(80,200,255,0.04) inset,
+    inset 0 -80px 80px -40px rgba(80,200,255,0.015);
   transition:
     width           0.5s cubic-bezier(0.22, 0.6, 0.36, 1),
     min-width       0.5s cubic-bezier(0.22, 0.6, 0.36, 1),
