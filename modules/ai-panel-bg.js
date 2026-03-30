@@ -197,10 +197,7 @@ function buildDefs() {
     <stop offset="100%" stop-color="${AMBER}" stop-opacity="0"/>
   </radialGradient>
   <linearGradient id="pb-upfade" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="white" stop-opacity="0"/>
-    <stop offset="15%" stop-color="white" stop-opacity="0.05"/>
-    <stop offset="45%" stop-color="white" stop-opacity="0.40"/>
-    <stop offset="70%" stop-color="white" stop-opacity="0.78"/>
+    <stop offset="0%" stop-color="white" stop-opacity="1"/>
     <stop offset="100%" stop-color="white" stop-opacity="1"/>
   </linearGradient>
   <mask id="pb-vm"><rect width="${W}" height="${H}" fill="url(#pb-upfade)"/></mask>
@@ -249,7 +246,7 @@ export function generatePanelBackground(opts = {}) {
     branchLevels = 6,
     spineSpacing = 48,
     baseY = 375,
-    groupOpacity = 0.5,
+    groupOpacity = 1.0,
   } = opts;
 
   const parts = [];
