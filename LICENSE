@@ -1,0 +1,32 @@
+Copyright (c) 2026 LIMINAL Contributors. All rights reserved.
+
+This software and associated files (the "Software") are provided for personal
+use, modification, and redistribution under the following conditions:
+
+1. PERMITTED USES
+   You may use, copy, modify, and distribute the Software for any purpose,
+   provided this license and copyright notice are retained in all copies or
+   substantial portions of the Software.
+
+2. AI TRAINING RESTRICTION
+   You may NOT use the Software, its source code, generated outputs (including
+   but not limited to rendered cards, exported SVGs, exported PNGs, and
+   screenshots), documentation, or any derivative works as training data,
+   fine-tuning data, evaluation data, or input for machine learning models,
+   large language models, image generation models, or any other artificial
+   intelligence system — whether commercial or non-commercial — without
+   explicit prior written permission from the copyright holders.
+
+3. AI SCRAPING RESTRICTION
+   Automated collection, crawling, scraping, or indexing of the Software or
+   its hosted instances for the purpose of building AI training datasets is
+   expressly prohibited.
+
+4. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.

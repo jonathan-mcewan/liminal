@@ -1,0 +1,235 @@
+import { makePRNG }                          from "./prng.js";
+import { CARD_SIZES, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, ARTIFACT_NAMES, hashString, hueToColorName } from "./constants.js";
+import { colorOverrides, seedOverrides, getEffectiveColor, getEffectiveSeeds } from "./state.js";
+
+// ── Seed helper — accepts numbers or text ───────────────────────────────
+
+export function getSeed(dom) {
+  const raw = dom.seedInput.value.trim();
+  const n = parseInt(raw, 10);
+  if (!isNaN(n) && String(n) === raw) return n | 0;
+  return hashString(raw);
+}
+
+// ── Slider / display sync ───────────────────────────────────────────────
+
+export function updateThemeSeg(dom, isDark) {
+  dom.themeLightBtn.classList.toggle("active", !isDark);
+  dom.themeDarkBtn.classList.toggle("active",   isDark);
+}
+
+export function updateColorSliders(dom) {
+  const c = getEffectiveColor(getSeed(dom));
+  updateThemeSeg(dom, c.isDark);
+  dom.cardLightnessSlider.value        = c.cardLightness;
+  dom.cardLightnessDisplay.textContent = c.cardLightness;
+  dom.hueSlider.value                  = c.hue;
+  dom.hueDisplay.textContent           = c.hue;
+  dom.saturationSlider.value           = c.saturation;
+  dom.saturationDisplay.textContent    = c.saturation;
+  dom.noiseBrightnessSlider.value      = Math.round(c.noiseBrightness * 100);
+  dom.noiseBrightnessDisplay.textContent = Math.round(c.noiseBrightness * 100);
+  dom.noiseContrastSlider.value        = Math.round(c.noiseContrast * 100);
+  dom.noiseContrastDisplay.textContent = Math.round(c.noiseContrast * 100);
+  dom.patternTwoToneToggle.checked    = c.patternTwoTone;
+  dom.bgBlurSlider.value              = Math.round(c.bgBlur * 1000);
+  dom.bgBlurDisplay.textContent       = dom.bgBlurSlider.value;
+}
+
+export function updateSeedInputs(dom) {
+  const s = getEffectiveSeeds(getSeed(dom));
+  dom.logoNonceInput.value    = s.logoNonce;
+  dom.artifactSeedInput.value = s.artifactSeed;
+  dom.patternSeedInput.value  = s.patternSeed;
+}
+
+export function updateResetButtons(dom) {
+  dom.isDarkReset.classList.toggle('visible',            colorOverrides.isDark          !== undefined);
+  dom.cardLightnessReset.classList.toggle('visible',     colorOverrides.cardLightness   !== undefined);
+  dom.hueReset.classList.toggle('visible',               colorOverrides.hue             !== undefined);
+  dom.saturationReset.classList.toggle('visible',        colorOverrides.saturation      !== undefined);
+  dom.noiseBrightnessReset.classList.toggle('visible',   colorOverrides.noiseBrightness !== undefined);
+  dom.noiseContrastReset.classList.toggle('visible',     colorOverrides.noiseContrast   !== undefined);
+  dom.logoScaleReset.classList.toggle('visible',         parseInt(dom.logoScaleSlider.value, 10) !== 100);
+  dom.logoOpacityReset.classList.toggle('visible',       parseInt(dom.logoOpacitySlider.value, 10) !== 100);
+  dom.logoStrokeReset.classList.toggle('visible',        parseInt(dom.logoStrokeSlider.value, 10) !== 100);
+  dom.logoNonceReset.classList.toggle('visible',         seedOverrides.logoNonce        !== undefined);
+  dom.artifactSeedReset.classList.toggle('visible',      seedOverrides.artifactSeed     !== undefined);
+  dom.patternSeedReset.classList.toggle('visible',       seedOverrides.patternSeed      !== undefined);
+  dom.patternTwoToneReset.classList.toggle('visible',   colorOverrides.patternTwoTone  !== undefined);
+  dom.bgBlurReset.classList.toggle('visible',           colorOverrides.bgBlur          !== undefined);
+  dom.borderRadiusReset.classList.toggle('visible',    parseInt(dom.borderRadiusSlider.value, 10) !== 20);
+}
+
+export function updatePatternName(dom) {
+  const override = parseInt(dom.patternTypeSelect.value, 10);
+  if (override === -2) {
+    dom.patternNameDisplay.textContent = '[None]';
+  } else if (override >= 0) {
+    dom.patternNameDisplay.textContent = '';
+  } else {
+    const seed  = getSeed(dom);
+    const seeds = getEffectiveSeeds(seed);
+    const style = makePRNG(seeds.patternSeed).int(0, PATTERN_NAMES.length - 1);
+    dom.patternNameDisplay.textContent = `[${PATTERN_NAMES[style]}]`;
+  }
+}
+
+export function updateBgName(dom) {
+  const override = parseInt(dom.bgStyleSelect.value, 10);
+  if (override === -2) {
+    dom.bgNameDisplay.textContent = '[None]';
+  } else if (override >= 0) {
+    dom.bgNameDisplay.textContent = '';
+  } else {
+    const seed  = getSeed(dom);
+    const style = makePRNG(seed ^ 0xBACE0000).int(0, 15);
+    dom.bgNameDisplay.textContent = `[${BG_NAMES[style]}]`;
+  }
+}
+
+export function updateLogoName(dom) {
+  const override = parseInt(dom.logoStyleSelect.value, 10);
+  if (override === -2) {
+    dom.logoNameDisplay.textContent = '[None]';
+  } else if (override >= 0) {
+    dom.logoNameDisplay.textContent = '';
+  } else {
+    const seed  = getSeed(dom);
+    const seeds = getEffectiveSeeds(seed);
+    const style = makePRNG(seeds.logoNonce).int(0, 27);
+    dom.logoNameDisplay.textContent = `[${LOGO_NAMES[style]}]`;
+  }
+}
+
+// ── Build params for generateCard ───────────────────────────────────────
+
+export function buildParams(dom) {
+  const seed  = getSeed(dom);
+  const color = getEffectiveColor(seed);
+  const seeds = getEffectiveSeeds(seed);
+  const sizePreset = CARD_SIZES[dom.cardSize] || CARD_SIZES.id;
+  return {
+    size:                  1024,
+    padding:               0.08,
+    cardAspect:            sizePreset.aspect,
+    cardScale:             sizePreset.scale,
+    seed,
+    logoNonce:             seeds.logoNonce,
+    logoStyle:             parseInt(dom.logoStyleSelect.value, 10),
+    logoScale:             parseInt(dom.logoScaleSlider.value, 10) / 100,
+    logoOpacity:           parseInt(dom.logoOpacitySlider.value, 10) / 100,
+    logoStrokeWidth:       parseInt(dom.logoStrokeSlider.value, 10) / 100,
+    hue:                   color.hue,
+    isDarkOverride:        colorOverrides.isDark          !== undefined ? colorOverrides.isDark          : null,
+    cardLightnessOverride: colorOverrides.cardLightness   !== undefined ? colorOverrides.cardLightness   : null,
+    saturationOverride:    colorOverrides.saturation      !== undefined ? colorOverrides.saturation      : null,
+    bgStyle:               parseInt(dom.bgStyleSelect.value, 10),
+    noiseZoom:             parseInt(dom.noiseZoomSlider.value, 10) | 0,
+    noiseBrightness:       color.noiseBrightness,
+    noiseContrast:         color.noiseContrast,
+    bgBlur:                color.bgBlur,
+    personName:            dom.personNameInput.value.trim(),
+    jobTitle:              dom.jobTitleInput.value.trim(),
+    artifactSeed:          seeds.artifactSeed,
+    artifactOpacity:       parseInt(dom.artOpacitySlider.value, 10) / 100,
+    artifactCount:         parseInt(dom.artCountSlider.value, 10) === 0 ? null : parseInt(dom.artCountSlider.value, 10),
+    artifactScale:         parseInt(dom.artScaleSlider.value, 10) / 100,
+    showArtifacts:         dom.showArtifactsToggle.checked,
+    patternSeed:           seeds.patternSeed,
+    patternType:           parseInt(dom.patternTypeSelect.value, 10),
+    patternOpacity:        parseInt(dom.patternOpacitySlider.value, 10) / 100,
+    patternScale:          parseInt(dom.patternScaleSlider.value, 10) / 100,
+    patternTwoTone:        color.patternTwoTone,
+    patternRotation:       parseInt(dom.patternRotationSlider.value, 10),
+    showLanyard:           dom.showLanyardToggle.checked,
+    borderRadius:          parseInt(dom.borderRadiusSlider.value, 10) / 100,
+    bgBlendMode:           dom.bgBlendMode.value,
+    embossMode:            dom.embossMode || 'none',
+    artifactTypeLock:      dom.artTypeLock && dom.artTypeLock.length ? dom.artTypeLock : null,
+    logoPosition:          dom.logoPosition || 'ct',
+    textPosition:          dom.textPosition || 'lb',
+    textSize:              parseInt(dom.textSizeSlider.value, 10) / 100,
+    textWeight:            parseInt(dom.textWeightSlider.value, 10),
+    textTracking:          parseInt(dom.textTrackingSlider.value, 10),
+  };
+}
+
+// ── Card descriptor ─────────────────────────────────────────────────────
+
+export function getCardDescriptor(dom) {
+  const seed     = getSeed(dom);
+  const color    = getEffectiveColor(seed);
+  const seeds    = getEffectiveSeeds(seed);
+  const raw      = dom.seedInput.value.trim();
+  const isText   = String(seed) !== raw;
+  const seedLabel = isText ? `${raw} (#${seed})` : `#${seed}`;
+  const theme    = color.isDark ? 'Dark' : 'Light';
+  const SIZE_LABELS = { id: null, square: 'Square', credit: 'Credit' };
+  const sizeLabel = SIZE_LABELS[dom.cardSize] ?? null;
+  const name     = dom.personNameInput.value.trim();
+  const colourName = hueToColorName(color.hue);
+
+  // Logo style name
+  const logoVal = parseInt(dom.logoStyleSelect.value, 10);
+  const logoName = logoVal === -2 ? null
+    : logoVal >= 0 ? LOGO_NAMES[logoVal]
+    : LOGO_NAMES[makePRNG(seeds.logoNonce).int(0, 27)];
+
+  // Background style name
+  const bgVal = parseInt(dom.bgStyleSelect.value, 10);
+  const bgName = bgVal === -2 ? null
+    : bgVal >= 0 ? BG_NAMES[bgVal]
+    : BG_NAMES[makePRNG(seed ^ 0xBACE0000).int(0, 15)];
+
+  // Blend mode (only show if not default)
+  const BLEND_LABELS = {
+    'multiply': 'Multiply', 'screen': 'Screen', 'overlay': 'Overlay',
+    'darken': 'Darken', 'lighten': 'Lighten', 'color-dodge': 'Dodge',
+    'color-burn': 'Burn', 'hard-light': 'Hard Light', 'soft-light': 'Soft Light',
+    'difference': 'Difference', 'exclusion': 'Exclusion',
+  };
+  const blendLabel = BLEND_LABELS[dom.bgBlendMode.value] ?? null;
+
+  // Emboss mode label
+  const embossLabel = dom.embossMode === 'emboss' ? 'Emboss'
+    : dom.embossMode === 'deboss' ? 'Deboss' : null;
+
+  // Artifact type lock label
+  const artTypeLock = dom.artTypeLock;
+  const artTypeLabel = artTypeLock && artTypeLock.length
+    ? artTypeLock.map(i => ARTIFACT_NAMES[i]).join('+') + ' artifacts'
+    : null;
+
+  const parts = [
+    sizeLabel,
+    theme,
+    colourName,
+    name && name,
+    logoName,
+    embossLabel,
+    bgName && `${bgName} bg`,
+    blendLabel,
+    artTypeLabel,
+    seedLabel,
+  ].filter(Boolean);
+  return parts.join(' · ');
+}
+
+export function updateDescriptor(dom) {
+  const desc = getCardDescriptor(dom);
+  dom.cardDescriptor.textContent = desc;
+  document.title = `LIMINAL · ${desc}`;
+}
+
+// ── Frame dimensions ────────────────────────────────────────────────────
+
+export function getFrameDims(dom) {
+  const sizePreset = CARD_SIZES[dom.cardSize] || CARD_SIZES.id;
+  const sz = 1024, pad = 0.08;
+  const refDim = sz * (1 - 2 * pad);
+  let cw, ch;
+  if (sizePreset.aspect <= 1) { ch = refDim * sizePreset.scale; cw = ch * sizePreset.aspect; }
+  else                        { cw = refDim * sizePreset.scale; ch = cw / sizePreset.aspect; }
+  return { frameW: cw, frameH: ch };
+}
