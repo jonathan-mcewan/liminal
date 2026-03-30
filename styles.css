@@ -1602,8 +1602,7 @@ button svg {
   overflow: hidden;
   visibility: hidden;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 90%, rgba(80,200,255,0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 30% at 50% 85%, rgba(200,160,60,0.025) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 40% at 50% 95%, rgba(80,200,255,0.035) 0%, transparent 70%),
     oklch(0.08 0.01 250 / 98%);
   border-left: 0px solid rgba(80,200,255,0.0);
   box-shadow: none;
@@ -1622,8 +1621,7 @@ button svg {
   border-left: 1px solid rgba(80,200,255,0.20);
   box-shadow:
     -8px 0 40px rgba(0,0,0,0.4),
-    0 0 60px rgba(80,200,255,0.04) inset,
-    inset 0 -80px 80px -40px rgba(80,200,255,0.015);
+    0 0 60px rgba(80,200,255,0.04) inset;
   transition:
     width           0.5s cubic-bezier(0.22, 0.6, 0.36, 1),
     min-width       0.5s cubic-bezier(0.22, 0.6, 0.36, 1),
@@ -1632,13 +1630,13 @@ button svg {
     visibility      0s linear 0s;
 }
 
-/* Ancient-tech growth pattern — procedurally generated SVG injected by JS */
+/* Ancient-tech strata pattern — procedurally generated SVG injected by JS */
 .ai-panel-bg {
   position: absolute;
   bottom: 3rem;
   left: 0;
   right: 0;
-  height: 80%;
+  height: 92%;
   pointer-events: none;
   z-index: 0;
   opacity: 0;
