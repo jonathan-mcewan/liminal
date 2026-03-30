@@ -1,0 +1,2800 @@
+<!doctype html>
+<!-- ES modules require a local HTTP server (e.g. `npx serve .` or VS Code Live Server) -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <title>LIMINAL — Zero-Trust Badge-Native Infrastructure</title>
+
+    <!-- SEO -->
+    <meta name="description" content="Zero-trust badge-native infrastructure. Colour, pattern, logo, texture — every parameter lives in the space between randomness and intention." />
+    <meta name="author" content="LIMINAL Team" />
+    <meta name="application-name" content="LIMINAL" />
+    <meta name="theme-color" content="#0d0d14" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="LIMINAL — Zero-Trust Badge-Native Infrastructure" />
+    <meta property="og:description" content="Zero-trust badge-native infrastructure. Colour, pattern, logo, and texture all derive from a single number." />
+    <meta property="og:site_name" content="LIMINAL" />
+    <meta property="og:url" content="https://jonathan-mcewan.github.io/liminal/" />
+    <meta property="og:image" content="https://jonathan-mcewan.github.io/liminal/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="LIMINAL — diagonal stripes through a dark field, zero-trust badge-native infrastructure" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LIMINAL — Zero-Trust Badge-Native Infrastructure" />
+    <meta name="twitter:description" content="Zero-trust badge-native infrastructure. Colour, pattern, logo, and texture all derive from a single number." />
+    <meta name="twitter:image" content="https://jonathan-mcewan.github.io/liminal/og-image.png" />
+
+    <!-- Favicon & touch icons -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="LIMINAL" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- AI training opt-out -->
+    <meta name="robots" content="noai, noimageai" />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "LIMINAL",
+      "description": "Zero-trust badge-native infrastructure.",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires a modern browser with ES module and Canvas 2D support",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "LIMINAL Team"
+      }
+    }
+    </script>
+
+    <!-- Canonical URL (default: GitHub Pages; updated at runtime if hosted elsewhere) -->
+    <link rel="canonical" href="https://jonathan-mcewan.github.io/liminal/" />
+    <script>
+    (function () {
+      var base = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
+      document.querySelector('link[rel="canonical"]').href = base;
+      document.querySelector('meta[property="og:url"]').content = base;
+      ['og:image', 'twitter:image'].forEach(function (attr) {
+        var isOg = attr.startsWith('og:');
+        var sel = isOg ? 'meta[property="' + attr + '"]' : 'meta[name="' + attr + '"]';
+        var el = document.querySelector(sel);
+        if (el) el.content = base + 'og-image.png';
+      });
+    })();
+    </script>
+
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  </head>
+  <body>
+
+    <!-- ── Left control panel ─────────────────────────────────────────────── -->
+    <aside class="panel">
+
+      <div class="brand brand-mobile">
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <clipPath id="lm-c2">
+              <circle cx="16" cy="16" r="13.4"/>
+            </clipPath>
+          </defs>
+          <g clip-path="url(#lm-c2)" stroke="rgba(255,255,255,0.70)" stroke-width="1.15" stroke-linecap="butt">
+            <line x1="-5" y1="20"   x2="20"   y2="-5"/>
+            <line x1="-5" y1="24.3" x2="24.3" y2="-5"/>
+            <line x1="-5" y1="28.5" x2="28.5" y2="-5"/>
+            <line x1="-5" y1="32.8" x2="32.8" y2="-5"/>
+            <line x1="-5" y1="37"   x2="37"   y2="-5"/>
+            <line x1="-5" y1="41.2" x2="41.2" y2="-5"/>
+            <line x1="-5" y1="45.5" x2="45.5" y2="-5"/>
+            <line x1="-5" y1="49.7" x2="49.7" y2="-5"/>
+            <line x1="-5" y1="54"   x2="54"   y2="-5"/>
+          </g>
+          <circle cx="16" cy="16" r="13.4" fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="1.15"/>
+        </svg>
+        <span class="brand-name">LIMINAL</span>
+      </div>
+
+      <div class="panel-section">
+        <h2><i data-lucide="fingerprint"></i>Card</h2>
+        <div class="render-mode-toggle">
+          <button id="btn-size-id"     class="mode-btn active">ID Card</button>
+          <button id="btn-size-square" class="mode-btn">Square</button>
+          <button id="btn-size-credit" class="mode-btn">Credit</button>
+        </div>
+        <div class="render-mode-toggle">
+          <button id="btn-mode-canvas" class="mode-btn">Canvas</button>
+          <button id="btn-mode-svg"    class="mode-btn active">SVG</button>
+        </div>
+        <div class="field">
+          <span>Seed</span>
+          <input id="seed" type="text" value="42" placeholder="number or text" />
+        </div>
+        <div class="field field--row">
+          <label class="toggle-switch"><input id="show-lanyard" type="checkbox" /><span class="toggle-track"></span></label>
+          <span>Lanyard Hole</span>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Corners <span id="border-radius-display">20%</span></span>
+            <button class="btn-reset" id="border-radius-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="border-radius" type="range" min="0" max="100" step="1" value="20" />
+        </div>
+      </div>
+
+     
+      <div class="panel-section">
+        <h2><i data-lucide="monitor"></i>Actions</h2>
+        <div class="card-actions">
+          <button id="btn-rand"><i data-lucide="shuffle"></i>Shuffle</button>
+          <button id="btn-micro-shuffle" title="Shuffle logo, pattern &amp; artifact seeds"><i data-lucide="dice-3"></i>Vary</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-favourites"><i data-lucide="bookmark"></i>Favourites</button>
+          <button id="btn-reset-all" class="btn-action-danger" title="Reset all overrides (keep name, title, seed)"><i data-lucide="rotate-ccw"></i>Reset</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-export"><i data-lucide="download"></i>Export SVG</button>
+          <select id="export-dpi" title="Export resolution">
+            <option value="1">1×</option>
+            <option value="2" selected>2×</option>
+            <option value="3">3×</option>
+          </select>
+        </div>
+        <div class="card-actions">
+          <button id="btn-copy-img"><i data-lucide="clipboard-copy"></i>Copy Image</button>
+          <button id="btn-copy-link"><i data-lucide="link"></i>Copy Link</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-export-json"><i data-lucide="file-json"></i>Export</button>
+          <button id="btn-import-json"><i data-lucide="file-input"></i>Import</button>
+        </div>
+        <div class="card-actions">
+          <button id="btn-enshittify" class="btn-enshittify"><i data-lucide="sparkles"></i>Go Pro</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2><i data-lucide="type"></i>Text</h2>
+        <div class="field">
+          <span>Name</span>
+          <input id="person-name" type="text" value="Alex Reeves" placeholder="Full name" />
+        </div>
+        <div class="field">
+          <span>Job Title</span>
+          <input id="job-title" type="text" value="Senior Engineer" placeholder="Job title" />
+        </div>
+        <div class="field">
+          <span>Text Position</span>
+          <div id="text-pos-grid" class="pos-grid">
+            <button data-pos="lt" title="Left Top">&#8598;</button>
+            <button data-pos="ct" title="Center Top">&#8593;</button>
+            <button data-pos="rt" title="Right Top">&#8599;</button>
+            <button data-pos="lm" title="Left Middle">&#8592;</button>
+            <button data-pos="cm" title="Center Middle">&#183;</button>
+            <button data-pos="rm" title="Right Middle">&#8594;</button>
+            <button data-pos="lb" title="Left Bottom" class="active">&#8601;</button>
+            <button data-pos="cb" title="Center Bottom">&#8595;</button>
+            <button data-pos="rb" title="Right Bottom">&#8600;</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Size <span id="text-size-display">100%</span></span>
+            <button class="btn-reset" id="text-size-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="text-size" type="range" min="50" max="200" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Weight <span id="text-weight-display">500</span></span>
+            <button class="btn-reset" id="text-weight-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="text-weight" type="range" min="100" max="900" step="100" value="500" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Tracking <span id="text-tracking-display">0</span></span>
+            <button class="btn-reset" id="text-tracking-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="text-tracking" type="range" min="-50" max="200" step="5" value="0" />
+        </div>
+      </div>
+
+
+      <div class="panel-section">
+        <h2><i data-lucide="palette"></i>Colour</h2>
+        <details class="preset-details">
+          <summary>Presets</summary>
+          <div id="theme-preset-grid" class="theme-grid"></div>
+        </details>
+        <div class="colour-swatches" id="colour-swatches"></div>
+        <div class="hsl-picker" id="hsl-picker">
+          <canvas class="hsl-picker-sl" id="hsl-picker-sl" width="180" height="180"></canvas>
+          <canvas class="hsl-picker-hue" id="hsl-picker-hue" width="180" height="16"></canvas>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Hue <span id="hue-value-display"></span>&deg;</span>
+            <button class="btn-reset" id="hue-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="hue" type="range" min="0" max="359" value="220" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Saturation <span id="saturation-value-display"></span></span>
+            <button class="btn-reset" id="saturation-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="saturation" type="range" min="0" max="100" step="1" value="50" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Theme</span>
+            <button class="btn-reset" id="dark-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="seg-control" id="theme-seg">
+            <button id="theme-light">Light</button>
+            <button id="theme-dark">Dark</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Lightness <span id="lightness-value-display"></span></span>
+            <button class="btn-reset" id="lightness-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="card-lightness" type="range" min="0" max="100" step="1" value="16" />
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2><i data-lucide="layers"></i>Background</h2>
+        <div class="field">
+          <span>Style <span id="bg-name-display"></span></span>
+          <div id="bg-style-grid" class="logo-grid"></div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Zoom <span id="noise-zoom-display">4</span></span>
+            <button class="btn-reset" id="noise-zoom-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="noise-zoom" type="range" min="2" max="16" step="1" value="4" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Brightness <span id="noise-brightness-display"></span></span>
+            <button class="btn-reset" id="noise-brightness-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="noise-brightness" type="range" min="0" max="30" step="1" value="6" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Contrast <span id="noise-contrast-display"></span></span>
+            <button class="btn-reset" id="noise-contrast-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="noise-contrast" type="range" min="0" max="20" step="1" value="5" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Blur <span id="bg-blur-display"></span></span>
+            <button class="btn-reset" id="bg-blur-reset" title="Reset to seed default">↺</button>
+          </div>
+          <input id="bg-blur" type="range" min="0" max="100" step="1" value="33" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Blend Mode</span>
+            <button class="btn-reset" id="bg-blend-reset" title="Reset to default">↺</button>
+          </div>
+          <select id="bg-blend-mode">
+            <option value="source-over" selected>Normal</option>
+            <option value="multiply">Multiply</option>
+            <option value="screen">Screen</option>
+            <option value="overlay">Overlay</option>
+            <option value="darken">Darken</option>
+            <option value="lighten">Lighten</option>
+            <option value="color-dodge">Color Dodge</option>
+            <option value="color-burn">Color Burn</option>
+            <option value="hard-light">Hard Light</option>
+            <option value="soft-light">Soft Light</option>
+            <option value="difference">Difference</option>
+            <option value="exclusion">Exclusion</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2><i data-lucide="shapes"></i>Logo</h2>
+        <div class="field">
+          <span>Style <span id="logo-name-display"></span></span>
+          <div id="logo-style-grid" class="logo-grid"></div>
+        </div>
+        <div class="field">
+          <span>Position</span>
+          <div id="logo-pos-grid" class="pos-grid">
+            <button data-pos="lt" title="Left Top">&#8598;</button>
+            <button data-pos="ct" title="Center Top" class="active">&#8593;</button>
+            <button data-pos="rt" title="Right Top">&#8599;</button>
+            <button data-pos="lm" title="Left Middle">&#8592;</button>
+            <button data-pos="cm" title="Center Middle">&#183;</button>
+            <button data-pos="rm" title="Right Middle">&#8594;</button>
+            <button data-pos="lb" title="Left Bottom">&#8601;</button>
+            <button data-pos="cb" title="Center Bottom">&#8595;</button>
+            <button data-pos="rb" title="Right Bottom">&#8600;</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Logo Seed</span>
+            <button class="btn-reset" id="logo-nonce-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="inline-row">
+            <input id="logo-nonce" type="number" value="0" min="0" max="999999" />
+            <button id="btn-next-logo">Next</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Scale <span id="logo-scale-display">100%</span></span>
+            <button class="btn-reset" id="logo-scale-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="logo-scale" type="range" min="25" max="200" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Opacity <span id="logo-opacity-display">100%</span></span>
+            <button class="btn-reset" id="logo-opacity-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="logo-opacity" type="range" min="0" max="100" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Stroke <span id="logo-stroke-display">100%</span></span>
+            <button class="btn-reset" id="logo-stroke-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="logo-stroke" type="range" min="25" max="300" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Effect</span>
+            <button class="btn-reset" id="emboss-reset" title="Reset to default">↺</button>
+          </div>
+          <div class="seg-control">
+            <button id="emboss-none" class="mode-btn active">None</button>
+            <button id="emboss-emboss" class="mode-btn">Emboss</button>
+            <button id="emboss-deboss" class="mode-btn">Deboss</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2><i data-lucide="grid-3x3"></i>Patterns</h2>
+        <div class="field">
+          <span>Type <span id="pattern-name-display"></span></span>
+          <div id="pattern-style-grid" class="logo-grid"></div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Seed</span>
+            <button class="btn-reset" id="pattern-seed-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="inline-row">
+            <input id="pattern-seed" type="number" value="0" min="0" max="999999" />
+            <button id="btn-next-pattern">Next</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Scale <span id="pattern-scale-display">100%</span></span>
+            <button class="btn-reset" id="pattern-scale-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="pattern-scale" type="range" min="25" max="200" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Rotation <span id="pattern-rotation-display">0</span>&deg;</span>
+            <button class="btn-reset" id="pattern-rotation-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="pattern-rotation" type="range" min="0" max="360" step="1" value="0" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Opacity <span id="pattern-opacity-display">15</span></span>
+            <button class="btn-reset" id="pattern-opacity-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="pattern-opacity" type="range" min="0" max="100" step="1" value="15" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Tone</span>
+            <button class="btn-reset" id="pattern-two-tone-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="seg-control">
+            <button id="tone-single" class="mode-btn">Single</button>
+            <button id="tone-two" class="mode-btn active">Two-Tone</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h2><i data-lucide="sparkles"></i>Artifacts</h2>
+        <div class="field">
+          <span>Type</span>
+          <div id="art-type-grid" class="logo-grid"></div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Seed</span>
+            <button class="btn-reset" id="artifact-seed-reset" title="Reset to seed default">↺</button>
+          </div>
+          <div class="inline-row">
+            <input id="artifact-seed" type="number" value="0" min="0" max="999999" />
+            <button id="btn-next-artifact">Next</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Count <span id="art-count-display"></span></span>
+            <button class="btn-reset" id="art-count-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="art-count" type="range" min="0" max="14" step="1" value="0" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Scale <span id="art-scale-display"></span></span>
+            <button class="btn-reset" id="art-scale-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="art-scale" type="range" min="25" max="200" step="5" value="100" />
+        </div>
+        <div class="field">
+          <div class="field-hdr">
+            <span>Opacity <span id="art-opacity-display"></span></span>
+            <button class="btn-reset" id="art-opacity-reset" title="Reset to default">↺</button>
+          </div>
+          <input id="art-opacity" type="range" min="0" max="60" step="1" value="20" />
+        </div>
+      </div>
+
+      <button class="btn-scroll-top" id="btn-scroll-top" title="Back to top" aria-label="Back to top">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 13V3M3 7l5-5 5 5"/>
+        </svg>
+      </button>
+    </aside>
+
+    <!-- ── Canvas area ────────────────────────────────────────────────────── -->
+    <main class="main">
+      <div class="canvas-wrap">
+        <div class="brand">
+          <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+            <defs>
+              <clipPath id="lm-c">
+                <circle cx="16" cy="16" r="13.4"/>
+              </clipPath>
+            </defs>
+            <g clip-path="url(#lm-c)" stroke="rgba(255,255,255,0.70)" stroke-width="1.15" stroke-linecap="butt">
+              <line x1="-5" y1="20"   x2="20"   y2="-5"/>
+              <line x1="-5" y1="24.3" x2="24.3" y2="-5"/>
+              <line x1="-5" y1="28.5" x2="28.5" y2="-5"/>
+              <line x1="-5" y1="32.8" x2="32.8" y2="-5"/>
+              <line x1="-5" y1="37"   x2="37"   y2="-5"/>
+              <line x1="-5" y1="41.2" x2="41.2" y2="-5"/>
+              <line x1="-5" y1="45.5" x2="45.5" y2="-5"/>
+              <line x1="-5" y1="49.7" x2="49.7" y2="-5"/>
+              <line x1="-5" y1="54"   x2="54"   y2="-5"/>
+            </g>
+            <circle cx="16" cy="16" r="13.4" fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="1.15"/>
+          </svg>
+          <span class="brand-name">LIMINAL</span>
+        </div>
+        <div class="card-scene">
+          <div class="card-body">
+            <div class="card-face card-front">
+              <canvas id="canvas" style="display:none"></canvas>
+              <div id="svg-output"></div>
+            </div>
+            <div class="card-face card-back">
+              <canvas id="canvas-back" style="display:none"></canvas>
+              <div id="svg-output-back"></div>
+              <div class="holo-sheen" id="holo-sheen"></div>
+            </div>
+            <div class="card-skeleton" id="card-skeleton"></div>
+          </div>
+        </div>
+        <div class="descriptor-row">
+          <p class="descriptor" id="card-descriptor"></p>
+        </div>
+      </div>
+
+      <!-- ── Hotkey legend + AI fab (inside main so they stay with the content area) -->
+      <button id="btn-ai-generate" class="ai-fab" title="IdeateIQ™">
+        <svg class="ai-eyes" viewBox="0 0 48 24" width="60" height="30">
+          <defs>
+            <filter id="chozo-glow">
+              <feGaussianBlur stdDeviation="0.8" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- left eye socket — angular diamond -->
+          <g filter="url(#chozo-glow)">
+            <path d="M13 3 L21 12 L13 21 L5 12 Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="bevel"/>
+            <!-- inner etch lines -->
+            <path d="M13 5.5 L18.5 12 L13 18.5 L7.5 12 Z" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
+            <!-- corner notches -->
+            <line x1="13" y1="3" x2="13" y2="5.5" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <line x1="5" y1="12" x2="7.5" y2="12" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <line x1="21" y1="12" x2="18.5" y2="12" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <line x1="13" y1="21" x2="13" y2="18.5" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <!-- slit pupil -->
+            <ellipse class="ai-pupil ai-pupil-l" cx="13" cy="12" rx="1.3" ry="4.2" fill="currentColor"/>
+          </g>
+          <!-- right eye socket — angular diamond -->
+          <g filter="url(#chozo-glow)">
+            <path d="M35 3 L43 12 L35 21 L27 12 Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="bevel"/>
+            <path d="M35 5.5 L40.5 12 L35 18.5 L29.5 12 Z" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
+            <line x1="35" y1="3" x2="35" y2="5.5" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <line x1="27" y1="12" x2="29.5" y2="12" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <line x1="43" y1="12" x2="40.5" y2="12" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <line x1="35" y1="21" x2="35" y2="18.5" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            <ellipse class="ai-pupil ai-pupil-r" cx="35" cy="12" rx="1.3" ry="4.2" fill="currentColor"/>
+          </g>
+          <!-- bridge glyph — small chevron between eyes -->
+          <path d="M22.5 10 L24 8 L25.5 10" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+          <path d="M22.5 14 L24 16 L25.5 14" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+        </svg>
+      </button>
+      <span class="ai-bubble" id="ai-bubble"></span>
+      <div class="hotkey-legend" id="hotkey-legend">
+        <div class="hotkey-buttons">
+          <button class="hotkey-toggle hotkey-pro" id="hotkey-pro" title="Go Pro"><i data-lucide="sparkles"></i></button>
+          <button class="hotkey-toggle hotkey-fav" id="btn-favourite" title="Save to favourites"><i data-lucide="star"></i></button>
+          <button class="hotkey-toggle" id="hotkey-favs-browser" title="Favourites"><i data-lucide="bookmark"></i></button>
+          <button class="hotkey-toggle" id="hotkey-toggle" title="Keyboard shortcuts"><i data-lucide="keyboard"></i></button>
+        </div>
+        <div class="hotkey-panel" id="hotkey-panel">
+          <div class="hotkey-row"><kbd>Space</kbd><span>Shuffle</span></div>
+          <div class="hotkey-row"><kbd>X</kbd><span>Vary</span></div>
+          <div class="hotkey-row"><kbd>E</kbd><span>Export</span></div>
+          <div class="hotkey-row"><kbd>R</kbd><span>Render</span></div>
+          <div class="hotkey-row"><kbd>C</kbd><span>Copy link</span></div>
+          <div class="hotkey-row"><kbd>&#9003;</kbd><span>Reset all</span></div>
+          <div class="hotkey-row"><kbd>F</kbd><span>Flip card</span></div>
+          <div class="hotkey-row"><kbd>&larr; &rarr;</kbd><span>Seed &plusmn;1</span></div>
+          <div class="hotkey-row"><kbd>&uarr; &darr;</kbd><span>Seed &plusmn;10</span></div>
+          <div class="hotkey-row"><kbd>1 2 3</kbd><span>ID / Sq / Credit</span></div>
+          <div class="hotkey-row"><kbd>S</kbd><span>SVG mode</span></div>
+          <div class="hotkey-row"><kbd>V</kbd><span>Canvas mode</span></div>
+          <div class="hotkey-row"><kbd>D</kbd><span>Toggle theme</span></div>
+          <div class="hotkey-row"><kbd>I</kbd><span>Copy image</span></div>
+          <div class="hotkey-row"><kbd>J</kbd><span>Export JSON</span></div>
+          <div class="hotkey-row"><kbd>B</kbd><span>Favourites</span></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── IdeateIQ™ chat panel ──────────────────────────────────────────── -->
+    <div id="ai-panel" class="ai-panel">
+      <div class="ai-panel-header">
+        <span class="ai-title">IdeateIQ™ <span class="ai-badge">AI</span> <span class="ai-badge">NEURAL</span> <span class="ai-badge">GPT</span> <span class="ai-badge">LLM</span></span>
+        <button id="ai-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <div id="ai-chat" class="ai-chat"></div>
+      <div class="ai-input-row">
+        <input id="ai-input" type="text" placeholder="Describe your ideal badge…" />
+        <button id="ai-send" class="btn-primary ai-send-btn">Send</button>
+      </div>
+    </div>
+
+    <!-- ── Favourites dialog ──────────────────────────────────────────────── -->
+    <dialog id="favourites-dialog" class="app-dialog app-dialog--wide">
+      <div class="dialog-header">
+        <h3>Favourites</h3>
+        <button id="favourites-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <div id="favourites-grid" class="favourites-grid"></div>
+      <p id="favourites-empty" class="dialog-hint" style="text-align:center; padding:2rem 0;">No favourites saved yet. Click the star below the card to save one.</p>
+      <div class="favourites-footer">
+        <button id="favourites-clear-all" class="btn-danger">Clear All</button>
+      </div>
+    </dialog>
+
+    <!-- ── Import dialog ─────────────────────────────────────────────────── -->
+    <dialog id="import-dialog" class="app-dialog">
+      <div class="dialog-header">
+        <h3>Import Settings</h3>
+        <button id="import-dialog-cancel-x" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <p class="dialog-hint">Paste JSON or choose a file</p>
+      <textarea id="import-textarea" rows="8" placeholder='{"v":1, "seed":"42", ...}'></textarea>
+      <div class="dialog-actions">
+        <button id="import-file-btn" class="btn-secondary">Choose File…</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" />
+        <div class="dialog-actions-right">
+          <button id="import-dialog-cancel" class="btn-secondary">Cancel</button>
+          <button id="import-dialog-apply" class="btn-primary">Apply</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ── Confirm dialog (reusable) ───────────────────────────────────────── -->
+    <dialog id="confirm-dialog" class="app-dialog">
+      <div class="dialog-header">
+        <h3 id="confirm-title">Confirm</h3>
+        <button id="confirm-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <p id="confirm-body" class="confirm-body"></p>
+      <div class="dialog-actions">
+        <div class="dialog-actions-right">
+          <button id="confirm-cancel" class="btn-secondary">Cancel</button>
+          <button id="confirm-ok" class="btn-danger">Delete</button>
+        </div>
+      </div>
+    </dialog>
+
+
+    <!-- ── Pro upsell dialog ──────────────────────────────────────────────── -->
+    <dialog id="pro-dialog" class="app-dialog pro-dialog">
+      <div class="dialog-header">
+        <h3 class="pro-title">LIMINAL PRICING</h3>
+        <button id="pro-close" class="btn-dialog-close" title="Close">&times;</button>
+      </div>
+      <p class="pricing-subtitle">Choose the tier that matches your tolerance for paying money for free software.</p>
+      <div class="pricing-grid">
+
+        <!-- ── Pro ──────────────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-pro">
+          <span class="tier-badge badge-pro">MOST POPULAR*</span>
+          <h4 class="tier-name tier-name--pro">Pro</h4>
+          <div class="tier-price tier-price--pro"><s class="tier-price-old">$24.99</s> $16.99<span class="tier-period">/mo</span></div>
+          <p class="tier-tagline">You deserve this. Probably.</p>
+          <ul class="tier-features">
+            <li><span class="ft-check check-pro">&#10003;</span>Smart Export Pacing&trade; (3/day)</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Premium 3-Second Render Delay</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Unlock hues past 180&deg;</li>
+            <li><span class="ft-check check-pro">&#10003;</span>SVG export (it&rsquo;s free, we just gate it)</li>
+            <li><span class="ft-check check-pro">&#10003;</span>AI seeds that are worse than random</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Unlimited shuffles (was 3/day)</li>
+            <li><span class="ft-check check-pro">&#10003;</span>Mandatory-login Card Vault&trade;</li>
+            <li><span class="ft-check check-pro">&#10003;</span>40% viewport cookie banner</li>
+          </ul>
+          <div class="tier-testimonial">
+            <p>&ldquo;I pay $16.99 to do the same thing, but slower.&rdquo;</p>
+            <span>&mdash; A Real Customer (we made them up)</span>
+          </div>
+          <button id="pro-subscribe" class="btn-tier btn-tier--pro">Subscribe Now</button>
+        </div>
+
+        <!-- ── Corporate ────────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-corporate">
+          <span class="tier-badge badge-corporate">FOR TEAMS</span>
+          <h4 class="tier-name tier-name--corporate">Corporate</h4>
+          <div class="tier-price tier-price--corporate">$7<span class="tier-period">/user/mo</span></div>
+          <p class="tier-tagline">Put your logo on it. Theoretically.</p>
+          <ul class="tier-features">
+            <li><span class="ft-check check-corporate">&#10003;</span>Remove &ldquo;Made with Liminal&rdquo; watermark&thinsp;<sup>&dagger;</sup></li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Custom client logo on every card&thinsp;<sup>&Dagger;</sup></li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Priority access to features that will never ship</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Brand-Compliant Seed Algorithm&trade;</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Dedicated account manager (Derek&thinsp;<sup>&sect;</sup>)</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Team analytics dashboard (it&rsquo;s a spreadsheet)</li>
+            <li><span class="ft-check check-corporate">&#10003;</span>Volume discount at 10,000+ seats</li>
+          </ul>
+          <div class="tier-footnotes">
+            <p><sup>&dagger;</sup> The watermark does not exist.</p>
+            <p><sup>&Dagger;</sup> This feature is perpetually with the developers. If someone actually pays money we might panic and build it. &thinsp;&#129335;</p>
+            <p><sup>&sect;</sup> Derek is a chatbot. Derek does not have answers. Derek has <em>enthusiasm</em>.</p>
+          </div>
+          <button id="corporate-demo" class="btn-tier btn-tier--corporate">Request Demo</button>
+        </div>
+
+        <!-- ── ??? ──────────────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-umbral">
+          <span class="tier-badge badge-umbral">BY INVITATION ONLY</span>
+          <h4 class="tier-name tier-name--umbral">Umbral</h4>
+          <div class="tier-price tier-price--umbral">&block;&block;&block;&block;&block;<span class="tier-period">/mo</span></div>
+          <p class="tier-tagline">If you have to ask, you&rsquo;re not ready.</p>
+          <ul class="tier-features tier-features--umbral">
+            <li><span class="ft-check check-umbral">&#10003;</span><span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></li>
+            <li><span class="ft-check check-umbral">&#10003;</span>Access to The Room</li>
+            <li><span class="ft-check check-umbral">&#10003;</span><span class="redacted">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span> with <span class="redacted">&#9608;&#9608;&#9608;&#9608;</span></li>
+            <li><span class="ft-check check-umbral">&#10003;</span>You&rsquo;ll know when you&rsquo;re ready</li>
+            <li><span class="ft-check check-umbral">&#10003;</span>Includes [REDACTED]</li>
+            <li><span class="ft-check check-umbral">&#10003;</span>Seeds from the other side</li>
+            <li><span class="ft-check check-umbral">&#10003;</span>NDA required. NDA is also redacted.</li>
+          </ul>
+          <button class="btn-tier btn-tier--umbral" disabled>You Are Not Ready</button>
+        </div>
+
+        <!-- ── Enterprise ───────────────────────────────────────────────────── -->
+        <div class="pricing-tier tier-enterprise">
+          <span class="tier-badge badge-enterprise">ENTERPRISE</span>
+          <h4 class="tier-name tier-name--enterprise">Enterprise</h4>
+          <div class="tier-price tier-price--enterprise">Let&rsquo;s Talk</div>
+          <p class="tier-tagline">For organisations that need a receipt.</p>
+          <ul class="tier-features">
+            <li><span class="ft-check check-enterprise">&#10003;</span>Everything in all tiers (except Umbral)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>99.9% uptime SLA (it runs in your browser)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>SOC 2 compliance (we wrote it on a Post-it)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>Dedicated Slack channel (it&rsquo;s just us)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>White-glove onboarding (we watch you open the URL)</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>Custom seed generation aligned to brand values</li>
+            <li><span class="ft-check check-enterprise">&#10003;</span>Quarterly Business Review (we show you a card)</li>
+          </ul>
+          <button id="enterprise-contact" class="btn-tier btn-tier--enterprise">Contact Sales</button>
+        </div>
+
+      </div>
+      <p class="pro-fine-print">* Most Popular among the 0 people currently subscribed. By clicking any button you agree to our 847-page Terms of Service, waive your right to a refund, and acknowledge that features may be moved to a future Ultra tier at any time. Cancel anytime (by registered mail to our Zurich office, singed in triplicate &mdash; singed, not signed). Corporate pricing does not include the upcoming Convenience Fee ($4.99/mo), the Fee Fee ($1.99/mo), or the Fee For The Fee Fee ($0.99/mo). Umbral tier participants agree not to discuss the existence of the Umbral tier. Enterprise SLA is measured in vibes. We reserve the right to increase pricing whenever Mercury is in retrograde.</p>
+    </dialog>
+
+
+    <script type="module">
+      import { generateCard, deriveColorParams }  from "./modules/card.js";
+      import { SvgContext }    from "./modules/svg-ctx.js";
+      import { artCountLabel, LOGO_NAMES, PATTERN_NAMES, BG_NAMES, ARTIFACT_NAMES, THEME_PRESETS, hashString } from "./modules/constants.js";
+      import { AI_GREETINGS, AI_TRUISMS, AI_QUESTIONS, AI_THINKING, AI_FIRST_NAMES, AI_LAST_NAMES, AI_TITLE_PARTS, AI_FILLERS } from "./modules/ideate-iq.js";
+      import { drawBackgroundTexture } from "./modules/bg-styles.js";
+      import { drawArtifacts, getArtifactTypesForSeed } from "./modules/background.js";
+      import { drawPatterns } from "./modules/patterns.js";
+      import { drawSymbol }   from "./modules/symbols.js";
+      import { makePRNG }     from "./modules/prng.js";
+      import { hsla }         from "./modules/utils.js";
+      import { colorOverrides, seedOverrides, clearColorOverrides, clearAllOverrides } from "./modules/state.js";
+      import { getSeed, updateColorSliders, updateSeedInputs, updateResetButtons,
+               updateLogoName, updatePatternName, updateBgName, updateDescriptor, buildParams, getFrameDims } from "./modules/ui-sync.js";
+      import { applyQueryString, syncURL } from "./modules/url-sync.js";
+      import { gatherSettings, applySettings } from "./modules/settings-io.js";
+      import { loadFavourites, saveFavourite, deleteFavourite, clearAllFavourites, findMatchingFavourite } from "./modules/favourites.js";
+      import { getEffectiveColor, getEffectiveSeeds } from "./modules/state.js";
+      import { initCard3D, isFlipped, setFlipped } from "./modules/card-3d.js";
+      import { generateCardBack } from "./modules/card-back.js";
+
+      // ── DOM cache ─────────────────────────────────────────────────────────
+      const dom = {
+        seedInput:              document.getElementById("seed"),
+        hueSlider:              document.getElementById("hue"),
+        hueDisplay:             document.getElementById("hue-value-display"),
+        hueReset:               document.getElementById("hue-reset"),
+        saturationSlider:       document.getElementById("saturation"),
+        saturationDisplay:      document.getElementById("saturation-value-display"),
+        saturationReset:        document.getElementById("saturation-reset"),
+        themeLightBtn:          document.getElementById("theme-light"),
+        themeDarkBtn:           document.getElementById("theme-dark"),
+        isDarkReset:            document.getElementById("dark-reset"),
+        cardLightnessSlider:    document.getElementById("card-lightness"),
+        cardLightnessDisplay:   document.getElementById("lightness-value-display"),
+        cardLightnessReset:     document.getElementById("lightness-reset"),
+        bgStyleGrid:            document.getElementById("bg-style-grid"),
+        bgStyleSelect:          { value: '-1' },   // virtual select — grid sets this; default = Auto
+        bgNameDisplay:          document.getElementById("bg-name-display"),
+        bgBlurSlider:           document.getElementById("bg-blur"),
+        bgBlurDisplay:          document.getElementById("bg-blur-display"),
+        bgBlurReset:            document.getElementById("bg-blur-reset"),
+        noiseZoomSlider:        document.getElementById("noise-zoom"),
+        noiseZoomDisplay:       document.getElementById("noise-zoom-display"),
+        noiseBrightnessSlider:  document.getElementById("noise-brightness"),
+        noiseBrightnessDisplay: document.getElementById("noise-brightness-display"),
+        noiseBrightnessReset:   document.getElementById("noise-brightness-reset"),
+        noiseContrastSlider:    document.getElementById("noise-contrast"),
+        noiseContrastDisplay:   document.getElementById("noise-contrast-display"),
+        noiseContrastReset:     document.getElementById("noise-contrast-reset"),
+        personNameInput:        document.getElementById("person-name"),
+        jobTitleInput:          document.getElementById("job-title"),
+        logoStyleGrid:          document.getElementById("logo-style-grid"),
+        logoStyleSelect:        { value: '-1' },  // virtual select — grid sets this
+        logoNameDisplay:        document.getElementById("logo-name-display"),
+        logoScaleSlider:        document.getElementById("logo-scale"),
+        logoScaleDisplay:       document.getElementById("logo-scale-display"),
+        logoScaleReset:         document.getElementById("logo-scale-reset"),
+        logoOpacitySlider:      document.getElementById("logo-opacity"),
+        logoOpacityDisplay:     document.getElementById("logo-opacity-display"),
+        logoOpacityReset:       document.getElementById("logo-opacity-reset"),
+        logoStrokeSlider:       document.getElementById("logo-stroke"),
+        logoStrokeDisplay:      document.getElementById("logo-stroke-display"),
+        logoStrokeReset:        document.getElementById("logo-stroke-reset"),
+        logoNonceInput:         document.getElementById("logo-nonce"),
+        logoNonceReset:         document.getElementById("logo-nonce-reset"),
+        embossMode:             'none',  // 'none' | 'emboss' | 'deboss'
+        btnSizeId:              document.getElementById("btn-size-id"),
+        btnSizeSquare:          document.getElementById("btn-size-square"),
+        btnSizeCredit:          document.getElementById("btn-size-credit"),
+        patternStyleGrid:       document.getElementById("pattern-style-grid"),
+        patternTypeSelect:      { value: '-1' },  // virtual select — grid sets this
+        patternNameDisplay:     document.getElementById("pattern-name-display"),
+        patternSeedInput:       document.getElementById("pattern-seed"),
+        patternSeedReset:       document.getElementById("pattern-seed-reset"),
+        patternOpacitySlider:   document.getElementById("pattern-opacity"),
+        patternOpacityDisplay:  document.getElementById("pattern-opacity-display"),
+        patternScaleSlider:     document.getElementById("pattern-scale"),
+        patternScaleDisplay:    document.getElementById("pattern-scale-display"),
+        patternTwoToneToggle:   { checked: true },  // virtual — seg-control drives this
+        patternTwoToneReset:    document.getElementById("pattern-two-tone-reset"),
+        showArtifactsToggle:    { checked: false },  // virtual — None/Auto in grid drives this
+        artifactSeedInput:      document.getElementById("artifact-seed"),
+        artifactSeedReset:      document.getElementById("artifact-seed-reset"),
+        artCountSlider:         document.getElementById("art-count"),
+        artCountDisplay:        document.getElementById("art-count-display"),
+        artOpacitySlider:       document.getElementById("art-opacity"),
+        artOpacityDisplay:      document.getElementById("art-opacity-display"),
+        artScaleSlider:         document.getElementById("art-scale"),
+        artScaleDisplay:        document.getElementById("art-scale-display"),
+        artTypeLock:            null,  // null = auto, [0,3] = only these types
+        artTypeGrid:            document.getElementById("art-type-grid"),
+        showLanyardToggle:      document.getElementById("show-lanyard"),
+        borderRadiusSlider:     document.getElementById("border-radius"),
+        borderRadiusDisplay:    document.getElementById("border-radius-display"),
+        borderRadiusReset:      document.getElementById("border-radius-reset"),
+        bgBlendMode:            document.getElementById("bg-blend-mode"),
+        patternRotationSlider:  document.getElementById("pattern-rotation"),
+        patternRotationDisplay: document.getElementById("pattern-rotation-display"),
+        colourSwatches:         document.getElementById("colour-swatches"),
+        themePresetGrid:        document.getElementById("theme-preset-grid"),
+        exportDpi:              document.getElementById("export-dpi"),
+        cardDescriptor:         document.getElementById("card-descriptor"),
+        canvasEl:               document.getElementById("canvas"),
+        svgOutputEl:            document.getElementById("svg-output"),
+        canvasBackEl:           document.getElementById("canvas-back"),
+        svgOutputBackEl:        document.getElementById("svg-output-back"),
+        cardScene:              document.querySelector(".card-scene"),
+        cardBody:               document.querySelector(".card-body"),
+        cardSize:               'id',
+        logoPosition:           'ct',
+        textPosition:           'lb',
+        logoPosGrid:            document.getElementById("logo-pos-grid"),
+        textPosGrid:            document.getElementById("text-pos-grid"),
+        textSizeSlider:         document.getElementById("text-size"),
+        textSizeDisplay:        document.getElementById("text-size-display"),
+        textSizeReset:          document.getElementById("text-size-reset"),
+        textWeightSlider:       document.getElementById("text-weight"),
+        textWeightDisplay:      document.getElementById("text-weight-display"),
+        textWeightReset:        document.getElementById("text-weight-reset"),
+        textTrackingSlider:     document.getElementById("text-tracking"),
+        textTrackingDisplay:    document.getElementById("text-tracking-display"),
+        textTrackingReset:      document.getElementById("text-tracking-reset"),
+      };
+
+      // ── Skeleton loading overlay ───────────────────────────────────────
+      const skeleton = (() => {
+        const el = document.getElementById('card-skeleton');
+        return {
+          show() {
+            el.classList.remove('active');
+            void el.offsetHeight;
+            el.classList.add('active');
+          },
+          hide() { el.classList.remove('active'); }
+        };
+      })();
+
+      // ── Position grids ─────────────────────────────────────────────────
+
+      function syncPosGrid(gridEl, activePos) {
+        gridEl.querySelectorAll('button').forEach(btn =>
+          btn.classList.toggle('active', btn.dataset.pos === activePos)
+        );
+      }
+
+      dom.logoPosGrid.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dom.logoPosition = btn.dataset.pos;
+          syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+          render(true);
+        });
+      });
+
+      dom.textPosGrid.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dom.textPosition = btn.dataset.pos;
+          syncPosGrid(dom.textPosGrid, dom.textPosition);
+          render(true);
+        });
+      });
+
+      // ── Text style controls ─────────────────────────────────────────────
+
+      dom.textSizeSlider.addEventListener("input", () => {
+        dom.textSizeDisplay.textContent = dom.textSizeSlider.value + '%';
+        dom.textSizeReset.classList.toggle('visible', dom.textSizeSlider.value !== '100');
+        render();
+      });
+      dom.textSizeReset.addEventListener("click", () => {
+        dom.textSizeSlider.value = 100;
+        dom.textSizeDisplay.textContent = '100%';
+        dom.textSizeReset.classList.remove('visible');
+        render(true);
+      });
+
+      dom.textWeightSlider.addEventListener("input", () => {
+        dom.textWeightDisplay.textContent = dom.textWeightSlider.value;
+        dom.textWeightReset.classList.toggle('visible', dom.textWeightSlider.value !== '500');
+        render();
+      });
+      dom.textWeightReset.addEventListener("click", () => {
+        dom.textWeightSlider.value = 500;
+        dom.textWeightDisplay.textContent = '500';
+        dom.textWeightReset.classList.remove('visible');
+        render(true);
+      });
+
+      dom.textTrackingSlider.addEventListener("input", () => {
+        dom.textTrackingDisplay.textContent = dom.textTrackingSlider.value;
+        dom.textTrackingReset.classList.toggle('visible', dom.textTrackingSlider.value !== '0');
+        render();
+      });
+      dom.textTrackingReset.addEventListener("click", () => {
+        dom.textTrackingSlider.value = 0;
+        dom.textTrackingDisplay.textContent = '0';
+        dom.textTrackingReset.classList.remove('visible');
+        render(true);
+      });
+
+      // ── Card size ────────────────────────────────────────────────────────
+
+      function syncCardSizeButtons() {
+        dom.btnSizeId.classList.toggle('active',     dom.cardSize === 'id');
+        dom.btnSizeSquare.classList.toggle('active', dom.cardSize === 'square');
+        dom.btnSizeCredit.classList.toggle('active',  dom.cardSize === 'credit');
+      }
+
+      function setCardSize(size) {
+        dom.cardSize = size;
+        syncCardSizeButtons();
+        render(true);
+      }
+
+      // ── Render mode ───────────────────────────────────────────────────────
+      let renderMode = 'svg';
+
+      function setRenderMode(mode) {
+        renderMode = mode;
+        dom.canvasEl.style.display        = mode === 'canvas' ? '' : 'none';
+        dom.svgOutputEl.style.display     = mode === 'svg'    ? '' : 'none';
+        dom.canvasBackEl.style.display    = mode === 'canvas' ? '' : 'none';
+        dom.svgOutputBackEl.style.display = mode === 'svg'    ? '' : 'none';
+        document.getElementById('btn-mode-canvas').classList.toggle('active', mode === 'canvas');
+        document.getElementById('btn-mode-svg').classList.toggle('active',    mode === 'svg');
+        const exportBtn = document.getElementById('btn-export');
+        exportBtn.innerHTML = `<i data-lucide="download"></i>Export ${mode === 'svg' ? 'SVG' : 'PNG'}`;
+        lucide.createIcons();
+        render();
+      }
+
+      // ── Logo style grid ─────────────────────────────────────────────────
+      const THUMB_SIZE = 48;
+      const LOGO_COUNT = LOGO_NAMES.length;  // 28 (0-27)
+      let _lastGridKey = null;
+
+      function buildLogoGrid(force = false) {
+        const seed = getSeed(dom);
+        const seeds = getEffectiveSeeds(seed);
+        const nonce = seeds.logoNonce;
+        const key = `${seed}:${nonce}`;
+        if (!force && key === _lastGridKey) return;
+        _lastGridKey = key;
+
+        const grid = dom.logoStyleGrid;
+        grid.innerHTML = '';
+
+        // "None" cell — no logo
+        const noneCell = document.createElement('button');
+        noneCell.className = 'logo-cell' + (dom.logoStyleSelect.value === '-2' ? ' active' : '');
+        noneCell.title = 'No Logo';
+        noneCell.dataset.style = '-2';
+        noneCell.innerHTML = '<i data-lucide="ban"></i>';
+        noneCell.addEventListener('click', () => selectLogoStyle('-2'));
+        grid.appendChild(noneCell);
+
+        // "Auto" cell
+        const autoCell = document.createElement('button');
+        autoCell.className = 'logo-cell' + (dom.logoStyleSelect.value === '-1' ? ' active' : '');
+        autoCell.title = 'Auto';
+        autoCell.dataset.style = '-1';
+        autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
+        autoCell.addEventListener('click', () => selectLogoStyle('-1'));
+        grid.appendChild(autoCell);
+
+        // One cell per style
+        for (let i = 0; i < LOGO_COUNT; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'logo-cell' + (dom.logoStyleSelect.value === String(i) ? ' active' : '');
+          cell.title = LOGO_NAMES[i];
+          cell.dataset.style = String(i);
+
+          const cvs = document.createElement('canvas');
+          cvs.width  = THUMB_SIZE * 2;  // 2x for sharpness
+          cvs.height = THUMB_SIZE * 2;
+          const tctx = cvs.getContext('2d');
+
+          // Draw on a dark circle background
+          const cx = THUMB_SIZE, cy = THUMB_SIZE, r = THUMB_SIZE * 0.82;
+          tctx.fillStyle = 'rgba(255,255,255,0.06)';
+          tctx.beginPath();
+          tctx.arc(cx, cy, r, 0, Math.PI * 2);
+          tctx.fill();
+
+          // symbolColor helper for thumbnails — neutral grey
+          const thumbColor = (lAdj = 0, a = 0.9) =>
+            hsla(0, 0, 72 + lAdj, a);
+
+          // Match the card's logoPRNG state: same seed, consume autoStyle + symbolRadiusFactor
+          const rng = makePRNG(nonce);
+          rng.int(0, 27);           // skip autoStyle (consumed in card.js before symbolRadiusFactor)
+          rng.float(0.169, 0.286);  // skip symbolRadiusFactor (consumed in card.js before drawSymbol)
+          drawSymbol(tctx, cx, cy, r * 0.85, i, thumbColor, rng);
+
+          cell.appendChild(cvs);
+          cell.addEventListener('click', () => selectLogoStyle(String(i)));
+          grid.appendChild(cell);
+        }
+        lucide.createIcons();
+      }
+
+      function selectLogoStyle(val, doRender = true) {
+        dom.logoStyleSelect.value = val;
+        // Update active state
+        dom.logoStyleGrid.querySelectorAll('.logo-cell').forEach(c =>
+          c.classList.toggle('active', c.dataset.style === val)
+        );
+        if (doRender) render(true);
+      }
+
+      // ── Pattern style grid ──────────────────────────────────────────────
+      const PAT_THUMB = 48;
+      const PAT_COUNT = PATTERN_NAMES.length;  // 16 (0-15)
+      let _lastPatGridKey = null;
+
+      function buildPatternGrid(force = false) {
+        const seed = getSeed(dom);
+        const seeds = getEffectiveSeeds(seed);
+        const pseed = seeds.patternSeed;
+        const key = `${seed}:${pseed}`;
+        if (!force && key === _lastPatGridKey) return;
+        _lastPatGridKey = key;
+
+        const grid = dom.patternStyleGrid;
+        grid.innerHTML = '';
+
+        // "None" cell — no pattern
+        const noneCell = document.createElement('button');
+        noneCell.className = 'logo-cell' + (dom.patternTypeSelect.value === '-2' ? ' active' : '');
+        noneCell.title = 'No Pattern';
+        noneCell.dataset.style = '-2';
+        noneCell.innerHTML = '<i data-lucide="ban"></i>';
+        noneCell.addEventListener('click', () => selectPatternType('-2'));
+        grid.appendChild(noneCell);
+
+        // "Auto" cell
+        const autoCell = document.createElement('button');
+        autoCell.className = 'logo-cell' + (dom.patternTypeSelect.value === '-1' ? ' active' : '');
+        autoCell.title = 'Auto';
+        autoCell.dataset.style = '-1';
+        autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
+        autoCell.addEventListener('click', () => selectPatternType('-1'));
+        grid.appendChild(autoCell);
+
+        // One cell per pattern
+        for (let i = 0; i < PAT_COUNT; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'logo-cell' + (dom.patternTypeSelect.value === String(i) ? ' active' : '');
+          cell.title = PATTERN_NAMES[i];
+          cell.dataset.style = String(i);
+
+          const cvs = document.createElement('canvas');
+          cvs.width  = PAT_THUMB * 2;
+          cvs.height = PAT_THUMB * 2;
+          const tctx = cvs.getContext('2d');
+
+          // Draw pattern thumbnail on a dark background
+          const geo = {
+            cardWidth: PAT_THUMB * 2, cardHeight: PAT_THUMB * 2,
+            cardLeft: 0, cardTop: 0,
+            centerX: PAT_THUMB, centerY: PAT_THUMB,
+            cornerRadius: 4, shortSide: PAT_THUMB * 2,
+            landscape: false, frameW: PAT_THUMB * 2, frameH: PAT_THUMB * 2,
+          };
+
+          tctx.fillStyle = 'rgba(255,255,255,0.03)';
+          tctx.fillRect(0, 0, PAT_THUMB * 2, PAT_THUMB * 2);
+
+          const rng = makePRNG(pseed);
+          drawPatterns(tctx, geo, rng, i, 0.9, 1, true, 0, 0, 15, true);
+
+          cell.appendChild(cvs);
+          cell.addEventListener('click', () => selectPatternType(String(i)));
+          grid.appendChild(cell);
+        }
+        lucide.createIcons();
+      }
+
+      function selectPatternType(val, doRender = true) {
+        dom.patternTypeSelect.value = val;
+        dom.patternStyleGrid.querySelectorAll('.logo-cell').forEach(c =>
+          c.classList.toggle('active', c.dataset.style === val)
+        );
+        if (doRender) render(true);
+      }
+
+      // ── Background style grid ────────────────────────────────────────────
+      const BG_THUMB = 48;
+      const BG_COUNT = BG_NAMES.length;  // 10 (0-9)
+      let _lastBgGridKey = null;
+
+      function buildBgGrid(force = false) {
+        const seed = getSeed(dom);
+        const key = `${seed}`;
+        if (!force && key === _lastBgGridKey) return;
+        _lastBgGridKey = key;
+
+        const grid = dom.bgStyleGrid;
+        grid.innerHTML = '';
+
+        // "None" cell — no background texture
+        const noneCell = document.createElement('button');
+        noneCell.className = 'logo-cell' + (dom.bgStyleSelect.value === '-2' ? ' active' : '');
+        noneCell.title = 'No Background';
+        noneCell.dataset.style = '-2';
+        noneCell.innerHTML = '<i data-lucide="ban"></i>';
+        noneCell.addEventListener('click', () => selectBgStyle('-2'));
+        grid.appendChild(noneCell);
+
+        // "Auto" cell
+        const autoCell = document.createElement('button');
+        autoCell.className = 'logo-cell' + (dom.bgStyleSelect.value === '-1' ? ' active' : '');
+        autoCell.title = 'Auto';
+        autoCell.dataset.style = '-1';
+        autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
+        autoCell.addEventListener('click', () => selectBgStyle('-1'));
+        grid.appendChild(autoCell);
+
+        // One cell per bg style
+        for (let i = 0; i < BG_COUNT; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'logo-cell' + (dom.bgStyleSelect.value === String(i) ? ' active' : '');
+          cell.title = BG_NAMES[i];
+          cell.dataset.style = String(i);
+
+          const cvs = document.createElement('canvas');
+          cvs.width  = BG_THUMB * 2;
+          cvs.height = BG_THUMB * 2;
+          const tctx = cvs.getContext('2d');
+
+          const geo = {
+            cardWidth: BG_THUMB * 2, cardHeight: BG_THUMB * 2,
+            cardLeft: 0, cardTop: 0,
+            centerX: BG_THUMB, centerY: BG_THUMB,
+            cornerRadius: 4, shortSide: BG_THUMB * 2,
+            landscape: false, frameW: BG_THUMB * 2, frameH: BG_THUMB * 2,
+          };
+
+          // Dark base so texture is visible
+          tctx.fillStyle = '#1a1a22';
+          tctx.fillRect(0, 0, BG_THUMB * 2, BG_THUMB * 2);
+
+          const rng = makePRNG(seed ^ 0xBACE0000);
+          drawBackgroundTexture(tctx, geo, rng, i, 0.12, 0.06, 4, 0.03);
+
+          cell.appendChild(cvs);
+          cell.addEventListener('click', () => selectBgStyle(String(i)));
+          grid.appendChild(cell);
+        }
+        lucide.createIcons();
+      }
+
+      function selectBgStyle(val, doRender = true) {
+        dom.bgStyleSelect.value = val;
+        dom.bgStyleGrid.querySelectorAll('.logo-cell').forEach(c =>
+          c.classList.toggle('active', c.dataset.style === val)
+        );
+        if (doRender) render(true);
+      }
+
+      // ── Artifact type grid ──────────────────────────────────────────────
+      const ART_THUMB = 48;
+      const ART_COUNT = ARTIFACT_NAMES.length;  // 7 (0-6)
+      let _lastArtGridKey = null;
+
+      // Compute which artifact types the seed would produce in auto mode
+      function getSeedArtTypes(dom) {
+        const seeds = getEffectiveSeeds(getSeed(dom));
+        return getArtifactTypesForSeed(makePRNG(seeds.artifactSeed));
+      }
+
+      function getActiveArtTypes(dom) {
+        if (dom.artTypeLock) return new Set(dom.artTypeLock);
+        return getSeedArtTypes(dom);
+      }
+
+      function buildArtTypeGrid(force = false) {
+        const seed = getSeed(dom);
+        const seeds = getEffectiveSeeds(seed);
+        const aseed = seeds.artifactSeed;
+        const active = getActiveArtTypes(dom);
+        const key = `${seed}:${aseed}:${dom.artTypeLock ? dom.artTypeLock.join(',') : 'auto'}`;
+        if (!force && key === _lastArtGridKey) return;
+        _lastArtGridKey = key;
+
+        const grid = dom.artTypeGrid;
+        grid.innerHTML = '';
+        const show = dom.showArtifactsToggle.checked;
+
+        // "None" cell — disables artifacts
+        const noneCell = document.createElement('button');
+        noneCell.className = 'logo-cell' + (!show ? ' active' : '');
+        noneCell.title = 'No Artifacts';
+        noneCell.dataset.style = 'none';
+        noneCell.innerHTML = '<i data-lucide="ban"></i>';
+        noneCell.addEventListener('click', () => {
+          dom.showArtifactsToggle.checked = false;
+          syncArtTypeGrid();
+          render(true);
+        });
+        grid.appendChild(noneCell);
+
+        // "Auto" cell — active when no types are manually locked
+        const autoCell = document.createElement('button');
+        autoCell.className = 'logo-cell' + (show && !dom.artTypeLock ? ' active' : '');
+        autoCell.title = 'Auto (seed picks types)';
+        autoCell.dataset.style = 'auto';
+        autoCell.innerHTML = '<i data-lucide="shuffle"></i>';
+        autoCell.addEventListener('click', () => {
+          dom.showArtifactsToggle.checked = true;
+          dom.artTypeLock = null;
+          syncArtTypeGrid();
+          render(true);
+        });
+        grid.appendChild(autoCell);
+
+        // One cell per artifact type — toggle on/off
+        for (let i = 0; i < ART_COUNT; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'logo-cell' + (show && active.has(i) ? ' active' : '');
+          cell.title = ARTIFACT_NAMES[i];
+          cell.dataset.style = String(i);
+
+          const cvs = document.createElement('canvas');
+          cvs.width  = ART_THUMB * 2;
+          cvs.height = ART_THUMB * 2;
+          const tctx = cvs.getContext('2d');
+
+          const sz = ART_THUMB * 2;
+          const geo = {
+            cardWidth: sz, cardHeight: sz,
+            cardLeft: 0, cardTop: 0,
+            centerX: ART_THUMB, centerY: ART_THUMB,
+            cornerRadius: 4, shortSide: sz,
+          };
+
+          tctx.fillStyle = 'rgba(255,255,255,0.03)';
+          tctx.fillRect(0, 0, sz, sz);
+
+          const rng = makePRNG(aseed + i * 7);
+          drawArtifacts(tctx, geo, true, rng, 0.7, 3, 1, [i]);
+
+          cell.appendChild(cvs);
+          cell.addEventListener('click', () => toggleArtType(i));
+          grid.appendChild(cell);
+        }
+        lucide.createIcons();
+      }
+
+      function syncArtTypeGrid() {
+        const show = dom.showArtifactsToggle.checked;
+        const active = getActiveArtTypes(dom);
+        dom.artTypeGrid.querySelectorAll('.logo-cell').forEach(c => {
+          if (c.dataset.style === 'none') {
+            c.classList.toggle('active', !show);
+          } else if (c.dataset.style === 'auto') {
+            c.classList.toggle('active', show && !dom.artTypeLock);
+          } else {
+            c.classList.toggle('active', show && active.has(parseInt(c.dataset.style, 10)));
+          }
+        });
+      }
+
+      function toggleArtType(i) {
+        dom.showArtifactsToggle.checked = true; // selecting a type enables artifacts
+        if (!dom.artTypeLock) {
+          // Switching from auto — start with the seed's types, then toggle
+          const seedTypes = getSeedArtTypes(dom);
+          if (seedTypes.has(i)) {
+            seedTypes.delete(i);
+            dom.artTypeLock = [...seedTypes];
+          } else {
+            seedTypes.add(i);
+            dom.artTypeLock = [...seedTypes];
+          }
+        } else if (dom.artTypeLock.includes(i)) {
+          dom.artTypeLock = dom.artTypeLock.filter(t => t !== i);
+        } else {
+          dom.artTypeLock = [...dom.artTypeLock, i];
+        }
+        if (dom.artTypeLock && dom.artTypeLock.length === 0) dom.artTypeLock = null;
+        dom.artTypeLock?.sort((a, b) => a - b);
+        syncArtTypeGrid();
+        render(true);
+      }
+
+      // ── Colour swatches ────────────────────────────────────────────────
+      function updateColourSwatches() {
+        const seed = getSeed(dom);
+        const c = getEffectiveColor(seed);
+        const d = deriveColorParams(seed);
+        const isDark = c.isDark;
+        const hue = c.hue;
+        const sat = c.saturation;
+        const lit = c.cardLightness;
+        const symDrift = d.symbolHueDrift;
+        const symLit = isDark ? 87 : 15;
+        const swatches = [
+          { label: 'Card base',      color: hsla(hue, sat, lit) },
+          { label: 'Card highlight',  color: hsla(hue, sat, lit + (isDark ? 6 : -6)) },
+          { label: 'Card shadow',     color: hsla(hue, sat, lit + (isDark ? -4 : 4)) },
+          { label: 'Symbol / text',   color: hsla(hue + symDrift, sat, symLit, 0.9) },
+          { label: 'Noise tint',      color: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)' },
+        ];
+        dom.colourSwatches.innerHTML = swatches.map((s, i) =>
+          `<div class="colour-swatch" style="background:${s.color}" title="${s.label}" data-idx="${i}"></div>`
+        ).join('');
+      }
+
+      // ── HSL colour picker ────────────────────────────────────────────────
+      const hslPickerEl = document.getElementById("hsl-picker");
+      const slCanvas    = document.getElementById("hsl-picker-sl");
+      const hueCanvas   = document.getElementById("hsl-picker-hue");
+      const slCtx       = slCanvas.getContext("2d");
+      const hueCtx      = hueCanvas.getContext("2d");
+      let pickerHue = 0, pickerSat = 50, pickerLit = 50;
+      let slDragging = false, hueDragging = false;
+
+      function drawHueBar() {
+        const w = hueCanvas.width, h = hueCanvas.height;
+        const grad = hueCtx.createLinearGradient(0, 0, w, 0);
+        for (let i = 0; i <= 12; i++) grad.addColorStop(i / 12, `hsl(${i * 30}, 100%, 50%)`);
+        hueCtx.fillStyle = grad;
+        hueCtx.fillRect(0, 0, w, h);
+        // Indicator
+        const x = (pickerHue / 359) * w;
+        hueCtx.strokeStyle = '#fff';
+        hueCtx.lineWidth = 2;
+        hueCtx.beginPath();
+        hueCtx.roundRect(x - 3, 0, 6, h, 3);
+        hueCtx.stroke();
+        hueCtx.strokeStyle = '#000';
+        hueCtx.lineWidth = 1;
+        hueCtx.beginPath();
+        hueCtx.roundRect(x - 2, 1, 4, h - 2, 2);
+        hueCtx.stroke();
+      }
+
+      function drawSLCanvas() {
+        const w = slCanvas.width, h = slCanvas.height;
+        const img = slCtx.createImageData(w, h);
+        for (let y = 0; y < h; y++) {
+          const lit = 100 - (y / (h - 1)) * 100; // top=100 (white), bottom=0 (black)
+          for (let x = 0; x < w; x++) {
+            const sat = (x / (w - 1)) * 100; // left=0 (grey), right=100 (vivid)
+            const idx = (y * w + x) * 4;
+            const [r, g, b] = hslToRGB(pickerHue, sat, lit);
+            img.data[idx]     = r;
+            img.data[idx + 1] = g;
+            img.data[idx + 2] = b;
+            img.data[idx + 3] = 255;
+          }
+        }
+        slCtx.putImageData(img, 0, 0);
+        // Crosshair indicator
+        const cx = (pickerSat / 100) * w;
+        const cy = (1 - pickerLit / 100) * h;
+        slCtx.beginPath(); slCtx.arc(cx, cy, 6, 0, Math.PI * 2);
+        slCtx.strokeStyle = '#fff'; slCtx.lineWidth = 2; slCtx.stroke();
+        slCtx.beginPath(); slCtx.arc(cx, cy, 5, 0, Math.PI * 2);
+        slCtx.strokeStyle = '#000'; slCtx.lineWidth = 1; slCtx.stroke();
+      }
+
+      function hslToRGB(h, s, l) {
+        s /= 100; l /= 100;
+        const a = s * Math.min(l, 1 - l);
+        const f = n => { const k = (n + h / 30) % 12; return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); };
+        return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+      }
+
+      function pickerApply() {
+        colorOverrides.hue = pickerHue;
+        colorOverrides.saturation = pickerSat;
+        colorOverrides.cardLightness = pickerLit;
+        updateColourSwatches();
+      }
+
+      function pickerCommit() {
+        pickerApply();
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      }
+
+      // SL canvas interaction
+      function slPick(e) {
+        const rect = slCanvas.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+        pickerSat = Math.round(x * 100);
+        pickerLit = Math.round((1 - y) * 100);
+        drawSLCanvas();
+        pickerApply();
+      }
+      slCanvas.addEventListener("pointerdown", (e) => { slDragging = true; slCanvas.setPointerCapture(e.pointerId); slPick(e); });
+      slCanvas.addEventListener("pointermove", (e) => { if (slDragging) slPick(e); });
+      slCanvas.addEventListener("pointerup", () => { slDragging = false; pickerCommit(); });
+
+      // Hue bar interaction
+      function huePick(e) {
+        const rect = hueCanvas.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        pickerHue = Math.round(x * 359);
+        drawHueBar();
+        drawSLCanvas();
+        pickerApply();
+      }
+      hueCanvas.addEventListener("pointerdown", (e) => { hueDragging = true; hueCanvas.setPointerCapture(e.pointerId); huePick(e); });
+      hueCanvas.addEventListener("pointermove", (e) => { if (hueDragging) huePick(e); });
+      hueCanvas.addEventListener("pointerup", () => { hueDragging = false; pickerCommit(); });
+
+      // Toggle picker on swatch click
+      dom.colourSwatches.addEventListener("click", (e) => {
+        const swatch = e.target.closest('.colour-swatch');
+        if (!swatch) return;
+        const isOpen = hslPickerEl.classList.toggle('open');
+        if (isOpen) {
+          const seed = getSeed(dom);
+          const c = getEffectiveColor(seed);
+          pickerHue = c.hue;
+          pickerSat = c.saturation;
+          pickerLit = c.cardLightness;
+          drawHueBar();
+          drawSLCanvas();
+        }
+      });
+
+      // ── Theme presets ──────────────────────────────────────────────────
+      function applyThemePreset(preset) {
+        if (preset.hue !== undefined)             colorOverrides.hue = preset.hue;
+        if (preset.saturation !== undefined)      colorOverrides.saturation = preset.saturation;
+        if (preset.isDark !== undefined)           colorOverrides.isDark = preset.isDark;
+        if (preset.cardLightness !== undefined)    colorOverrides.cardLightness = preset.cardLightness;
+        if (preset.noiseBrightness !== undefined)  colorOverrides.noiseBrightness = preset.noiseBrightness;
+        if (preset.noiseContrast !== undefined)    colorOverrides.noiseContrast = preset.noiseContrast;
+        if (preset.bgBlur !== undefined)           colorOverrides.bgBlur = preset.bgBlur;
+        if (preset.patternTwoTone !== undefined)   colorOverrides.patternTwoTone = preset.patternTwoTone;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      }
+
+      function buildThemePresetGrid() {
+        const grid = dom.themePresetGrid;
+        grid.innerHTML = '';
+        let prevDark = null;
+        for (const preset of THEME_PRESETS) {
+          // Insert separator between dark and light groups
+          if (prevDark !== null && prevDark !== preset.isDark) {
+            const sep = document.createElement('div');
+            sep.className = 'theme-grid-separator';
+            grid.appendChild(sep);
+          }
+          prevDark = preset.isDark;
+          const btn = document.createElement('button');
+          btn.className = 'theme-swatch';
+          btn.title = preset.name;
+          const swatch = document.createElement('span');
+          swatch.className = 'theme-swatch-dot';
+          swatch.style.background = hsla(preset.hue, preset.saturation, preset.cardLightness);
+          btn.appendChild(swatch);
+          const label = document.createElement('span');
+          label.className = 'theme-swatch-label';
+          label.textContent = preset.name;
+          btn.appendChild(label);
+          btn.addEventListener('click', () => applyThemePreset(preset));
+          grid.appendChild(btn);
+        }
+      }
+
+      let renderRAF = null;
+
+      function render(push = false) {
+        skeleton.show();
+        if (renderRAF) cancelAnimationFrame(renderRAF);
+        renderRAF = requestAnimationFrame(() => {
+          renderRAF = requestAnimationFrame(() => {
+            renderRAF = null;
+
+            buildLogoGrid();
+            buildPatternGrid();
+            buildBgGrid();
+            buildArtTypeGrid();
+            const { frameW, frameH } = getFrameDims(dom);
+            const aspect = `${frameW} / ${frameH}`;
+
+            let backResult;
+            if (renderMode === 'svg') {
+              const p   = buildParams(dom);
+              // Front
+              const svg = new SvgContext(frameW, frameH);
+              generateCard({ ...p, ctx: svg });
+              dom.svgOutputEl.innerHTML = svg.toSVG();
+              // Back
+              const svgBack = new SvgContext(frameW, frameH);
+              backResult = generateCardBack({ ...p, ctx: svgBack });
+              dom.svgOutputBackEl.innerHTML = svgBack.toSVG();
+            } else {
+              // Front
+              generateCard(buildParams(dom));
+              // Back
+              const backCtx = dom.canvasBackEl.getContext('2d');
+              const bp = buildParams(dom);
+              dom.canvasBackEl.width  = Math.round(frameW);
+              dom.canvasBackEl.height = Math.round(frameH);
+              backResult = generateCardBack({ ...bp, ctx: backCtx });
+            }
+
+            // Position hologram sheen overlay
+            const holoEl = document.getElementById('holo-sheen');
+            if (backResult && backResult.holoBounds) {
+              const b = backResult.holoBounds;
+              holoEl.style.display = 'block';
+              holoEl.style.left    = (b.left   * 100).toFixed(2) + '%';
+              holoEl.style.top     = (b.top    * 100).toFixed(2) + '%';
+              holoEl.style.width   = (b.width  * 100).toFixed(2) + '%';
+              holoEl.style.height  = (b.height * 100).toFixed(2) + '%';
+            } else {
+              holoEl.style.display = 'none';
+            }
+
+            dom.cardScene.style.setProperty('--card-ar', (frameW / frameH).toFixed(6));
+            fitCardBody();
+
+            syncURL(dom, push);
+            updateLogoName(dom);
+            updatePatternName(dom);
+            updateBgName(dom);
+            updateDescriptor(dom);
+            updateColourSwatches();
+            updateArtResetButtons();
+            // Non-override control reset button visibility
+            noiseZoomReset.classList.toggle('visible', dom.noiseZoomSlider.value !== '4');
+            bgBlendReset.classList.toggle('visible', dom.bgBlendMode.value !== 'source-over');
+            if (typeof updateEmbossReset === 'function') updateEmbossReset();
+            patRotReset.classList.toggle('visible', dom.patternRotationSlider.value !== '0');
+            patOpacityReset.classList.toggle('visible', dom.patternOpacitySlider.value !== '15');
+            patScaleReset.classList.toggle('visible', dom.patternScaleSlider.value !== '100');
+            if (typeof syncToneButtons === 'function') syncToneButtons();
+            updateStarButton();
+
+            skeleton.hide();
+          });
+        });
+      }
+
+      // ── Events ────────────────────────────────────────────────────────────
+
+      window.addEventListener("popstate", () => {
+        applyQueryString(dom);
+        syncCardSizeButtons();
+        syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+        syncPosGrid(dom.textPosGrid, dom.textPosition);
+        dom.textSizeReset.classList.toggle('visible', dom.textSizeSlider.value !== '100');
+        dom.textWeightReset.classList.toggle('visible', dom.textWeightSlider.value !== '500');
+        dom.textTrackingReset.classList.toggle('visible', dom.textTrackingSlider.value !== '0');
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
+        buildLogoGrid(true);
+        buildPatternGrid(true);
+        buildBgGrid(true);
+        buildArtTypeGrid(true);
+        render();
+      });
+
+      dom.seedInput.addEventListener("change", () => {
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      // Colour
+      dom.hueSlider.addEventListener("input", () => {
+        colorOverrides.hue          = parseInt(dom.hueSlider.value, 10);
+        dom.hueDisplay.textContent  = dom.hueSlider.value;
+        updateResetButtons(dom);
+        render();
+      });
+      dom.hueReset.addEventListener("click", () => {
+        delete colorOverrides.hue;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      dom.saturationSlider.addEventListener("input", () => {
+        colorOverrides.saturation          = parseInt(dom.saturationSlider.value, 10);
+        dom.saturationDisplay.textContent  = dom.saturationSlider.value;
+        updateResetButtons(dom);
+        render();
+      });
+      dom.saturationReset.addEventListener("click", () => {
+        delete colorOverrides.saturation;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      function setTheme(isDark) {
+        colorOverrides.isDark = isDark;
+        delete colorOverrides.cardLightness;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      }
+      dom.themeLightBtn.addEventListener("click", () => setTheme(false));
+      dom.themeDarkBtn.addEventListener("click",  () => setTheme(true));
+      dom.isDarkReset.addEventListener("click", () => {
+        delete colorOverrides.isDark;
+        delete colorOverrides.cardLightness;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      dom.cardLightnessSlider.addEventListener("input", () => {
+        colorOverrides.cardLightness          = parseInt(dom.cardLightnessSlider.value, 10);
+        dom.cardLightnessDisplay.textContent  = dom.cardLightnessSlider.value;
+        updateResetButtons(dom);
+        render();
+      });
+      dom.cardLightnessReset.addEventListener("click", () => {
+        delete colorOverrides.cardLightness;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      // Background
+      const noiseZoomReset = document.getElementById("noise-zoom-reset");
+      dom.noiseZoomSlider.addEventListener("input", () => {
+        dom.noiseZoomDisplay.textContent = dom.noiseZoomSlider.value;
+        noiseZoomReset.classList.toggle('visible', dom.noiseZoomSlider.value !== '4');
+        render();
+      });
+      noiseZoomReset.addEventListener("click", () => {
+        dom.noiseZoomSlider.value = 4;
+        dom.noiseZoomDisplay.textContent = '4';
+        noiseZoomReset.classList.remove('visible');
+        render(true);
+      });
+
+      dom.noiseBrightnessSlider.addEventListener("input", () => {
+        colorOverrides.noiseBrightness          = parseInt(dom.noiseBrightnessSlider.value, 10) / 100;
+        dom.noiseBrightnessDisplay.textContent  = dom.noiseBrightnessSlider.value;
+        updateResetButtons(dom);
+        render();
+      });
+      dom.noiseBrightnessReset.addEventListener("click", () => {
+        delete colorOverrides.noiseBrightness;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      dom.noiseContrastSlider.addEventListener("input", () => {
+        colorOverrides.noiseContrast          = parseInt(dom.noiseContrastSlider.value, 10) / 100;
+        dom.noiseContrastDisplay.textContent  = dom.noiseContrastSlider.value;
+        updateResetButtons(dom);
+        render();
+      });
+      dom.noiseContrastReset.addEventListener("click", () => {
+        delete colorOverrides.noiseContrast;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      dom.bgBlurSlider.addEventListener("input", () => {
+        colorOverrides.bgBlur          = parseInt(dom.bgBlurSlider.value, 10) / 1000;
+        dom.bgBlurDisplay.textContent  = dom.bgBlurSlider.value;
+        updateResetButtons(dom);
+        render();
+      });
+      dom.bgBlurReset.addEventListener("click", () => {
+        delete colorOverrides.bgBlur;
+        updateColorSliders(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      // Logo scale
+      dom.logoScaleSlider.addEventListener("input", () => {
+        dom.logoScaleDisplay.textContent = dom.logoScaleSlider.value + '%';
+        dom.logoScaleReset.classList.toggle('visible', parseInt(dom.logoScaleSlider.value, 10) !== 100);
+        render();
+      });
+      dom.logoScaleReset.addEventListener("click", () => {
+        dom.logoScaleSlider.value        = 100;
+        dom.logoScaleDisplay.textContent = '100%';
+        dom.logoScaleReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Logo opacity
+      dom.logoOpacitySlider.addEventListener("input", () => {
+        dom.logoOpacityDisplay.textContent = dom.logoOpacitySlider.value + '%';
+        dom.logoOpacityReset.classList.toggle('visible', parseInt(dom.logoOpacitySlider.value, 10) !== 100);
+        render();
+      });
+      dom.logoOpacityReset.addEventListener("click", () => {
+        dom.logoOpacitySlider.value        = 100;
+        dom.logoOpacityDisplay.textContent = '100%';
+        dom.logoOpacityReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Logo stroke width
+      dom.logoStrokeSlider.addEventListener("input", () => {
+        dom.logoStrokeDisplay.textContent = dom.logoStrokeSlider.value + '%';
+        dom.logoStrokeReset.classList.toggle('visible', parseInt(dom.logoStrokeSlider.value, 10) !== 100);
+        render();
+      });
+      dom.logoStrokeReset.addEventListener("click", () => {
+        dom.logoStrokeSlider.value        = 100;
+        dom.logoStrokeDisplay.textContent = '100%';
+        dom.logoStrokeReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Logo seed
+      document.getElementById("btn-next-logo").addEventListener("click", () => {
+        seedOverrides.logoNonce  = (parseInt(dom.logoNonceInput.value, 10) | 0) + 1;
+        dom.logoNonceInput.value = seedOverrides.logoNonce;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.logoNonceInput.addEventListener("change", () => {
+        seedOverrides.logoNonce = parseInt(dom.logoNonceInput.value, 10) | 0;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.logoNonceReset.addEventListener("click", () => {
+        delete seedOverrides.logoNonce;
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      // Artifact sliders
+      const artCountReset   = document.getElementById("art-count-reset");
+      const artScaleReset   = document.getElementById("art-scale-reset");
+      const artOpacityReset = document.getElementById("art-opacity-reset");
+
+      function updateArtResetButtons() {
+        artCountReset.classList.toggle('visible',   parseInt(dom.artCountSlider.value, 10) !== 0);
+        artScaleReset.classList.toggle('visible',   parseInt(dom.artScaleSlider.value, 10) !== 100);
+        artOpacityReset.classList.toggle('visible', parseInt(dom.artOpacitySlider.value, 10) !== 20);
+      }
+
+      dom.artCountSlider.addEventListener("input", () => {
+        dom.artCountDisplay.textContent = artCountLabel(dom.artCountSlider.value);
+        updateArtResetButtons();
+        render();
+      });
+      dom.artOpacitySlider.addEventListener("input", () => {
+        dom.artOpacityDisplay.textContent = dom.artOpacitySlider.value;
+        updateArtResetButtons();
+        render();
+      });
+      dom.artScaleSlider.addEventListener("input", () => {
+        dom.artScaleDisplay.textContent = dom.artScaleSlider.value + '%';
+        updateArtResetButtons();
+        render();
+      });
+
+      artCountReset.addEventListener("click", () => {
+        dom.artCountSlider.value = 0;
+        dom.artCountDisplay.textContent = artCountLabel(0);
+        updateArtResetButtons();
+        render(true);
+      });
+      artScaleReset.addEventListener("click", () => {
+        dom.artScaleSlider.value = 100;
+        dom.artScaleDisplay.textContent = '100%';
+        updateArtResetButtons();
+        render(true);
+      });
+      artOpacityReset.addEventListener("click", () => {
+        dom.artOpacitySlider.value = 20;
+        dom.artOpacityDisplay.textContent = '20';
+        updateArtResetButtons();
+        render(true);
+      });
+
+      // Artifact seed
+      document.getElementById("btn-next-artifact").addEventListener("click", () => {
+        seedOverrides.artifactSeed  = (parseInt(dom.artifactSeedInput.value, 10) | 0) + 1;
+        dom.artifactSeedInput.value = seedOverrides.artifactSeed;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.artifactSeedInput.addEventListener("change", () => {
+        seedOverrides.artifactSeed = parseInt(dom.artifactSeedInput.value, 10) | 0;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.artifactSeedReset.addEventListener("click", () => {
+        delete seedOverrides.artifactSeed;
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      // Artifact type lock — handled by grid select below
+
+      // Emboss mode
+      const embossBtns = {
+        none:   document.getElementById("emboss-none"),
+        emboss: document.getElementById("emboss-emboss"),
+        deboss: document.getElementById("emboss-deboss"),
+      };
+      function setEmbossMode(mode) {
+        dom.embossMode = mode;
+        for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === mode);
+        if (typeof updateEmbossReset === 'function') updateEmbossReset();
+        render(true);
+      }
+      embossBtns.none.addEventListener("click", () => setEmbossMode('none'));
+      embossBtns.emboss.addEventListener("click", () => setEmbossMode('emboss'));
+      embossBtns.deboss.addEventListener("click", () => setEmbossMode('deboss'));
+
+      // Actions
+      document.getElementById("btn-reset-all").addEventListener("click", () => {
+        clearAllOverrides();
+        setCardSize('id');
+        selectLogoStyle('-1', false);
+        dom.logoScaleSlider.value         = 100;
+        dom.logoScaleDisplay.textContent  = '100%';
+        dom.logoOpacitySlider.value       = 100;
+        dom.logoOpacityDisplay.textContent = '100%';
+        dom.logoStrokeSlider.value        = 100;
+        dom.logoStrokeDisplay.textContent = '100%';
+        selectBgStyle('-1', false);
+        dom.noiseZoomSlider.value         = 4;
+        dom.noiseZoomDisplay.textContent  = '4';
+        selectPatternType('-1', false);
+        dom.patternTypeSelect.value      = '-1';
+        dom.patternOpacitySlider.value   = 15;
+        dom.patternOpacityDisplay.textContent = '15';
+        dom.patternScaleSlider.value     = 100;
+        dom.patternScaleDisplay.textContent = '100%';
+        dom.showArtifactsToggle.checked   = false;
+        dom.showLanyardToggle.checked     = false;
+        dom.artCountSlider.value          = 0;
+        dom.artCountDisplay.textContent   = artCountLabel(0);
+        dom.artOpacitySlider.value        = 20;
+        dom.artOpacityDisplay.textContent = '20';
+        dom.artScaleSlider.value          = 100;
+        dom.artScaleDisplay.textContent   = '100%';
+        dom.borderRadiusSlider.value      = 20;
+        dom.borderRadiusDisplay.textContent = '20%';
+        dom.bgBlendMode.value             = 'source-over';
+        dom.patternRotationSlider.value   = 0;
+        dom.patternRotationDisplay.textContent = '0';
+        dom.artTypeLock = null;
+        dom.embossMode = 'none';
+        for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === 'none');
+        dom.logoPosition = 'ct';
+        dom.textPosition = 'lb';
+        syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+        syncPosGrid(dom.textPosGrid, dom.textPosition);
+        dom.textSizeSlider.value       = 100;
+        dom.textSizeDisplay.textContent = '100%';
+        dom.textWeightSlider.value     = 500;
+        dom.textWeightDisplay.textContent = '500';
+        dom.textTrackingSlider.value   = 0;
+        dom.textTrackingDisplay.textContent = '0';
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      document.getElementById("btn-rand").addEventListener("click", () => {
+        dom.seedInput.value = (Math.random() * 99999) | 0;
+        updateColorSliders(dom);
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      document.getElementById("btn-micro-shuffle").addEventListener("click", () => {
+        const rand = () => (Math.random() * 999999) | 0;
+        seedOverrides.logoNonce    = rand();
+        seedOverrides.artifactSeed = rand();
+        seedOverrides.patternSeed  = rand();
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      document.getElementById("btn-export").addEventListener("click", () => {
+        const seed = getSeed(dom);
+        const c = getEffectiveColor(seed);
+        const s = getEffectiveSeeds(seed);
+        const dpi = parseInt(dom.exportDpi.value, 10) || 1;
+        const link = document.createElement("a");
+        if (renderMode === 'svg') {
+          const p   = buildParams(dom);
+          const { frameW, frameH } = getFrameDims(dom);
+          const svg = new SvgContext(frameW, frameH);
+          generateCard({ ...p, ctx: svg });
+          const blob = new Blob([svg.toSVG()], { type: 'image/svg+xml' });
+          const url  = URL.createObjectURL(blob);
+          link.download = `card-s${dom.seedInput.value}-h${c.hue}-l${s.logoNonce}.svg`;
+          link.href     = url;
+          link.click();
+          URL.revokeObjectURL(url);
+        } else {
+          const p = buildParams(dom);
+          const { frameW, frameH } = getFrameDims(dom);
+          const exportCanvas = document.createElement('canvas');
+          exportCanvas.width  = Math.round(frameW * dpi);
+          exportCanvas.height = Math.round(frameH * dpi);
+          const exportCtx = exportCanvas.getContext('2d');
+          generateCard({ ...p, size: 1024 * dpi, ctx: exportCtx });
+          link.download = `card-s${dom.seedInput.value}-h${c.hue}-l${s.logoNonce}-${dpi}x.png`;
+          link.href     = exportCanvas.toDataURL("image/png");
+          link.click();
+        }
+      });
+
+      document.getElementById("btn-copy-link").addEventListener("click", (e) => {
+        navigator.clipboard.writeText(window.location.href);
+        const btn = e.currentTarget;
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.innerHTML = '<i data-lucide="link"></i>Copy Link'; lucide.createIcons(); }, 1500);
+      });
+
+      document.getElementById("btn-copy-img").addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        try {
+          const dpi = parseInt(dom.exportDpi.value, 10) || 1;
+          const { frameW, frameH } = getFrameDims(dom);
+          const copyCanvas = document.createElement('canvas');
+          copyCanvas.width  = Math.round(frameW * dpi);
+          copyCanvas.height = Math.round(frameH * dpi);
+          const copyCtx = copyCanvas.getContext('2d');
+          const p = buildParams(dom);
+          generateCard({ ...p, size: 1024 * dpi, ctx: copyCtx });
+          const blob = await new Promise(resolve => copyCanvas.toBlob(resolve, 'image/png'));
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          btn.textContent = "Copied!";
+          setTimeout(() => { btn.innerHTML = '<i data-lucide="clipboard-copy"></i>Copy Image'; lucide.createIcons(); }, 1500);
+        } catch (err) {
+          console.error('Copy image failed:', err);
+          btn.textContent = "Failed";
+          setTimeout(() => { btn.innerHTML = '<i data-lucide="clipboard-copy"></i>Copy Image'; lucide.createIcons(); }, 1500);
+        }
+      });
+
+      // ── JSON import/export ──────────────────────────────────────────────
+      document.getElementById("btn-export-json").addEventListener("click", (e) => {
+        const settings = gatherSettings(dom);
+        const json = JSON.stringify(settings, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = `liminal-settings-s${dom.seedInput.value}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        const btn = e.currentTarget;
+        btn.textContent = "Exported!";
+        setTimeout(() => { btn.innerHTML = '<i data-lucide="file-json"></i>Export JSON'; lucide.createIcons(); }, 1500);
+      });
+
+      // ── Click-on-backdrop to close for all dialogs ────────────────────────
+      document.querySelectorAll('.app-dialog').forEach(dialog => {
+        dialog.addEventListener('click', (e) => {
+          if (e.target === dialog) dialog.close();
+        });
+      });
+
+      const importDialog   = document.getElementById("import-dialog");
+      const importTextarea = document.getElementById("import-textarea");
+      const importFileInput = document.getElementById("import-file");
+
+      document.getElementById("btn-import-json").addEventListener("click", () => {
+        importTextarea.value = '';
+        importDialog.showModal();
+      });
+
+      document.getElementById("import-file-btn").addEventListener("click", () => importFileInput.click());
+
+      importFileInput.addEventListener("change", () => {
+        const file = importFileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => { importTextarea.value = reader.result; };
+        reader.readAsText(file);
+        importFileInput.value = ''; // reset so same file can be re-selected
+      });
+
+      document.getElementById("import-dialog-cancel").addEventListener("click", () => importDialog.close());
+      document.getElementById("import-dialog-cancel-x").addEventListener("click", () => importDialog.close());
+
+      // Styled error toast inside a dialog (replaces native alert)
+      function showImportError(msg) {
+        const el = importTextarea.parentElement.querySelector('.import-error');
+        if (el) el.remove();
+        const err = document.createElement('p');
+        err.className = 'import-error';
+        err.style.cssText = 'color:#f08080; font-size:0.78rem; margin:0.5rem 0 0;';
+        err.textContent = msg;
+        importTextarea.after(err);
+        setTimeout(() => err.remove(), 5000);
+      }
+
+      function applyImportedSettings() {
+        try {
+          const json = JSON.parse(importTextarea.value);
+          applySettings(json, dom);
+          syncCardSizeButtons();
+          syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+          syncPosGrid(dom.textPosGrid, dom.textPosition);
+          updateColorSliders(dom);
+          updateSeedInputs(dom);
+          updateResetButtons(dom);
+          for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
+          buildLogoGrid(true);
+          buildPatternGrid(true);
+          buildBgGrid(true);
+          buildArtTypeGrid(true);
+          render(true);
+          importDialog.close();
+        } catch (err) {
+          showImportError('Invalid settings JSON: ' + err.message);
+        }
+      }
+
+      document.getElementById("import-dialog-apply").addEventListener("click", applyImportedSettings);
+
+      // ── Favourites ──────────────────────────────────────────────────────
+      const favDialog    = document.getElementById("favourites-dialog");
+      const favGrid      = document.getElementById("favourites-grid");
+      const favEmpty     = document.getElementById("favourites-empty");
+      const btnFavourite = document.getElementById("btn-favourite");
+
+      function generateThumbnail() {
+        const thumbCanvas = document.createElement('canvas');
+        const tw = 200;
+        const p = buildParams(dom);
+        const th = Math.round(tw / p.cardAspect);
+        thumbCanvas.width  = tw;
+        thumbCanvas.height = th;
+        const thumbSize = Math.ceil(tw / ((1 - 2 * 0.08) * (p.cardAspect <= 1 ? p.cardScale * p.cardAspect : p.cardScale)));
+        const thumbCtx = thumbCanvas.getContext('2d');
+        generateCard({ ...p, size: thumbSize, ctx: thumbCtx });
+        return thumbCanvas.toDataURL('image/png', 0.8);
+      }
+
+      function updateStarButton() {
+        const settings = gatherSettings(dom);
+        const match = findMatchingFavourite(settings);
+        btnFavourite.classList.toggle('starred', !!match);
+        btnFavourite.dataset.matchId = match || '';
+      }
+
+      btnFavourite.addEventListener("click", () => {
+        const settings = gatherSettings(dom);
+        const matchId = findMatchingFavourite(settings);
+        if (matchId) {
+          deleteFavourite(matchId);
+        } else {
+          const descriptor = dom.cardDescriptor.textContent;
+          const thumbnail  = generateThumbnail();
+          saveFavourite({
+            id:         crypto.randomUUID(),
+            settings,
+            descriptor,
+            thumbnail,
+            savedAt:    Date.now(),
+          });
+        }
+        updateStarButton();
+      });
+
+      function renderFavouritesGrid() {
+        const favs = loadFavourites();
+        favGrid.innerHTML = '';
+        favEmpty.style.display = favs.length === 0 ? '' : 'none';
+        favGrid.style.display  = favs.length === 0 ? 'none' : '';
+
+        for (const fav of favs) {
+          const card = document.createElement('div');
+          card.className = 'fav-card';
+          card.dataset.id = fav.id;
+
+          const date = new Date(fav.savedAt);
+          const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+          card.innerHTML = `
+            <img class="fav-thumb" src="${fav.thumbnail}" alt="" />
+            <button class="fav-delete" title="Delete">&times;</button>
+            <div class="fav-info">
+              <span class="fav-descriptor">${fav.descriptor}</span>
+              <span class="fav-date">${dateStr}</span>
+            </div>
+          `;
+
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.fav-delete')) return;
+            applySettings(fav.settings, dom);
+            syncCardSizeButtons();
+            syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+            syncPosGrid(dom.textPosGrid, dom.textPosition);
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
+            buildLogoGrid(true);
+            buildPatternGrid(true);
+            buildBgGrid(true);
+            buildArtTypeGrid(true);
+            render(true);
+            favDialog.close();
+          });
+
+          card.querySelector('.fav-delete').addEventListener('click', () => {
+            deleteFavourite(fav.id);
+            renderFavouritesGrid();
+            updateStarButton();
+          });
+
+          favGrid.appendChild(card);
+        }
+      }
+
+      document.getElementById("btn-favourites").addEventListener("click", () => {
+        renderFavouritesGrid();
+        favDialog.showModal();
+      });
+
+      document.getElementById("favourites-close").addEventListener("click", () => favDialog.close());
+
+      // ── Styled confirm dialog (replaces native confirm()) ────────────────
+      const confirmDialog = document.getElementById("confirm-dialog");
+      const confirmTitle  = document.getElementById("confirm-title");
+      const confirmBody   = document.getElementById("confirm-body");
+      const confirmOk     = document.getElementById("confirm-ok");
+      let confirmResolve  = null;
+
+      function showConfirm({ title = 'Confirm', body = '', okLabel = 'OK', okClass = 'btn-danger' }) {
+        confirmTitle.textContent = title;
+        confirmBody.textContent  = body;
+        confirmOk.textContent    = okLabel;
+        confirmOk.className      = okClass;
+        confirmDialog.showModal();
+        return new Promise(resolve => { confirmResolve = resolve; });
+      }
+
+      confirmOk.addEventListener("click", () => { confirmDialog.close(); confirmResolve?.(true);  confirmResolve = null; });
+      document.getElementById("confirm-cancel").addEventListener("click", () => { confirmDialog.close(); confirmResolve?.(false); confirmResolve = null; });
+      document.getElementById("confirm-close").addEventListener("click",  () => { confirmDialog.close(); confirmResolve?.(false); confirmResolve = null; });
+      confirmDialog.addEventListener("close", () => { if (confirmResolve) { confirmResolve(false); confirmResolve = null; } });
+
+      // ── Pro upsell dialog ──────────────────────────────────────────────────
+      const proDialog    = document.getElementById("pro-dialog");
+      const proSubscribe = document.getElementById("pro-subscribe");
+
+      function openProDialog() {
+        proSubscribe.textContent = "Subscribe Now";
+        proDialog.showModal();
+      }
+      document.getElementById("btn-enshittify").addEventListener("click", openProDialog);
+      document.getElementById("hotkey-pro").addEventListener("click", openProDialog);
+      document.getElementById("hotkey-favs-browser").addEventListener("click", () => {
+        renderFavouritesGrid();
+        favDialog.showModal();
+      });
+      document.getElementById("pro-close").addEventListener("click", () => proDialog.close());
+
+      // ── IdeateIQ™ chatbot ─────────────────────────────────────────────
+      const aiPanel = document.getElementById("ai-panel");
+      const aiChat  = document.getElementById("ai-chat");
+      const aiInput = document.getElementById("ai-input");
+      let aiMsgCount = 0;
+      let aiBusy = false;
+      let allKeywords = '';
+      let aiCloseTimer = null;
+
+      function aiScheduleClose() {
+        aiCancelClose();
+        aiCloseTimer = setTimeout(() => {
+          aiPanel.classList.remove('open');
+          document.getElementById("btn-ai-generate").classList.remove('ai-fab-hidden');
+          document.getElementById("hotkey-legend").classList.remove('ai-pushed');
+        }, 5000);
+      }
+      function aiCancelClose() {
+        if (aiCloseTimer) { clearTimeout(aiCloseTimer); aiCloseTimer = null; }
+      }
+
+      function aiFill(template, userInput) {
+        return template.replace(/\{(\w+)\}/g, (_, key) => {
+          if (key === 'input') return userInput;
+          const pool = AI_FILLERS[key];
+          return pool ? pool[Math.floor(Math.random() * pool.length)] : `{${key}}`;
+        });
+      }
+
+      function aiAddMsg(text, cls) {
+        const div = document.createElement('div');
+        div.className = `ai-msg ${cls}`;
+        div.textContent = text;
+        aiChat.appendChild(div);
+        aiChat.scrollTop = aiChat.scrollHeight;
+        return div;
+      }
+
+      function aiPickSeedWords(allKw) {
+        // Take 1-3 words from the user's input as the seed text
+        const words = allKw.trim().split(/\s+/).filter(w => w.length > 1);
+        if (words.length === 0) return 'liminal';
+        const shuffled = [...words].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, Math.min(3, shuffled.length)).join(' ');
+      }
+
+      function aiGenerate(allKw) {
+        const seedText = aiPickSeedWords(allKw);
+        const seed = hashString(seedText.toLowerCase());
+        const rng  = makePRNG(seed);
+        const first = AI_FIRST_NAMES[rng.int(0, AI_FIRST_NAMES.length - 1)];
+        const last  = AI_LAST_NAMES[rng.int(0, AI_LAST_NAMES.length - 1)];
+        const hasPrefix = rng.next() > 0.3;
+        const hasDomain = rng.next() > 0.4;
+        const prefix = hasPrefix ? AI_TITLE_PARTS.prefix[rng.int(0, AI_TITLE_PARTS.prefix.length - 1)] + ' ' : '';
+        const role   = AI_TITLE_PARTS.role[rng.int(0, AI_TITLE_PARTS.role.length - 1)];
+        const domain = hasDomain ? ' ' + AI_TITLE_PARTS.domain[rng.int(0, AI_TITLE_PARTS.domain.length - 1)] : '';
+        return { name: `${first} ${last}`, title: `${prefix}${role}${domain}`, seed: seedText };
+      }
+
+      function aiRespond(userText) {
+        if (aiBusy) return;
+        aiBusy = true;
+        aiMsgCount++;
+        allKeywords += ' ' + userText;
+
+        aiAddMsg(userText, 'ai-msg-user');
+        const typingEl = aiAddMsg(AI_THINKING[Math.floor(Math.random() * AI_THINKING.length)], 'ai-msg-typing');
+
+        // ~35% question (no reseed), ~65% statement (reseeds)
+        const isQuestion = Math.random() < 0.35;
+        const shouldGenerate =  /\b(generate|make|go|create|do it|yes|badge|card)\b/i.test(userText) || (!isQuestion && aiMsgCount >= 3) ;
+        const delay = 800 + Math.random() * 1200;
+
+        setTimeout(() => {
+          typingEl.remove();
+          if (shouldGenerate) {
+            const result = aiGenerate(allKeywords);
+            const truism = aiFill(AI_TRUISMS[Math.floor(Math.random() * AI_TRUISMS.length)], userText);
+            aiAddMsg(`${truism} Meet ${result.name}, ${result.title}.`, 'ai-msg-bot');
+
+            // Apply to card — seed text goes into the seed input (hashString converts it)
+            dom.personNameInput.value = result.name;
+            dom.jobTitleInput.value   = result.title;
+            dom.seedInput.value       = result.seed;
+            clearAllOverrides();
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+
+            aiBusy = false;
+            if (window.innerWidth <= 768) {
+              const viewBtn = document.createElement('button');
+              viewBtn.className = 'ai-view-btn';
+              viewBtn.textContent = 'View Badge →';
+              viewBtn.addEventListener('click', () => {
+                aiCancelClose();
+                aiPanel.classList.remove('open');
+                aiFab.classList.remove('ai-fab-hidden');
+                hotkeyLegend.classList.remove('ai-pushed');
+              });
+              aiChat.appendChild(viewBtn);
+              aiChat.scrollTop = aiChat.scrollHeight;
+            }
+          } else {
+      
+            if (isQuestion) {
+              const q = aiFill(AI_QUESTIONS[Math.floor(Math.random() * AI_QUESTIONS.length)], userText);
+              aiAddMsg(q, 'ai-msg-bot');
+            } else {
+              const statement = aiFill(AI_TRUISMS[Math.floor(Math.random() * AI_TRUISMS.length)], userText);
+              aiAddMsg(statement, 'ai-msg-bot');
+
+              const result = aiGenerate(allKeywords);
+              dom.personNameInput.value = result.name;
+              dom.jobTitleInput.value   = result.title;
+              dom.seedInput.value       = result.seed;
+              clearAllOverrides();
+              updateColorSliders(dom);
+              updateSeedInputs(dom);
+              updateResetButtons(dom);
+              render(true);
+              if (window.innerWidth <= 768) {
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'ai-view-btn';
+                viewBtn.textContent = 'View Badge →';
+                viewBtn.addEventListener('click', () => {
+                  aiCancelClose();
+                  aiPanel.classList.remove('open');
+                  aiFab.classList.remove('ai-fab-hidden');
+                  hotkeyLegend.classList.remove('ai-pushed');
+                });
+                aiChat.appendChild(viewBtn);
+                aiChat.scrollTop = aiChat.scrollHeight;
+              }
+            }
+            aiBusy = false;
+          }
+        }, delay);
+      }
+
+      function aiSend() {
+        const text = aiInput.value.trim();
+        if (!text || aiBusy) return;
+        aiInput.value = '';
+        aiRespond(text);
+      }
+
+      const aiFab = document.getElementById("btn-ai-generate");
+      const hotkeyLegend = document.getElementById("hotkey-legend");
+
+      // Random freakouts — every 8-25s, chance of a meltdown or glitch
+      function scheduleFreakout() {
+        const delay = 8000 + Math.random() * 17000;
+        setTimeout(() => {
+          if (!aiFab.classList.contains('ai-fab-hidden')) {
+            const roll = Math.random();
+            const mode = roll < 0.20 ? 'glitching' : roll < 0.35 ? 'freaking-out' : roll < 0.50 ? 'grow-snap' : null;
+            if (mode) {
+              aiFab.classList.add(mode);
+              aiFab.addEventListener('animationend', () => {
+                aiFab.classList.remove(mode);
+              }, { once: true });
+            }
+          }
+          scheduleFreakout();
+        }, delay);
+      }
+      scheduleFreakout();
+
+      // Speech bubble — non-sequitur single words
+      const AI_WORDS = [
+        'turmeric', 'carbuncle', 'plinth', 'vestibule', 'loam',
+        'spackle', 'dundee', 'fennel', 'corgi', 'pumice',
+        'grommet', 'slacks', 'gazebo', 'pewter', 'shale',
+        'brisket', 'lanyard', 'mulch', 'satchel', 'duvet',
+        'wainscot', 'grout', 'kibble', 'flange', 'caulk',
+        'bisque', 'tambourine', 'pliers', 'dirigible', 'yurt',
+        'parsnip', 'gasket', 'cupola', 'bollard', 'ramekin',
+        'pleat', 'groat', 'spigot', 'lintel', 'pergola',
+        'hamper', 'cleat', 'sorbet', 'trestle', 'wadding',
+        'thimble', 'bevel', 'crouton', 'dormer', 'nutmeg',
+      ];
+      const aiBubble = document.getElementById('ai-bubble');
+      function scheduleBubble() {
+        const delay = 4000 + Math.random() * 12000;
+        setTimeout(() => {
+          if (!aiFab.classList.contains('ai-fab-hidden') && !aiBubble.classList.contains('visible')) {
+            const word = AI_WORDS[Math.floor(Math.random() * AI_WORDS.length)];
+            aiBubble.textContent = word;
+            aiBubble.classList.add('visible');
+            setTimeout(() => { aiBubble.classList.remove('visible'); }, 1800 + Math.random() * 1200);
+          }
+          scheduleBubble();
+        }, delay);
+      }
+      scheduleBubble();
+      window.aiBubble = (w) => { aiBubble.textContent = w || AI_WORDS[Math.floor(Math.random() * AI_WORDS.length)]; aiBubble.classList.remove('visible'); void aiBubble.offsetWidth; aiBubble.classList.add('visible'); setTimeout(() => aiBubble.classList.remove('visible'), 2500); };
+
+      // Console helpers: aiFreakout() / aiGlitch() / aiGrowSnap()
+      const aiModes = ['freaking-out','glitching','grow-snap'];
+      const aiClearModes = () => { aiModes.forEach(m => aiFab.classList.remove(m)); void aiFab.offsetWidth; };
+      window.aiFreakout = () => { aiClearModes(); aiFab.classList.add('freaking-out'); };
+      window.aiGlitch   = () => { aiClearModes(); aiFab.classList.add('glitching'); };
+      window.aiGrowSnap = () => { aiClearModes(); aiFab.classList.add('grow-snap'); };
+
+      document.getElementById("btn-ai-generate").addEventListener("click", () => {
+        const isOpen = aiPanel.classList.toggle('open');
+        aiFab.classList.toggle('ai-fab-hidden', isOpen);
+        hotkeyLegend.classList.toggle('ai-pushed', isOpen);
+        if (isOpen) {
+          // Only greet on first open; keep chat history on reopen
+          if (aiChat.children.length === 0) {
+            setTimeout(() => {
+              aiAddMsg(AI_GREETINGS[Math.floor(Math.random() * AI_GREETINGS.length)], 'ai-msg-bot');
+            }, 500);
+          }
+          aiInput.focus();
+        }
+      });
+      document.getElementById("ai-close").addEventListener("click", () => {
+        aiCancelClose();
+        aiPanel.classList.remove('open');
+        aiFab.classList.remove('ai-fab-hidden');
+        hotkeyLegend.classList.remove('ai-pushed');
+      });
+      document.getElementById("ai-send").addEventListener("click", aiSend);
+      aiInput.addEventListener("keydown", (e) => {
+        if (e.key === 'Enter') aiSend();
+      });
+      aiInput.addEventListener("input", aiCancelClose);
+
+      function tierButtonCycle(btn, messages) {
+        let i = 0;
+        btn.addEventListener("click", () => {
+          btn.textContent = messages[i % messages.length];
+          i++;
+          if (i >= messages.length) i = 0;
+        });
+      }
+
+      tierButtonCycle(proSubscribe, [
+        "Just kidding. This is all free forever.",
+        "Still free. We meant it.",
+        "You can stop clicking now.",
+        "Okay, we admire your persistence.",
+        "There is no payment form. There never was.",
+        "The real Pro was the cards you made along the way.",
+      ]);
+
+      tierButtonCycle(document.getElementById("corporate-demo"), [
+        "Derek is setting up the demo environment…",
+        "Derek has encountered an error.",
+        "Derek is rebooting.",
+        "The demo is a screenshot of this website.",
+        "Derek has left the building.",
+        "There is no demo. There is only Derek.",
+        "Derek says hi. Derek cannot help you.",
+      ]);
+
+      tierButtonCycle(document.getElementById("enterprise-contact"), [
+        "Our sales team is at an offsite.",
+        "They are doing trust falls.",
+        "Someone got hurt. Meeting paused.",
+        "Sales will return Q3. Of which year? Yes.",
+        "Please fax your enquiry to nobody.",
+        "Have you tried the Corporate tier? Derek is available.",
+      ]);
+
+      document.getElementById("favourites-clear-all").addEventListener("click", async () => {
+        const ok = await showConfirm({
+          title: 'Clear favourites',
+          body: 'Delete all saved favourites? This cannot be undone.',
+          okLabel: 'Delete All',
+          okClass: 'btn-danger',
+        });
+        if (ok) {
+          clearAllFavourites();
+          renderFavouritesGrid();
+          updateStarButton();
+        }
+      });
+
+      document.getElementById("btn-mode-canvas").addEventListener("click", () => setRenderMode('canvas'));
+      document.getElementById("btn-mode-svg").addEventListener("click",    () => setRenderMode('svg'));
+
+      dom.btnSizeId.addEventListener("click",     () => setCardSize('id'));
+      dom.btnSizeSquare.addEventListener("click", () => setCardSize('square'));
+      dom.btnSizeCredit.addEventListener("click",  () => setCardSize('credit'));
+
+      // Border radius control
+      dom.borderRadiusSlider.addEventListener("input", () => {
+        dom.borderRadiusDisplay.textContent = dom.borderRadiusSlider.value + '%';
+        dom.borderRadiusReset.classList.toggle('visible', parseInt(dom.borderRadiusSlider.value, 10) !== 20);
+        render();
+      });
+      dom.borderRadiusReset.addEventListener("click", () => {
+        dom.borderRadiusSlider.value        = 20;
+        dom.borderRadiusDisplay.textContent = '20%';
+        dom.borderRadiusReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Background blend mode
+      const bgBlendReset = document.getElementById("bg-blend-reset");
+      dom.bgBlendMode.addEventListener("change", () => {
+        bgBlendReset.classList.toggle('visible', dom.bgBlendMode.value !== 'source-over');
+        render(true);
+      });
+      bgBlendReset.addEventListener("click", () => {
+        dom.bgBlendMode.value = 'source-over';
+        bgBlendReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Emboss reset
+      const embossReset = document.getElementById("emboss-reset");
+      function updateEmbossReset() {
+        embossReset.classList.toggle('visible', dom.embossMode !== 'none');
+      }
+      embossReset.addEventListener("click", () => {
+        setEmbossMode('none');
+      });
+
+      // Pattern rotation
+      const patRotReset = document.getElementById("pattern-rotation-reset");
+      dom.patternRotationSlider.addEventListener("input", () => {
+        dom.patternRotationDisplay.textContent = dom.patternRotationSlider.value;
+        patRotReset.classList.toggle('visible', dom.patternRotationSlider.value !== '0');
+        render();
+      });
+      patRotReset.addEventListener("click", () => {
+        dom.patternRotationSlider.value = 0;
+        dom.patternRotationDisplay.textContent = '0';
+        patRotReset.classList.remove('visible');
+        render(true);
+      });
+
+      // Pattern controls
+      const patOpacityReset = document.getElementById("pattern-opacity-reset");
+      dom.patternOpacitySlider.addEventListener("input", () => {
+        dom.patternOpacityDisplay.textContent = dom.patternOpacitySlider.value;
+        patOpacityReset.classList.toggle('visible', dom.patternOpacitySlider.value !== '15');
+        render();
+      });
+      patOpacityReset.addEventListener("click", () => {
+        dom.patternOpacitySlider.value = 15;
+        dom.patternOpacityDisplay.textContent = '15';
+        patOpacityReset.classList.remove('visible');
+        render(true);
+      });
+
+      const patScaleReset = document.getElementById("pattern-scale-reset");
+      dom.patternScaleSlider.addEventListener("input", () => {
+        dom.patternScaleDisplay.textContent = dom.patternScaleSlider.value + '%';
+        patScaleReset.classList.toggle('visible', dom.patternScaleSlider.value !== '100');
+        render();
+      });
+      patScaleReset.addEventListener("click", () => {
+        dom.patternScaleSlider.value = 100;
+        dom.patternScaleDisplay.textContent = '100%';
+        patScaleReset.classList.remove('visible');
+        render(true);
+      });
+      document.getElementById("btn-next-pattern").addEventListener("click", () => {
+        seedOverrides.patternSeed  = (parseInt(dom.patternSeedInput.value, 10) | 0) + 1;
+        dom.patternSeedInput.value = seedOverrides.patternSeed;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.patternSeedInput.addEventListener("change", () => {
+        seedOverrides.patternSeed = parseInt(dom.patternSeedInput.value, 10) | 0;
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.patternSeedReset.addEventListener("click", () => {
+        delete seedOverrides.patternSeed;
+        updateSeedInputs(dom);
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      const toneSingleBtn = document.getElementById("tone-single");
+      const toneTwoBtn    = document.getElementById("tone-two");
+      function syncToneButtons() {
+        toneSingleBtn.classList.toggle('active', !dom.patternTwoToneToggle.checked);
+        toneTwoBtn.classList.toggle('active',     dom.patternTwoToneToggle.checked);
+      }
+      toneSingleBtn.addEventListener("click", () => {
+        dom.patternTwoToneToggle.checked = false;
+        colorOverrides.patternTwoTone = false;
+        syncToneButtons();
+        updateResetButtons(dom);
+        render(true);
+      });
+      toneTwoBtn.addEventListener("click", () => {
+        dom.patternTwoToneToggle.checked = true;
+        colorOverrides.patternTwoTone = true;
+        syncToneButtons();
+        updateResetButtons(dom);
+        render(true);
+      });
+      dom.patternTwoToneReset.addEventListener("click", () => {
+        delete colorOverrides.patternTwoTone;
+        updateColorSliders(dom);
+        syncToneButtons();
+        updateResetButtons(dom);
+        render(true);
+      });
+
+      // showArtifactsToggle is virtual — driven by None/Auto in artifact type grid
+      dom.showLanyardToggle.addEventListener("change",    () => render(true));
+      dom.personNameInput.addEventListener("input", render);
+      dom.jobTitleInput.addEventListener("input",   render);
+
+      // ── Keyboard shortcuts ────────────────────────────────────────────────
+      const hotkeyPanel  = document.getElementById('hotkey-panel');
+      const hotkeyToggle = document.getElementById('hotkey-toggle');
+
+      hotkeyToggle.addEventListener('click', () => {
+        hotkeyPanel.classList.toggle('open');
+      });
+
+      document.addEventListener('keydown', (e) => {
+        // Skip when typing in an input/select/textarea
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+        switch (e.key) {
+          case ' ':
+            e.preventDefault();
+            dom.seedInput.value = (Math.random() * 99999) | 0;
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'e':
+            document.getElementById('btn-export').click();
+            break;
+          case 'r':
+            render(true);
+            break;
+          case 'c':
+            document.getElementById('btn-copy-link').click();
+            break;
+          case 'Backspace':
+            e.preventDefault();
+            document.getElementById('btn-reset-all').click();
+            break;
+          case 'f':
+            setFlipped(!isFlipped());
+            break;
+          case 'ArrowLeft':
+            e.preventDefault();
+            dom.seedInput.value = Math.max(0, getSeed(dom) - 1);
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'ArrowRight':
+            e.preventDefault();
+            dom.seedInput.value = getSeed(dom) + 1;
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            dom.seedInput.value = getSeed(dom) + 10;
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case 'ArrowDown':
+            e.preventDefault();
+            dom.seedInput.value = Math.max(0, getSeed(dom) - 10);
+            updateColorSliders(dom);
+            updateSeedInputs(dom);
+            updateResetButtons(dom);
+            render(true);
+            break;
+          case '1':
+            setCardSize('id');
+            break;
+          case '2':
+            setCardSize('square');
+            break;
+          case '3':
+            setCardSize('credit');
+            break;
+          case 's':
+            setRenderMode('svg');
+            break;
+          case 'v':
+            setRenderMode('canvas');
+            break;
+          case 'd':
+            setTheme(colorOverrides.isDark !== undefined ? !colorOverrides.isDark
+              : !(getEffectiveColor(getSeed(dom)).isDark));
+            break;
+          case 'i':
+            document.getElementById('btn-copy-img').click();
+            break;
+          case 'j':
+            document.getElementById('btn-export-json').click();
+            break;
+          case 'b':
+            document.getElementById('btn-favourites').click();
+            break;
+          case 'x':
+            document.getElementById('btn-micro-shuffle').click();
+            break;
+          case '?':
+            hotkeyPanel.classList.toggle('open');
+            break;
+        }
+      });
+
+      // ── Init ──────────────────────────────────────────────────────────────
+      dom.artCountDisplay.textContent   = artCountLabel(dom.artCountSlider.value);
+      dom.artOpacityDisplay.textContent = dom.artOpacitySlider.value;
+      dom.artScaleDisplay.textContent   = dom.artScaleSlider.value + '%';
+      lucide.createIcons();
+      applyQueryString(dom);
+      syncCardSizeButtons();
+      syncPosGrid(dom.logoPosGrid, dom.logoPosition);
+      syncPosGrid(dom.textPosGrid, dom.textPosition);
+      updateColorSliders(dom);
+      updateSeedInputs(dom);
+      updateResetButtons(dom);
+      // Sync emboss buttons from URL-loaded state
+      for (const [k, btn] of Object.entries(embossBtns)) btn.classList.toggle('active', k === dom.embossMode);
+      initCard3D(dom.cardScene, dom.cardBody);
+      buildThemePresetGrid();
+
+      // ── Fit card-body inside card-scene while maintaining aspect ratio ───
+      function fitCardBody() {
+        const ar = parseFloat(
+          getComputedStyle(dom.cardScene).getPropertyValue('--card-ar')
+        ) || 0.63;
+        const cs = getComputedStyle(dom.cardScene);
+        const w  = dom.cardScene.clientWidth
+                 - (parseFloat(cs.paddingLeft) || 0)
+                 - (parseFloat(cs.paddingRight) || 0);
+        const h  = dom.cardScene.clientHeight
+                 - (parseFloat(cs.paddingTop) || 0)
+                 - (parseFloat(cs.paddingBottom) || 0);
+        if (w <= 0 || h <= 0) return;
+        let bw, bh;
+        if (w / h > ar) { bh = h; bw = h * ar; }
+        else             { bw = w; bh = w / ar; }
+        dom.cardBody.style.width  = bw + 'px';
+        dom.cardBody.style.height = bh + 'px';
+      }
+      new ResizeObserver(fitCardBody).observe(dom.cardScene);
+
+      buildLogoGrid();
+      render();
+
+      /* ── Scroll-to-top button ─────────────────────────────────────────── */
+      {
+        const panel = document.querySelector('.panel');
+        const btn   = document.getElementById('btn-scroll-top');
+        panel.addEventListener('scroll', () => {
+          btn.classList.toggle('visible', panel.scrollTop > 200);
+        });
+        btn.addEventListener('click', () => {
+          panel.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+    </script>
+
+  </body>
+</html>
