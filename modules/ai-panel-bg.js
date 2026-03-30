@@ -77,6 +77,66 @@ export function buildTendril(tip, dir) {
   ];
 }
 
+/* ── Sub-branch geometry ────────────────────────────────────────── */
+
+/**
+ * Generate a shorter sub-branch splitting off a primary branch midpoint.
+ * @param {object} origin - midpoint on a primary branch
+ * @param {number} dir - -1 left, +1 right
+ * @param {number} depth - branch depth level
+ * @param {number} maxDepth - total levels
+ */
+export function buildSubBranch(origin, dir, depth, maxDepth) {
+  const reach = 18 + 25 * (1 - depth / maxDepth);
+  const dy = (depth % 2 === 0 ? -6 : 6) * (1 - depth / maxDepth);
+  return [
+    { x: origin.x, y: origin.y },
+    { x: origin.x + dir * reach * 0.55, y: origin.y + dy * 0.5 },
+    { x: origin.x + dir * reach, y: origin.y + dy },
+  ];
+}
+
+/* ── Micro-artifact geometry ────────────────────────────────────── */
+
+/**
+ * Generate a small ring artifact (open circle) at a point.
+ */
+export function microRing(cx, cy, r, opacity) {
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#50c8ff" stroke-width="0.3" stroke-opacity="${opacity}"/>`;
+}
+
+/**
+ * Generate a cluster of tiny dots around a point.
+ */
+export function dotCluster(cx, cy, count, spread, baseR, baseOpacity) {
+  const dots = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const dist = spread * (0.5 + 0.5 * ((i * 7 + 3) % count) / count);
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    const r = baseR * (0.6 + 0.4 * (1 - i / count));
+    dots.push(`<circle cx="${(cx + dx).toFixed(1)}" cy="${(cy + dy).toFixed(1)}" r="${r.toFixed(2)}" fill="#50c8ff" fill-opacity="${(baseOpacity * (0.5 + 0.5 * (1 - i / count))).toFixed(3)}"/>`);
+  }
+  return dots.join('');
+}
+
+/**
+ * Generate small dash marks radiating from a point.
+ */
+export function dashMarks(cx, cy, count, len, opacity) {
+  const marks = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const x1 = cx + Math.cos(angle) * len * 0.4;
+    const y1 = cy + Math.sin(angle) * len * 0.4;
+    const x2 = cx + Math.cos(angle) * len;
+    const y2 = cy + Math.sin(angle) * len;
+    marks.push(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#50c8ff" stroke-width="0.25" stroke-opacity="${opacity}"/>`);
+  }
+  return marks.join('');
+}
+
 /* ── Opacity & stroke helpers ────────────────────────────────────── */
 
 /** Map a depth index (0 = base) to a stroke opacity. */
@@ -225,15 +285,38 @@ export function generatePanelBackground(opts = {}) {
       const branchD = smoothPath(branchPts);
       parts.push(pathEl(branchD, CYAN, sw, so));
 
-      // amber trace on the two deepest levels
-      if (depth < 2) {
+      // amber trace on the three deepest levels
+      if (depth < 3) {
         parts.push(pathEl(branchD, AMBER, sw * 0.5, so * 0.45));
+      }
+
+      // sub-branches from primary branch midpoints
+      for (let m = 1; m < branchPts.length - 1; m++) {
+        const mid = branchPts[m];
+        // sub-branch angles away from the main branch direction
+        const subDir = (m % 2 === 0) ? dir : -dir;
+        const subPts = buildSubBranch(mid, subDir, depth, branchLevels);
+        parts.push(pathEl(smoothPath(subPts), CYAN, sw * 0.4, so * 0.55));
+
+        // sub-branch terminal node
+        const subTip = subPts[subPts.length - 1];
+        parts.push(circleEl(subTip.x, subTip.y, 0.5 + (1 - depth / branchLevels) * 0.3, CYAN,
+          0.02 + (1 - depth / branchLevels) * 0.04));
+
+        // amber on deep sub-branches
+        if (depth < 2) {
+          parts.push(pathEl(smoothPath(subPts), AMBER, sw * 0.2, so * 0.25));
+        }
       }
 
       // secondary tendril from branch tip
       const tip = branchPts[branchPts.length - 1];
       const tendril = buildTendril(tip, dir);
       parts.push(pathEl(smoothPath(tendril), CYAN, sw * 0.45, so * 0.5));
+
+      // extra tendril branching the opposite way from tip
+      const tendril2 = buildTendril(tip, -dir);
+      parts.push(pathEl(smoothPath(tendril2), CYAN, sw * 0.3, so * 0.35));
 
       // midpoint nodes
       for (const pt of branchPts.slice(1)) {
@@ -242,10 +325,34 @@ export function generatePanelBackground(opts = {}) {
         parts.push(circleEl(pt.x, pt.y, nr, CYAN, no));
       }
 
-      // tendril terminal dot
+      // tendril terminal dots
       const last = tendril[tendril.length - 1];
       parts.push(circleEl(last.x, last.y, 0.6 + (1 - depth / branchLevels) * 0.4, CYAN,
         0.03 + (1 - depth / branchLevels) * 0.05));
+      const last2 = tendril2[tendril2.length - 1];
+      parts.push(circleEl(last2.x, last2.y, 0.5 + (1 - depth / branchLevels) * 0.3, CYAN,
+        0.02 + (1 - depth / branchLevels) * 0.04));
+    }
+
+    // ── micro-artifacts at spine junctions ──
+    const jx = junction.x;
+    const jy = junction.y;
+    const fade = 1 - depth / branchLevels;
+
+    // micro ring around every other junction
+    if (depth % 2 === 0 && depth < branchLevels - 1) {
+      parts.push(microRing(jx, jy, 5 + fade * 4, 0.04 + fade * 0.06));
+    }
+
+    // dash marks radiating from deeper junctions
+    if (depth < 3) {
+      parts.push(dashMarks(jx, jy, 6 + depth * 2, 4 + fade * 3, 0.03 + fade * 0.04));
+    }
+
+    // dot clusters flanking the spine at the deepest levels
+    if (depth < 2) {
+      parts.push(dotCluster(jx - 8, jy, 4, 3, 0.4, 0.06));
+      parts.push(dotCluster(jx + 8, jy, 4, 3, 0.4, 0.06));
     }
   }
 
@@ -255,10 +362,15 @@ export function generatePanelBackground(opts = {}) {
     const no = nodeOpacity(i, spine.length);
     parts.push(circleEl(spine[i].x, spine[i].y, nr, CYAN, no));
 
-    // glow on the three deepest nodes
-    if (i < 3) {
+    // glow on the four deepest nodes
+    if (i < 4) {
       parts.push(circleEl(spine[i].x, spine[i].y, nr * 1.5, CYAN, no * 0.5,
         { filter: 'url(#pb-glow-sm)' }));
+    }
+
+    // outer ring halo on deepest two
+    if (i < 2) {
+      parts.push(microRing(spine[i].x, spine[i].y, nr * 2.5, no * 0.3));
     }
   }
 
@@ -267,16 +379,35 @@ export function generatePanelBackground(opts = {}) {
   parts.push(circleEl(coreX, coreY, 10, 'none', 1,
     { stroke: CYAN, 'stroke-width': 0.5, 'stroke-opacity': 0.14 }));
   parts.push(circleEl(coreX, coreY, 5, CYAN, 0.08));
+  // core detail: concentric rings
+  parts.push(microRing(coreX, coreY, 20, 0.06));
+  parts.push(microRing(coreX, coreY, 28, 0.03));
+  // core dash halo
+  parts.push(dashMarks(coreX, coreY, 12, 8, 0.05));
 
-  // ── spores — scattered near branch tips ──
+  // ── spores — scattered near branch tips and along the spine ──
   const sporePositions = [
-    [0.2, 0.65], [0.8, 0.65], [0.3, 0.55], [0.7, 0.55],
-    [0.38, 0.45], [0.62, 0.45], [0.45, 0.35], [0.55, 0.35],
-    [0.48, 0.25], [0.52, 0.18],
+    [0.12, 0.72], [0.88, 0.72],
+    [0.2, 0.65], [0.8, 0.65], [0.15, 0.60], [0.85, 0.60],
+    [0.3, 0.55], [0.7, 0.55], [0.25, 0.50], [0.75, 0.50],
+    [0.38, 0.45], [0.62, 0.45], [0.35, 0.40], [0.65, 0.40],
+    [0.45, 0.35], [0.55, 0.35], [0.42, 0.30], [0.58, 0.30],
+    [0.48, 0.25], [0.52, 0.25], [0.46, 0.20], [0.54, 0.20],
+    [0.49, 0.15], [0.51, 0.10],
   ];
   for (const [rx, ry] of sporePositions) {
     const t = 1 - ry; // higher = more transparent
     parts.push(circleEl(rx * W, ry * H, 0.4 + t * 0.3, CYAN, 0.01 + t * 0.04));
+  }
+
+  // ── spine-adjacent spore lines — tiny dashes paralleling the spine ──
+  for (let i = 1; i < spine.length - 2; i++) {
+    const s = spine[i];
+    const fade = 1 - i / spine.length;
+    // left and right offset spore dots
+    for (const dx of [-14, -10, 10, 14]) {
+      parts.push(circleEl(s.x + dx, s.y + 3, 0.35 + fade * 0.2, CYAN, 0.015 + fade * 0.025));
+    }
   }
 
   // assemble

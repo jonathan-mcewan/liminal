@@ -8,6 +8,10 @@ import {
   smoothPath,
   buildBranch,
   buildTendril,
+  buildSubBranch,
+  microRing,
+  dotCluster,
+  dashMarks,
   branchOpacity,
   branchWidth,
   nodeRadius,
@@ -197,6 +201,76 @@ test('respects branchLevels option', () => {
   const large = generatePanelBackground({ branchLevels: 8 });
   // More branches = more SVG content
   assert.ok(large.length > small.length, 'more branch levels should produce more SVG');
+});
+
+test('contains micro ring artifacts', () => {
+  const svg = generatePanelBackground();
+  // micro rings have stroke but no fill
+  assert.ok(svg.includes('fill="none" stroke="#50c8ff" stroke-width="0.3"'));
+});
+
+test('contains dash marks', () => {
+  const svg = generatePanelBackground();
+  assert.ok(svg.includes('<line'));
+});
+
+test('contains sub-branch paths', () => {
+  const svg = generatePanelBackground();
+  // sub-branches produce more path elements than basic branches alone
+  const pathCount = (svg.match(/<path /g) || []).length;
+  assert.ok(pathCount > 20, `expected many paths from sub-branches, got ${pathCount}`);
+});
+
+test('contains spine-adjacent spore dots', () => {
+  const svg = generatePanelBackground();
+  // more spore circles than before
+  const circleCount = (svg.match(/<circle /g) || []).length;
+  assert.ok(circleCount > 40, `expected many circles, got ${circleCount}`);
+});
+
+console.log('\nbuildSubBranch');
+
+test('returns 3 points starting from origin', () => {
+  const origin = { x: 100, y: 250 };
+  const pts = buildSubBranch(origin, 1, 0, 6);
+  assert.equal(pts.length, 3);
+  assert.equal(pts[0].x, origin.x);
+  assert.equal(pts[0].y, origin.y);
+});
+
+test('sub-branch is shorter than primary branch', () => {
+  const origin = { x: 170, y: 300 };
+  const primary = buildBranch(origin, 1, 0, 6);
+  const sub = buildSubBranch(origin, 1, 0, 6);
+  const primaryReach = Math.abs(primary[primary.length - 1].x - 170);
+  const subReach = Math.abs(sub[sub.length - 1].x - 170);
+  assert.ok(subReach < primaryReach, `sub reach ${subReach} < primary ${primaryReach}`);
+});
+
+console.log('\nmicroRing');
+
+test('returns an SVG circle element with stroke', () => {
+  const el = microRing(100, 200, 5, 0.1);
+  assert.ok(el.includes('<circle'));
+  assert.ok(el.includes('fill="none"'));
+  assert.ok(el.includes('stroke="#50c8ff"'));
+  assert.ok(el.includes('cx="100"'));
+});
+
+console.log('\ndotCluster');
+
+test('returns correct number of dots', () => {
+  const result = dotCluster(100, 200, 5, 10, 0.5, 0.1);
+  const count = (result.match(/<circle /g) || []).length;
+  assert.equal(count, 5);
+});
+
+console.log('\ndashMarks');
+
+test('returns correct number of lines', () => {
+  const result = dashMarks(100, 200, 8, 5, 0.1);
+  const count = (result.match(/<line /g) || []).length;
+  assert.equal(count, 8);
 });
 
 // Summary
