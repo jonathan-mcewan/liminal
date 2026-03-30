@@ -69,7 +69,7 @@ export function buildBranch(origin, dir, depth, maxDepth) {
  */
 export function buildTendril(tip, dir) {
   const dx = dir * (12 + Math.abs(tip.x - W / 2) * 0.15);
-  const dy = Math.random() > 0.5 ? -8 : 8;
+  const dy = (tip.x % 2 < 1) ? -8 : 8;
   return [
     tip,
     { x: tip.x + dx * 0.5, y: tip.y + dy * 0.6 },
@@ -197,7 +197,7 @@ function buildDefs() {
     <stop offset="100%" stop-color="${AMBER}" stop-opacity="0"/>
   </radialGradient>
   <linearGradient id="pb-upfade" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="white" stop-opacity="1"/>
+    <stop offset="0%" stop-color="white" stop-opacity="0"/>
     <stop offset="100%" stop-color="white" stop-opacity="1"/>
   </linearGradient>
   <mask id="pb-vm"><rect width="${W}" height="${H}" fill="url(#pb-upfade)"/></mask>
