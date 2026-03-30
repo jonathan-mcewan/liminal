@@ -1284,20 +1284,51 @@ button svg {
   padding: 0;
   border-radius: 50%;
   border: 2px solid rgba(80,200,255,0.45);
-  background: linear-gradient(135deg, rgba(80,200,255,0.25), rgba(140,100,255,0.20));
+  background:
+    linear-gradient(135deg, rgba(80,200,255,0.25), rgba(140,100,255,0.20)),
+    radial-gradient(circle at 50% 50%,
+      transparent 38%, rgba(80,200,255,0.08) 40%, transparent 42%,
+      transparent 58%, rgba(80,200,255,0.06) 60%, transparent 62%),
+    repeating-linear-gradient(0deg,
+      transparent 0%, transparent 48%,
+      rgba(80,200,255,0.07) 49%, rgba(80,200,255,0.07) 51%,
+      transparent 52%, transparent 100%),
+    repeating-linear-gradient(90deg,
+      transparent 0%, transparent 48%,
+      rgba(80,200,255,0.07) 49%, rgba(80,200,255,0.07) 51%,
+      transparent 52%, transparent 100%),
+    radial-gradient(circle at 50% 50%,
+      rgba(80,200,255,0.06) 0%, transparent 40%, rgba(10,15,25,0.3) 100%);
   color: #7dd3fc;
   cursor: pointer;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 4px 20px rgba(80,200,255,0.15);
+  outline: 1px solid rgba(80,200,255,0.12);
+  outline-offset: 3px;
   animation: ai-tantrum 3s ease-in-out infinite;
   transition: transform 0.15s;
 }
 .ai-fab:hover {
   transform: scale(1.15);
   animation: ai-tantrum-hover 0.3s ease infinite;
-  background: linear-gradient(135deg, rgba(80,200,255,0.35), rgba(140,100,255,0.28));
+  background:
+    linear-gradient(135deg, rgba(80,200,255,0.35), rgba(140,100,255,0.28)),
+    radial-gradient(circle at 50% 50%,
+      transparent 38%, rgba(80,200,255,0.12) 40%, transparent 42%,
+      transparent 58%, rgba(80,200,255,0.10) 60%, transparent 62%),
+    repeating-linear-gradient(0deg,
+      transparent 0%, transparent 48%,
+      rgba(80,200,255,0.10) 49%, rgba(80,200,255,0.10) 51%,
+      transparent 52%, transparent 100%),
+    repeating-linear-gradient(90deg,
+      transparent 0%, transparent 48%,
+      rgba(80,200,255,0.10) 49%, rgba(80,200,255,0.10) 51%,
+      transparent 52%, transparent 100%),
+    radial-gradient(circle at 50% 50%,
+      rgba(80,200,255,0.10) 0%, transparent 40%, rgba(10,15,25,0.25) 100%);
   border-color: rgba(80,200,255,0.65);
+  outline-color: rgba(80,200,255,0.20);
   color: #a5e4ff;
 }
 /* Speech bubble — tiny non-sequitur word */
@@ -1310,10 +1341,19 @@ button svg {
   font-weight: 500;
   font-family: system-ui, sans-serif;
   color: #c4eaff;
-  background: rgba(30, 42, 58, 0.92);
+  background:
+    repeating-linear-gradient(0deg,
+      transparent 0px, transparent 2px,
+      rgba(80,200,255,0.03) 2px, rgba(80,200,255,0.03) 3px),
+    linear-gradient(90deg,
+      rgba(80,200,255,0.06) 0%, transparent 15%,
+      transparent 85%, rgba(80,200,255,0.06) 100%),
+    linear-gradient(180deg, rgba(30, 42, 58, 0.92), rgba(25, 36, 50, 0.94));
   border: 1px solid rgba(80, 200, 255, 0.3);
   border-radius: 0.75rem;
   padding: 0.3rem 0.6rem;
+  box-shadow: inset 0 0 6px rgba(80,200,255,0.06),
+              inset 0 1px 0 rgba(80,200,255,0.08);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -1333,7 +1373,7 @@ button svg {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(30, 42, 58, 0.92);
+  background: linear-gradient(180deg, rgba(30, 42, 58, 0.92), rgba(25, 36, 50, 0.94));
   border: 1px solid rgba(80, 200, 255, 0.3);
 }
 .ai-bubble::after {
@@ -1344,7 +1384,7 @@ button svg {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(30, 42, 58, 0.92);
+  background: linear-gradient(180deg, rgba(30, 42, 58, 0.92), rgba(25, 36, 50, 0.94));
   border: 1px solid rgba(80, 200, 255, 0.3);
 }
 
