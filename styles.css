@@ -1619,9 +1619,7 @@ button svg {
   width: 340px;
   min-width: 340px;
   border-left: 1px solid rgba(80,200,255,0.20);
-  box-shadow:
-    -8px 0 40px rgba(0,0,0,0.4),
-    0 0 60px rgba(80,200,255,0.04) inset;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.4), 0 0 60px rgba(80,200,255,0.04) inset;
   transition:
     width           0.5s cubic-bezier(0.22, 0.6, 0.36, 1),
     min-width       0.5s cubic-bezier(0.22, 0.6, 0.36, 1),
@@ -1630,13 +1628,31 @@ button svg {
     visibility      0s linear 0s;
 }
 
-/* Ancient-tech strata pattern — procedurally generated SVG injected by JS */
-.ai-panel-bg {
+/* Ancient-tech growth creeping up from panel bottom — external SVG */
+.ai-panel::after {
+  content: '';
   position: absolute;
   bottom: 3rem;
   left: 0;
   right: 0;
-  height: 92%;
+  height: 80%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.5s;
+  background: url('artifact.svg') no-repeat center bottom / contain;
+}
+.ai-panel.open::after {
+  opacity: 1;
+}
+
+/* Procedural SVG background injected by ai-panel-bg.js */
+.ai-panel-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
   opacity: 0;
