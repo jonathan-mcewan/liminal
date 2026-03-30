@@ -1,0 +1,306 @@
+/**
+ * ai-panel-bg.js — Procedurally generates an SVG background for the AI chat panel.
+ *
+ * Renders an organic "ancient tech" growth pattern: a central spine with
+ * branching tendrils, glowing junction nodes, amber energy traces, and
+ * micro spore dots. The design grows upward from a core at the bottom,
+ * fading out toward the top via a linear mask.
+ */
+
+const CYAN = '#50c8ff';
+const AMBER = '#c8a03c';
+const W = 340;
+const H = 400;
+
+/* ── Spine geometry ──────────────────────────────────────────────── */
+
+/** Generate the central spine path as a series of junction points. */
+export function buildSpinePoints(count = 7, baseY = 375, spacing = 48) {
+  const pts = [];
+  for (let i = 0; i < count; i++) {
+    const y = baseY - i * spacing;
+    // subtle lateral drift — alternates direction, grows smaller upward
+    const x = W / 2 + (i % 2 === 0 ? -1 : 1) * (2 + Math.sin(i * 1.1) * 1.5);
+    pts.push({ x, y });
+  }
+  return pts;
+}
+
+/** Build a smooth quadratic-bezier path string through points. */
+export function smoothPath(pts) {
+  if (pts.length < 2) return '';
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const prev = pts[i - 1];
+    const cur = pts[i];
+    const cpx = (prev.x + cur.x) / 2 + (i % 2 === 0 ? 2 : -2);
+    const cpy = (prev.y + cur.y) / 2;
+    d += ` Q${cpx},${cpy} ${cur.x},${cur.y}`;
+  }
+  return d;
+}
+
+/* ── Branch geometry ─────────────────────────────────────────────── */
+
+/**
+ * Generate a primary branch curving outward from a spine junction.
+ * @param {object} origin - {x, y} spine junction
+ * @param {number} dir - -1 for left, +1 for right
+ * @param {number} depth - 0 = deepest (longest), higher = shorter
+ * @param {number} maxDepth - total branch levels
+ */
+export function buildBranch(origin, dir, depth, maxDepth) {
+  const reach = 55 + 65 * (1 - depth / maxDepth); // shorter higher up
+  const segments = depth < 2 ? 3 : 2;
+  const pts = [{ x: origin.x, y: origin.y }];
+
+  for (let i = 1; i <= segments; i++) {
+    const t = i / segments;
+    const x = origin.x + dir * reach * t;
+    const yDrift = (i % 2 === 0 ? -5 : 5) * (1 - depth / maxDepth);
+    const y = origin.y + yDrift;
+    pts.push({ x, y });
+  }
+  return pts;
+}
+
+/**
+ * Generate a secondary tendril from a branch tip.
+ */
+export function buildTendril(tip, dir) {
+  const dx = dir * (12 + Math.abs(tip.x - W / 2) * 0.15);
+  const dy = Math.random() > 0.5 ? -8 : 8;
+  return [
+    tip,
+    { x: tip.x + dx * 0.5, y: tip.y + dy * 0.6 },
+    { x: tip.x + dx, y: tip.y + dy },
+  ];
+}
+
+/* ── Opacity & stroke helpers ────────────────────────────────────── */
+
+/** Map a depth index (0 = base) to a stroke opacity. */
+export function branchOpacity(depth, maxDepth) {
+  return 0.22 - (depth / maxDepth) * 0.16;
+}
+
+/** Map a depth index to a stroke width. */
+export function branchWidth(depth, maxDepth) {
+  return 1.0 - (depth / maxDepth) * 0.65;
+}
+
+/** Map a depth index to a node radius. */
+export function nodeRadius(depth, maxDepth) {
+  return 2.8 - (depth / maxDepth) * 2.0;
+}
+
+/** Map a depth index to a node fill opacity. */
+export function nodeOpacity(depth, maxDepth) {
+  return 0.22 - (depth / maxDepth) * 0.17;
+}
+
+/* ── SVG serialisation ───────────────────────────────────────────── */
+
+function svgEl(tag, attrs, children = '') {
+  const a = Object.entries(attrs)
+    .map(([k, v]) => `${k}="${v}"`)
+    .join(' ');
+  return children
+    ? `<${tag} ${a}>${children}</${tag}>`
+    : `<${tag} ${a}/>`;
+}
+
+function pathEl(d, stroke, sw, so) {
+  return svgEl('path', { d, fill: 'none', stroke, 'stroke-width': sw, 'stroke-opacity': so });
+}
+
+function circleEl(cx, cy, r, fill, fo, extra = {}) {
+  return svgEl('circle', { cx, cy, r, fill, 'fill-opacity': fo, ...extra });
+}
+
+/* ── Defs: gradients, masks, filters ─────────────────────────────── */
+
+function buildDefs() {
+  return `<defs>
+  <radialGradient id="pb-core" cx="50%" cy="92%" r="15%">
+    <stop offset="0%" stop-color="${CYAN}" stop-opacity="0.32"/>
+    <stop offset="40%" stop-color="${CYAN}" stop-opacity="0.08"/>
+    <stop offset="100%" stop-color="${CYAN}" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="pb-core-wide" cx="50%" cy="95%" r="45%">
+    <stop offset="0%" stop-color="${CYAN}" stop-opacity="0.06"/>
+    <stop offset="100%" stop-color="${CYAN}" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="pb-warm" cx="50%" cy="100%" r="50%">
+    <stop offset="0%" stop-color="${AMBER}" stop-opacity="0.10"/>
+    <stop offset="50%" stop-color="${AMBER}" stop-opacity="0.02"/>
+    <stop offset="100%" stop-color="${AMBER}" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="pb-upfade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="white" stop-opacity="0"/>
+    <stop offset="15%" stop-color="white" stop-opacity="0.05"/>
+    <stop offset="45%" stop-color="white" stop-opacity="0.40"/>
+    <stop offset="70%" stop-color="white" stop-opacity="0.78"/>
+    <stop offset="100%" stop-color="white" stop-opacity="1"/>
+  </linearGradient>
+  <mask id="pb-vm"><rect width="${W}" height="${H}" fill="url(#pb-upfade)"/></mask>
+  <filter id="pb-glow"><feGaussianBlur stdDeviation="5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="pb-glow-sm"><feGaussianBlur stdDeviation="2" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>`;
+}
+
+/* ── Root tendrils (below the core, fanning to bottom edge) ──────── */
+
+function buildRoots(coreX, coreY) {
+  const roots = [];
+  const fans = [
+    { dx: -30, sw: 0.6, so: 0.14 },
+    { dx: 30, sw: 0.6, so: 0.14 },
+    { dx: -65, sw: 0.45, so: 0.10 },
+    { dx: 65, sw: 0.45, so: 0.10 },
+    { dx: -100, sw: 0.3, so: 0.07 },
+    { dx: 100, sw: 0.3, so: 0.07 },
+  ];
+  for (const f of fans) {
+    const tx = coreX + f.dx;
+    roots.push(pathEl(
+      `M${coreX},${coreY + 5} Q${(coreX + tx) / 2},${H - 5} ${tx},${H}`,
+      CYAN, f.sw, f.so
+    ));
+  }
+  return roots.join('');
+}
+
+/* ── Main generator ──────────────────────────────────────────────── */
+
+/**
+ * Generate the full SVG string for the AI panel background.
+ * @param {object} [opts]
+ * @param {number} [opts.branchLevels=6] - Number of branch levels along the spine
+ * @param {number} [opts.spineSpacing=48] - Vertical spacing between spine junctions
+ * @param {number} [opts.baseY=375] - Y position of the core
+ * @param {number} [opts.groupOpacity=0.5] - Overall opacity of the artwork
+ * @returns {string} Complete SVG markup
+ */
+export function generatePanelBackground(opts = {}) {
+  const {
+    branchLevels = 6,
+    spineSpacing = 48,
+    baseY = 375,
+    groupOpacity = 0.5,
+  } = opts;
+
+  const parts = [];
+
+  // Spine junctions (+ 1 for the topmost tip)
+  const spine = buildSpinePoints(branchLevels + 1, baseY, spineSpacing);
+  const coreX = spine[0].x;
+  const coreY = spine[0].y;
+
+  // ── ambient glow ──
+  parts.push(svgEl('rect', { x: 0, y: 240, width: W, height: 160, fill: 'url(#pb-warm)' }));
+  parts.push(circleEl(coreX, coreY + 10, 160, 'url(#pb-core-wide)', 1));
+
+  // ── spine path ──
+  const spineD = smoothPath(spine);
+  parts.push(pathEl(spineD, CYAN, 1.2, 0.26));
+  // glow halo on spine
+  parts.push(pathEl(spineD, CYAN, 3, 0.04));
+
+  // ── roots ──
+  parts.push(buildRoots(coreX, coreY));
+
+  // ── branches at each spine junction (skip first = core, skip last = tip) ──
+  for (let i = 1; i < spine.length - 1; i++) {
+    const depth = i - 1;
+    const junction = spine[i];
+    const sw = branchWidth(depth, branchLevels);
+    const so = branchOpacity(depth, branchLevels);
+
+    for (const dir of [-1, 1]) {
+      // primary branch
+      const branchPts = buildBranch(junction, dir, depth, branchLevels);
+      const branchD = smoothPath(branchPts);
+      parts.push(pathEl(branchD, CYAN, sw, so));
+
+      // amber trace on the two deepest levels
+      if (depth < 2) {
+        parts.push(pathEl(branchD, AMBER, sw * 0.5, so * 0.45));
+      }
+
+      // secondary tendril from branch tip
+      const tip = branchPts[branchPts.length - 1];
+      const tendril = buildTendril(tip, dir);
+      parts.push(pathEl(smoothPath(tendril), CYAN, sw * 0.45, so * 0.5));
+
+      // midpoint nodes
+      for (const pt of branchPts.slice(1)) {
+        const nr = nodeRadius(depth, branchLevels) * 0.55;
+        const no = nodeOpacity(depth, branchLevels) * 0.7;
+        parts.push(circleEl(pt.x, pt.y, nr, CYAN, no));
+      }
+
+      // tendril terminal dot
+      const last = tendril[tendril.length - 1];
+      parts.push(circleEl(last.x, last.y, 0.6 + (1 - depth / branchLevels) * 0.4, CYAN,
+        0.03 + (1 - depth / branchLevels) * 0.05));
+    }
+  }
+
+  // ── spine junction nodes ──
+  for (let i = 0; i < spine.length; i++) {
+    const nr = nodeRadius(i, spine.length);
+    const no = nodeOpacity(i, spine.length);
+    parts.push(circleEl(spine[i].x, spine[i].y, nr, CYAN, no));
+
+    // glow on the three deepest nodes
+    if (i < 3) {
+      parts.push(circleEl(spine[i].x, spine[i].y, nr * 1.5, CYAN, no * 0.5,
+        { filter: 'url(#pb-glow-sm)' }));
+    }
+  }
+
+  // ── core ──
+  parts.push(circleEl(coreX, coreY, 16, 'url(#pb-core)', 1, { filter: 'url(#pb-glow)' }));
+  parts.push(circleEl(coreX, coreY, 10, 'none', 1,
+    { stroke: CYAN, 'stroke-width': 0.5, 'stroke-opacity': 0.14 }));
+  parts.push(circleEl(coreX, coreY, 5, CYAN, 0.08));
+
+  // ── spores — scattered near branch tips ──
+  const sporePositions = [
+    [0.2, 0.65], [0.8, 0.65], [0.3, 0.55], [0.7, 0.55],
+    [0.38, 0.45], [0.62, 0.45], [0.45, 0.35], [0.55, 0.35],
+    [0.48, 0.25], [0.52, 0.18],
+  ];
+  for (const [rx, ry] of sporePositions) {
+    const t = 1 - ry; // higher = more transparent
+    parts.push(circleEl(rx * W, ry * H, 0.4 + t * 0.3, CYAN, 0.01 + t * 0.04));
+  }
+
+  // assemble
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">`,
+    buildDefs(),
+    `<g mask="url(#pb-vm)" opacity="${groupOpacity}">`,
+    parts.join(''),
+    '</g>',
+    '</svg>',
+  ].join('');
+}
+
+/**
+ * Inject the generated SVG background into the AI panel element.
+ * @param {HTMLElement} panelEl - The .ai-panel element
+ */
+export function injectPanelBackground(panelEl) {
+  // Remove any existing procedural background
+  const existing = panelEl.querySelector('.ai-panel-bg');
+  if (existing) existing.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ai-panel-bg';
+  wrapper.innerHTML = generatePanelBackground();
+  panelEl.insertBefore(wrapper, panelEl.firstChild);
+}

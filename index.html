@@ -762,6 +762,7 @@
       import { getEffectiveColor, getEffectiveSeeds } from "./modules/state.js";
       import { initCard3D, isFlipped, setFlipped } from "./modules/card-3d.js";
       import { generateCardBack } from "./modules/card-back.js";
+      import { injectPanelBackground } from "./modules/ai-panel-bg.js";
 
       // ── DOM cache ─────────────────────────────────────────────────────────
       const dom = {
@@ -2221,6 +2222,7 @@
 
       // ── IdeateIQ™ chatbot ─────────────────────────────────────────────
       const aiPanel = document.getElementById("ai-panel");
+      injectPanelBackground(aiPanel);
       const aiChat  = document.getElementById("ai-chat");
       const aiInput = document.getElementById("ai-input");
       let aiMsgCount = 0;
