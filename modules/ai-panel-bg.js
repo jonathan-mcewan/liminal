@@ -66,10 +66,12 @@ export function buildBranch(origin, dir, depth, maxDepth) {
 
 /**
  * Generate a secondary tendril from a branch tip.
+ * Uses tip position for deterministic vertical drift instead of Math.random().
  */
 export function buildTendril(tip, dir) {
   const dx = dir * (12 + Math.abs(tip.x - W / 2) * 0.15);
-  const dy = Math.random() > 0.5 ? -8 : 8;
+  // Deterministic: alternate based on tip position hash
+  const dy = ((Math.round(tip.x * 7 + tip.y * 13) % 2) === 0) ? -8 : 8;
   return [
     tip,
     { x: tip.x + dx * 0.5, y: tip.y + dy * 0.6 },
@@ -182,25 +184,42 @@ function circleEl(cx, cy, r, fill, fo, extra = {}) {
 
 function buildDefs() {
   return `<defs>
-  <radialGradient id="pb-core" cx="50%" cy="92%" r="15%">
-    <stop offset="0%" stop-color="${CYAN}" stop-opacity="0.32"/>
-    <stop offset="40%" stop-color="${CYAN}" stop-opacity="0.08"/>
+  <radialGradient id="pb-core" cx="50%" cy="92%" r="18%">
+    <stop offset="0%" stop-color="${CYAN}" stop-opacity="0.36"/>
+    <stop offset="30%" stop-color="${CYAN}" stop-opacity="0.12"/>
+    <stop offset="70%" stop-color="${CYAN}" stop-opacity="0.03"/>
     <stop offset="100%" stop-color="${CYAN}" stop-opacity="0"/>
   </radialGradient>
-  <radialGradient id="pb-core-wide" cx="50%" cy="95%" r="45%">
-    <stop offset="0%" stop-color="${CYAN}" stop-opacity="0.06"/>
+  <radialGradient id="pb-core-wide" cx="50%" cy="95%" r="55%">
+    <stop offset="0%" stop-color="${CYAN}" stop-opacity="0.08"/>
+    <stop offset="50%" stop-color="${CYAN}" stop-opacity="0.02"/>
     <stop offset="100%" stop-color="${CYAN}" stop-opacity="0"/>
   </radialGradient>
-  <radialGradient id="pb-warm" cx="50%" cy="100%" r="50%">
-    <stop offset="0%" stop-color="${AMBER}" stop-opacity="0.10"/>
-    <stop offset="50%" stop-color="${AMBER}" stop-opacity="0.02"/>
+  <radialGradient id="pb-warm" cx="50%" cy="88%" r="60%">
+    <stop offset="0%" stop-color="${AMBER}" stop-opacity="0.12"/>
+    <stop offset="35%" stop-color="${AMBER}" stop-opacity="0.05"/>
+    <stop offset="70%" stop-color="${AMBER}" stop-opacity="0.015"/>
+    <stop offset="100%" stop-color="${AMBER}" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="pb-warm-hi" cx="50%" cy="70%" r="40%">
+    <stop offset="0%" stop-color="${AMBER}" stop-opacity="0.04"/>
     <stop offset="100%" stop-color="${AMBER}" stop-opacity="0"/>
   </radialGradient>
   <linearGradient id="pb-upfade" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="white" stop-opacity="1"/>
+    <stop offset="0%" stop-color="white" stop-opacity="0"/>
+    <stop offset="25%" stop-color="white" stop-opacity="0.6"/>
     <stop offset="100%" stop-color="white" stop-opacity="1"/>
   </linearGradient>
-  <mask id="pb-vm"><rect width="${W}" height="${H}" fill="url(#pb-upfade)"/></mask>
+  <linearGradient id="pb-hfade" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="white" stop-opacity="0.3"/>
+    <stop offset="15%" stop-color="white" stop-opacity="1"/>
+    <stop offset="85%" stop-color="white" stop-opacity="1"/>
+    <stop offset="100%" stop-color="white" stop-opacity="0.3"/>
+  </linearGradient>
+  <mask id="pb-vm">
+    <rect width="${W}" height="${H}" fill="url(#pb-upfade)"/>
+    <rect width="${W}" height="${H}" fill="url(#pb-hfade)" style="mix-blend-mode:multiply"/>
+  </mask>
   <filter id="pb-glow"><feGaussianBlur stdDeviation="5" result="b"/>
     <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   <filter id="pb-glow-sm"><feGaussianBlur stdDeviation="2" result="b"/>
@@ -219,13 +238,21 @@ function buildRoots(coreX, coreY) {
     { dx: 65, sw: 0.45, so: 0.10 },
     { dx: -100, sw: 0.3, so: 0.07 },
     { dx: 100, sw: 0.3, so: 0.07 },
+    { dx: -130, sw: 0.2, so: 0.04 },
+    { dx: 130, sw: 0.2, so: 0.04 },
   ];
   for (const f of fans) {
     const tx = coreX + f.dx;
-    roots.push(pathEl(
-      `M${coreX},${coreY + 5} Q${(coreX + tx) / 2},${H - 5} ${tx},${H}`,
-      CYAN, f.sw, f.so
-    ));
+    const d = `M${coreX},${coreY + 5} Q${(coreX + tx) / 2},${H - 5} ${tx},${H}`;
+    // soft glow echo on inner roots
+    if (Math.abs(f.dx) <= 65) {
+      roots.push(pathEl(d, CYAN, f.sw * 3, f.so * 0.12));
+    }
+    roots.push(pathEl(d, CYAN, f.sw, f.so));
+    // warm amber trace on inner roots
+    if (Math.abs(f.dx) <= 65) {
+      roots.push(pathEl(d, AMBER, f.sw * 0.4, f.so * 0.3));
+    }
   }
   return roots.join('');
 }
@@ -256,15 +283,23 @@ export function generatePanelBackground(opts = {}) {
   const coreX = spine[0].x;
   const coreY = spine[0].y;
 
-  // ── ambient glow ──
-  parts.push(svgEl('rect', { x: 0, y: 240, width: W, height: 160, fill: 'url(#pb-warm)' }));
-  parts.push(circleEl(coreX, coreY + 10, 160, 'url(#pb-core-wide)', 1));
+  // ── ambient glow — layered for depth ──
+  parts.push(svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#pb-warm)' }));
+  parts.push(svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#pb-warm-hi)' }));
+  parts.push(circleEl(coreX, coreY + 10, 180, 'url(#pb-core-wide)', 1));
+  // secondary glow higher up — ties the upper branches into the atmosphere
+  parts.push(circleEl(coreX, coreY - 120, 120, 'url(#pb-core-wide)', 0.5));
 
   // ── spine path ──
   const spineD = smoothPath(spine);
-  parts.push(pathEl(spineD, CYAN, 1.2, 0.26));
-  // glow halo on spine
-  parts.push(pathEl(spineD, CYAN, 3, 0.04));
+  // wide atmospheric halo
+  parts.push(pathEl(spineD, CYAN, 8, 0.015));
+  // warm undertone along the spine
+  parts.push(pathEl(spineD, AMBER, 4, 0.025));
+  // glow halo
+  parts.push(pathEl(spineD, CYAN, 3, 0.06));
+  // main spine stroke
+  parts.push(pathEl(spineD, CYAN, 1.2, 0.28));
 
   // ── roots ──
   parts.push(buildRoots(coreX, coreY));
@@ -280,11 +315,16 @@ export function generatePanelBackground(opts = {}) {
       // primary branch
       const branchPts = buildBranch(junction, dir, depth, branchLevels);
       const branchD = smoothPath(branchPts);
+      // soft glow echo behind the branch for depth
+      if (depth < 4) {
+        parts.push(pathEl(branchD, CYAN, sw * 3.5, so * 0.08));
+      }
       parts.push(pathEl(branchD, CYAN, sw, so));
 
-      // amber trace on the three deepest levels
-      if (depth < 3) {
-        parts.push(pathEl(branchD, AMBER, sw * 0.5, so * 0.45));
+      // amber trace — graduated fade across all levels for cohesion
+      const amberFade = 1 - depth / branchLevels;
+      if (amberFade > 0.15) {
+        parts.push(pathEl(branchD, AMBER, sw * 0.55, so * 0.35 * amberFade));
       }
 
       // sub-branches from primary branch midpoints
@@ -372,13 +412,16 @@ export function generatePanelBackground(opts = {}) {
   }
 
   // ── core ──
+  // warm under-glow beneath the core
+  parts.push(circleEl(coreX, coreY + 5, 30, AMBER, 0.04, { filter: 'url(#pb-glow)' }));
   parts.push(circleEl(coreX, coreY, 16, 'url(#pb-core)', 1, { filter: 'url(#pb-glow)' }));
   parts.push(circleEl(coreX, coreY, 10, 'none', 1,
-    { stroke: CYAN, 'stroke-width': 0.5, 'stroke-opacity': 0.14 }));
-  parts.push(circleEl(coreX, coreY, 5, CYAN, 0.08));
-  // core detail: concentric rings
-  parts.push(microRing(coreX, coreY, 20, 0.06));
-  parts.push(microRing(coreX, coreY, 28, 0.03));
+    { stroke: CYAN, 'stroke-width': 0.5, 'stroke-opacity': 0.16 }));
+  parts.push(circleEl(coreX, coreY, 5, CYAN, 0.10));
+  // core detail: concentric rings with graduating opacity
+  parts.push(microRing(coreX, coreY, 14, 0.08));
+  parts.push(microRing(coreX, coreY, 20, 0.05));
+  parts.push(microRing(coreX, coreY, 28, 0.025));
   // core dash halo
   parts.push(dashMarks(coreX, coreY, 12, 8, 0.05));
 
