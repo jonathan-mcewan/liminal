@@ -1,0 +1,7 @@
+# ai.txt — AI training opt-out declaration
+# Specification: https://site.spawning.ai/spawning-ai-txt
+
+User-Agent: *
+Disallow: AI-Training
+Disallow: AI-Scraping
+Disallow: AI-Indexing
