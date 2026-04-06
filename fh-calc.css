@@ -342,18 +342,28 @@
 
 .fh-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.75rem;
+}
+
+.fh-actions .btn-secondary {
+  font-size: 0.65rem;
+  padding: 0.3rem 0.6rem;
+  white-space: nowrap;
 }
 
 /* ── Mobile ── */
 
 @media (max-width: 480px) {
+  .fh-calc-dialog {
+    padding: 1rem;
+  }
   .fh-deck-grid {
     grid-template-columns: 1fr;
   }
   .fh-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
   }
   .fh-hist-label {
     min-width: 3.5rem;
@@ -361,5 +371,23 @@
   }
   .fh-compare-wrap {
     flex-direction: column;
+  }
+  .fh-preset-btn {
+    font-size: 0.58rem;
+    padding: 0.3rem 0.4rem;
+  }
+  .fh-actions {
+    flex-direction: column;
+  }
+  .fh-actions .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+  .fh-stat-value {
+    font-size: 0.85rem;
+  }
+  .fh-hist-pct {
+    min-width: 2.2rem;
+    font-size: 0.55rem;
   }
 }
