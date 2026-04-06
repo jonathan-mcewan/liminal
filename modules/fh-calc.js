@@ -85,19 +85,35 @@ function loadState() {
 
 // ── Presets ─────────────────────────────────────────────────────────────
 
+// Common Frosthaven perk operations (appear across many class perk sheets)
 const PRESETS = [
-  { label: 'Remove two \u22121',        apply: () => addCards('n1', -2),                                  valid: () => deck.n1 >= 2 },
-  { label: 'Remove one \u22122',         apply: () => addCards('n2', -1),                                  valid: () => deck.n2 >= 1 },
-  { label: 'Add one +2',              apply: () => addCards('p2', 1) },
-  { label: 'Add two rolling +1',      apply: () => addCards('rp1', 2) },
-  { label: 'Replace \u22121 with +1',   apply: () => { addCards('n1', -1); addCards('p1', 1); },          valid: () => deck.n1 >= 1 },
-  { label: 'Replace +0 with +2',      apply: () => { addCards('p0', -1); addCards('p2', 1); },          valid: () => deck.p0 >= 1 },
-  { label: 'Add one \u00d72',           apply: () => addCards('crit', 1) },
-  { label: 'Remove four +0',          apply: () => addCards('p0', -4),                                  valid: () => deck.p0 >= 4 },
-  { label: 'Add one +3',              apply: () => addCards('p3', 1) },
-  { label: 'Add rolling Stun',        apply: () => addCards('rstun', 1) },
-  { label: 'Add rolling Wound',       apply: () => addCards('rwound', 1) },
-  { label: 'Add rolling Poison',      apply: () => addCards('rpoison', 1) },
+  { label: 'Remove two \u22121',           apply: () => addCards('n1', -2),                                   valid: () => deck.n1 >= 2 },
+  { label: 'Remove one \u22122',            apply: () => addCards('n2', -1),                                   valid: () => deck.n2 >= 1 },
+  { label: 'Remove one +0',              apply: () => addCards('p0', -1),                                   valid: () => deck.p0 >= 1 },
+  { label: 'Remove four +0',             apply: () => addCards('p0', -4),                                   valid: () => deck.p0 >= 4 },
+  { label: 'Replace one \u22121 with +0',  apply: () => { addCards('n1', -1); addCards('p0', 1); },           valid: () => deck.n1 >= 1 },
+  { label: 'Replace one \u22121 with +1',  apply: () => { addCards('n1', -1); addCards('p1', 1); },           valid: () => deck.n1 >= 1 },
+  { label: 'Replace one +0 with +2',     apply: () => { addCards('p0', -1); addCards('p2', 1); },           valid: () => deck.p0 >= 1 },
+  { label: 'Replace one \u22122 with +0',  apply: () => { addCards('n2', -1); addCards('p0', 1); },           valid: () => deck.n2 >= 1 },
+  { label: 'Add one +1',                 apply: () => addCards('p1', 1) },
+  { label: 'Add one +2',                 apply: () => addCards('p2', 1) },
+  { label: 'Add one +3',                 apply: () => addCards('p3', 1) },
+  { label: 'Add two rolling +1',         apply: () => addCards('rp1', 2) },
+  { label: 'Add one rolling +2',         apply: () => addCards('rp2', 1) },
+  { label: 'Add one rolling Pierce 3',   apply: () => addCards('rpierce', 1) },
+  { label: 'Add one rolling Push 1',     apply: () => addCards('rpush', 1) },
+  { label: 'Add one rolling Pull 1',     apply: () => addCards('rpull', 1) },
+  { label: 'Add one rolling Muddle',     apply: () => addCards('rmuddle', 1) },
+  { label: 'Add one rolling Poison',     apply: () => addCards('rpoison', 1) },
+  { label: 'Add one rolling Wound',      apply: () => addCards('rwound', 1) },
+  { label: 'Add one rolling Immobilize', apply: () => addCards('rimmob', 1) },
+  { label: 'Add one rolling Stun',       apply: () => addCards('rstun', 1) },
+  { label: 'Add one rolling Fire',       apply: () => addCards('rfire', 1) },
+  { label: 'Add one rolling Ice',        apply: () => addCards('rice', 1) },
+  { label: 'Add one rolling Air',        apply: () => addCards('rair', 1) },
+  { label: 'Add one rolling Earth',      apply: () => addCards('rearth', 1) },
+  { label: 'Add one rolling Light',      apply: () => addCards('rlight', 1) },
+  { label: 'Add one rolling Dark',       apply: () => addCards('rdark', 1) },
 ];
 
 // ── Stats computation ──────────────────────────────────────────────────
@@ -222,6 +238,21 @@ function renderPresets() {
   }
 }
 
+// Stat tooltip descriptions
+const STAT_TIPS = {
+  deckSize:   'Total cards in the deck, split into base (non-rolling) cards that end your draw and rolling cards that chain before the final draw.',
+  ev:         'Average modifier added to your attack per draw. Includes the additive contribution of rolling modifiers. Crit (\u00d72) and Miss (null) are excluded from the additive average but shown separately.',
+  crit:       'Probability of drawing the \u00d72 card, which doubles your total attack value. Higher is better.',
+  miss:       'Probability of drawing the null/Miss card, which reduces your attack to zero. Lower is better.',
+  reliability:'Percentage of non-rolling draws that are neutral or better (\u22650 modifier, including \u00d72). A deck with 100% reliability never draws a negative modifier.',
+  rolling:    'Chance that any given draw starts with at least one rolling modifier before resolving. Rolling cards add their effect and you draw again until a non-rolling card ends the chain.',
+  split:      'Breakdown of base (non-rolling, non-special) cards into positive (>0), neutral (0), and negative (<0) buckets. Does not count \u00d72 or Miss.',
+};
+
+function tip(key) {
+  return `<span class="fh-stat-tip" title="${STAT_TIPS[key]}">?</span>`;
+}
+
 function buildStatsHTML(s, ref) {
   if (!s) return '<p class="dialog-hint">Add cards to see stats</p>';
 
@@ -243,31 +274,31 @@ function buildStatsHTML(s, ref) {
 
   return `
     <div class="fh-stat">
-      <div class="fh-stat-label">Deck Size</div>
+      <div class="fh-stat-label">Deck Size ${tip('deckSize')}</div>
       <div class="fh-stat-value">${s.total}${delta(s.total, ref?.total, f0)} <span style="font-size:0.6rem;color:rgba(255,255,255,0.4)">(${s.drawPool}+${s.rollingCount}r)</span></div>
     </div>
     <div class="fh-stat">
-      <div class="fh-stat-label">Expected Value</div>
+      <div class="fh-stat-label">Expected Value ${tip('ev')}</div>
       <div class="fh-stat-value ${evClass}">${evSign}${s.totalEV.toFixed(2)}${delta(s.totalEV, ref?.totalEV, f2)}</div>
     </div>
     <div class="fh-stat">
-      <div class="fh-stat-label">Crit Chance</div>
+      <div class="fh-stat-label">Crit Chance ${tip('crit')}</div>
       <div class="fh-stat-value fh-positive">${s.critPct.toFixed(1)}%${delta(s.critPct, ref?.critPct, f1)}</div>
     </div>
     <div class="fh-stat">
-      <div class="fh-stat-label">Miss Chance</div>
+      <div class="fh-stat-label">Miss Chance ${tip('miss')}</div>
       <div class="fh-stat-value fh-negative">${s.missPct.toFixed(1)}%${delta(s.missPct, ref?.missPct, f1, true)}</div>
     </div>
     <div class="fh-stat">
-      <div class="fh-stat-label">Reliability</div>
+      <div class="fh-stat-label">Reliability ${tip('reliability')}</div>
       <div class="fh-stat-value">${s.reliability.toFixed(1)}%${delta(s.reliability, ref?.reliability, f1)}</div>
     </div>
     <div class="fh-stat">
-      <div class="fh-stat-label">Rolling Chain</div>
+      <div class="fh-stat-label">Rolling Chain ${tip('rolling')}</div>
       <div class="fh-stat-value">${s.rollingChainProb.toFixed(1)}%</div>
     </div>
     <div class="fh-stat">
-      <div class="fh-stat-label">Positive / Neutral / Negative</div>
+      <div class="fh-stat-label">Pos / Neut / Neg ${tip('split')}</div>
       <div class="fh-stat-value"><span class="fh-positive">${s.posPct.toFixed(0)}%</span> / <span class="fh-neutral">${s.neutPct.toFixed(0)}%</span> / <span class="fh-negative">${s.negPct.toFixed(0)}%</span></div>
     </div>
   `;
