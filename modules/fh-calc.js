@@ -198,7 +198,6 @@ function updateDetailsSummary(detailsEl, total) {
     summary.appendChild(span);
   }
   span.textContent = total > 0 ? `(${total} cards)` : '';
-  if (total > 0 && !detailsEl.open) detailsEl.open = true;
 }
 
 function renderDeckGrid() {
