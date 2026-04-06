@@ -1,0 +1,338 @@
+/* ── Frosthaven Attack Modifier Calculator ────────────────────────────── */
+
+.fh-calc-dialog {
+  max-width: 720px;
+  width: 95vw;
+}
+
+.fh-calc-dialog .fh-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.fh-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.4);
+  margin: 1rem 0 0.5rem;
+}
+
+.fh-section-title:first-child { margin-top: 0; }
+
+/* ── Deck grid ── */
+
+.fh-deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.3rem;
+}
+
+.fh-card-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.03);
+}
+
+.fh-card-row.fh-has-cards {
+  background: rgba(255,255,255,0.06);
+}
+
+.fh-card-label {
+  flex: 1;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fh-card-row.fh-has-cards .fh-card-label {
+  color: rgba(255,255,255,0.9);
+}
+
+.fh-card-label .fh-rolling-tag {
+  font-size: 0.55rem;
+  color: rgba(100,200,255,0.6);
+  margin-right: 0.2rem;
+}
+
+.fh-card-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+
+.fh-card-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8);
+}
+
+.fh-card-btn:active {
+  background: rgba(255,255,255,0.18);
+}
+
+.fh-card-count {
+  min-width: 1.4rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  font-variant-numeric: tabular-nums;
+}
+
+.fh-card-row:not(.fh-has-cards) .fh-card-count {
+  color: rgba(255,255,255,0.25);
+}
+
+/* ── Collapsible sections ── */
+
+.fh-details {
+  margin-top: 0.4rem;
+}
+
+.fh-details-summary {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  padding: 0.3rem 0;
+  list-style: none;
+  user-select: none;
+}
+
+.fh-details-summary::-webkit-details-marker { display: none; }
+
+.fh-details-summary::before {
+  content: '\25b6';
+  display: inline-block;
+  margin-right: 0.35rem;
+  font-size: 0.5rem;
+  transition: transform 0.15s;
+  vertical-align: middle;
+}
+
+.fh-details[open] > .fh-details-summary::before {
+  transform: rotate(90deg);
+}
+
+.fh-details-summary:hover {
+  color: rgba(255,255,255,0.6);
+}
+
+.fh-details .fh-deck-grid {
+  margin-top: 0.3rem;
+}
+
+.fh-details-summary .fh-details-count {
+  font-size: 0.55rem;
+  color: rgba(100,200,255,0.5);
+  margin-left: 0.3rem;
+}
+
+/* ── Presets ── */
+
+.fh-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.fh-preset-btn {
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.65);
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, opacity 0.12s;
+  white-space: nowrap;
+}
+
+.fh-preset-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.85);
+}
+
+.fh-preset-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Stats ── */
+
+.fh-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.5rem;
+}
+
+.fh-stat {
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.fh-stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.2rem;
+}
+
+.fh-stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  font-variant-numeric: tabular-nums;
+}
+
+.fh-stat-value.fh-positive { color: #6ecf7a; }
+.fh-stat-value.fh-negative { color: #e06060; }
+.fh-stat-value.fh-neutral  { color: #aaa; }
+
+/* ── Histogram ── */
+
+.fh-histogram {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.fh-hist-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 1.3rem;
+}
+
+.fh-hist-label {
+  min-width: 5rem;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.6);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.fh-hist-bar-wrap {
+  flex: 1;
+  height: 100%;
+  background: rgba(255,255,255,0.03);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fh-hist-bar {
+  height: 100%;
+  border-radius: 3px;
+  min-width: 2px;
+  transition: width 0.2s ease;
+}
+
+.fh-hist-bar.fh-bar-positive { background: rgba(110,207,122,0.55); }
+.fh-hist-bar.fh-bar-negative { background: rgba(224,96,96,0.55); }
+.fh-hist-bar.fh-bar-neutral  { background: rgba(170,170,170,0.4); }
+.fh-hist-bar.fh-bar-crit     { background: rgba(255,210,80,0.6); }
+.fh-hist-bar.fh-bar-miss     { background: rgba(100,100,120,0.6); }
+.fh-hist-bar.fh-bar-rolling  { background: rgba(100,200,255,0.45); }
+
+.fh-hist-pct {
+  min-width: 2.8rem;
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Compare mode ── */
+
+.fh-compare-wrap {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.fh-compare-wrap .fh-stats-grid {
+  flex: 1;
+  min-width: 0;
+}
+
+.fh-compare-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.fh-compare-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  text-align: center;
+}
+
+.fh-compare-label--before {
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.04);
+}
+
+.fh-compare-label--after {
+  color: rgba(100,200,255,0.7);
+  background: rgba(100,200,255,0.08);
+}
+
+.fh-stat-delta {
+  font-size: 0.6rem;
+  margin-left: 0.3rem;
+  font-weight: 600;
+}
+
+.fh-stat-delta.fh-delta-up   { color: #6ecf7a; }
+.fh-stat-delta.fh-delta-down { color: #e06060; }
+.fh-stat-delta.fh-delta-same { color: rgba(255,255,255,0.25); }
+
+/* ── Actions ── */
+
+.fh-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* ── Mobile ── */
+
+@media (max-width: 480px) {
+  .fh-deck-grid {
+    grid-template-columns: 1fr;
+  }
+  .fh-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .fh-hist-label {
+    min-width: 3.5rem;
+    font-size: 0.58rem;
+  }
+  .fh-compare-wrap {
+    flex-direction: column;
+  }
+}
