@@ -370,7 +370,10 @@
     font-size: 0.58rem;
   }
   .fh-compare-wrap {
-    flex-direction: column;
+    flex-direction: row;
+  }
+  .fh-compare-wrap .fh-stats-grid {
+    grid-template-columns: 1fr;
   }
   .fh-preset-btn {
     font-size: 0.58rem;
