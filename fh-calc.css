@@ -258,11 +258,15 @@
 }
 
 .fh-hist-label {
-  min-width: 5rem;
+  width: 4.5rem;
+  min-width: 0;
   font-size: 0.65rem;
   color: rgba(255,255,255,0.6);
   text-align: right;
   flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fh-hist-bar-wrap {

@@ -21,24 +21,24 @@ const CARD_TYPES = [
   // Extra non-rolling cards (collapsed)
   { id: 'p3',      label: '+3',           value: 3, rolling: false, cat: 'pos', group: 'extra' },
   { id: 'p4',      label: '+4',           value: 4, rolling: false, cat: 'pos', group: 'extra' },
-  { id: 'refresh', label: 'Refresh Item', value: 0, rolling: false, cat: 'pos', group: 'extra' },
+  { id: 'refresh', label: 'Refresh Item', short: 'Refresh', value: 0, rolling: false, cat: 'pos', group: 'extra' },
   // Rolling modifiers (collapsed)
-  { id: 'rp1',     label: '+1',         value: 1, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rp2',     label: '+2',         value: 2, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rpierce', label: 'Pierce 3',   value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rmuddle', label: 'Muddle',     value: 0, rolling: true, cat: 'neg', group: 'rolling' },
-  { id: 'rpoison', label: 'Poison',     value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rwound',  label: 'Wound',      value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rimmob',  label: 'Immobilize', value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rstun',   label: 'Stun',       value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rpush',   label: 'Push 1',     value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rpull',   label: 'Pull 1',     value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rfire',   label: 'Fire',       value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rice',    label: 'Ice',        value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rair',    label: 'Air',        value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rearth',  label: 'Earth',      value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rlight',  label: 'Light',      value: 0, rolling: true, cat: 'pos', group: 'rolling' },
-  { id: 'rdark',   label: 'Dark',       value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rp1',     label: '+1',       short: 'R +1',         value: 1, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rp2',     label: '+2',       short: 'R +2',         value: 2, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rpierce', label: 'Pierce 3', short: 'R Prc3',   value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rmuddle', label: 'Muddle',   short: 'R Mud',     value: 0, rolling: true, cat: 'neg', group: 'rolling' },
+  { id: 'rpoison', label: 'Poison',   short: 'R Psn',     value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rwound',  label: 'Wound',    short: 'R Wnd',      value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rimmob',  label: 'Immobilize', short: 'R Imm', value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rstun',   label: 'Stun',     short: 'R Stn',       value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rpush',   label: 'Push 1',   short: 'R Psh',     value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rpull',   label: 'Pull 1',   short: 'R Pll',     value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rfire',   label: 'Fire',     short: 'R Fire',       value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rice',    label: 'Ice',      short: 'R Ice',        value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rair',    label: 'Air',      short: 'R Air',        value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rearth',  label: 'Earth',    short: 'R Ear',      value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rlight',  label: 'Light',    short: 'R Lgt',      value: 0, rolling: true, cat: 'pos', group: 'rolling' },
+  { id: 'rdark',   label: 'Dark',     short: 'R Drk',       value: 0, rolling: true, cat: 'pos', group: 'rolling' },
 ];
 
 const BASE_DECK = { p0: 6, p1: 5, n1: 5, p2: 1, n2: 1, crit: 1, miss: 1 };
@@ -331,7 +331,7 @@ function renderHistogram() {
   for (const ct of CARD_TYPES) {
     const n = deck[ct.id] || 0;
     if (n === 0) continue;
-    const label = ct.rolling ? `Rolling ${ct.label}` : ct.label;
+    const label = ct.short || ct.label;
     let barClass;
     if (ct.id === 'crit') barClass = 'fh-bar-crit';
     else if (ct.id === 'miss') barClass = 'fh-bar-miss';
